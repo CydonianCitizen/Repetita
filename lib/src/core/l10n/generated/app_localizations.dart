@@ -1279,6 +1279,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Tags'**
   String get selectTags;
+
+  /// No description provided for @failedToLoadDecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load decks'**
+  String get failedToLoadDecks;
+
+  /// No description provided for @deckStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{deckName} Stats'**
+  String deckStatsTitle(String deckName);
+
+  /// No description provided for @errorLoadingStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading statistics'**
+  String get errorLoadingStats;
+
+  /// No description provided for @cardOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Card options'**
+  String get cardOptions;
+
+  /// No description provided for @errorLoadingStudySession.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading study session'**
+  String get errorLoadingStudySession;
+
+  /// No description provided for @backupRestoredSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored successfully!'**
+  String get backupRestoredSuccess;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed'**
+  String get restoreFailed;
+
+  /// No description provided for @exportedCsvTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported CSV'**
+  String get exportedCsvTitle;
+
+  /// No description provided for @csvExportedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV exported successfully!'**
+  String get csvExportedSuccess;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportFailed;
+
+  /// No description provided for @createDeckFirstNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Please create a deck first before importing cards.'**
+  String get createDeckFirstNotice;
+
+  /// No description provided for @importCardsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {importedCount} cards ({skippedCount} skipped).'**
+  String importCardsSuccess(int importedCount, int skippedCount);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get importFailed;
+
+  /// No description provided for @csvSectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.'**
+  String get csvSectionDescription;
+
+  /// No description provided for @restoreBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Backup'**
+  String get restoreBackupTitle;
+
+  /// No description provided for @restoreWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: Restoring a backup will overwrite all existing decks and cards.'**
+  String get restoreWarning;
+
+  /// No description provided for @pasteBackupJsonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste backup JSON here...'**
+  String get pasteBackupJsonHint;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @importCsvTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Cards from CSV'**
+  String get importCsvTitle;
+
+  /// No description provided for @targetDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Deck'**
+  String get targetDeck;
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard!'**
+  String get copiedToClipboard;
 }
 
 class _AppLocalizationsDelegate

@@ -41,9 +41,13 @@ void main() {
       );
       await db.cardsDao.createCard(
         deckId: deck2Id,
-        front: 'Front 2',
+        front: 'Front 2 {{c2::cloze}}',
         back: 'Back 2',
+        clozeIndex: 2,
       );
+
+      final tag1 = await db.tagsDao.getOrCreateTag('Medicine');
+      await db.tagsDao.setCardTags(card1Id, [tag1]);
 
       // Record review on card 1 to create review log and modify FSRS state
       await db.studySessionDao.recordReview(
@@ -78,8 +82,12 @@ void main() {
       expect(jsonString, contains('Deck 2'));
       expect(jsonString, contains('Front 1'));
       expect(jsonString, contains('Front 2'));
+      expect(jsonString, contains('"clozeIndex": 2'));
+      expect(jsonString, contains('Medicine'));
 
       // 3. Clear database
+      await db.delete(db.cardTags).go();
+      await db.delete(db.tags).go();
       await db.delete(db.reviewLogs).go();
       await db.delete(db.cards).go();
       await db.delete(db.decks).go();
@@ -87,6 +95,8 @@ void main() {
       expect(await db.select(db.decks).get(), isEmpty);
       expect(await db.select(db.cards).get(), isEmpty);
       expect(await db.select(db.reviewLogs).get(), isEmpty);
+      expect(await db.select(db.tags).get(), isEmpty);
+      expect(await db.select(db.cardTags).get(), isEmpty);
 
       // 4. Import JSON
       await backupService.importJsonPayload(jsonString);
@@ -95,10 +105,15 @@ void main() {
       final restoredDecks = await db.select(db.decks).get();
       final restoredCards = await db.select(db.cards).get();
       final restoredLogs = await db.select(db.reviewLogs).get();
+      final restoredTags = await db.select(db.tags).get();
+      final restoredCardTags = await db.select(db.cardTags).get();
 
       expect(restoredDecks, hasLength(2));
       expect(restoredCards, hasLength(2));
       expect(restoredLogs, hasLength(1));
+      expect(restoredTags, hasLength(1));
+      expect(restoredTags.first.name, equals('Medicine'));
+      expect(restoredCardTags, hasLength(1));
 
       final restoredCard1 = restoredCards.firstWhere(
         (c) => c.front == 'Front 1',
@@ -108,6 +123,15 @@ void main() {
       expect(restoredCard1.difficulty, closeTo(6.1, 0.001));
       expect(restoredCard1.reps, equals(2));
       expect(restoredCard1.lapses, equals(1));
+
+      final restoredCard2 = restoredCards.firstWhere(
+        (c) => c.front.contains('{{c2::cloze}}'),
+      );
+      expect(restoredCard2.clozeIndex, equals(2));
+
+      final card1Tags = await db.tagsDao.getTagsForCard(restoredCard1.id);
+      expect(card1Tags, hasLength(1));
+      expect(card1Tags.first.name, equals('Medicine'));
 
       final restoredLog = restoredLogs.first;
       expect(restoredLog.cardId, equals(restoredCard1.id));

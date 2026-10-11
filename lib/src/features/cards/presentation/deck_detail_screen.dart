@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/database/app_database.dart' show Deck;
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/theme/card_state_colors.dart';
 import '../../study_session/presentation/study_screen.dart';
 import '../../tags/domain/tag_entity.dart';
 import '../../tags/presentation/controllers/tags_controller.dart';
@@ -367,36 +368,6 @@ class _CardTile extends StatelessWidget {
   final VoidCallback onToggleSuspend;
   final VoidCallback onToggleBury;
 
-  String _stateName(int state, AppLocalizations? l10n) {
-    switch (state) {
-      case 0:
-        return l10n?.stateNew ?? 'New';
-      case 1:
-        return l10n?.stateLearning ?? 'Learning';
-      case 2:
-        return l10n?.stateReview ?? 'Review';
-      case 3:
-        return l10n?.stateRelearning ?? 'Relearning';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  Color _stateColor(int state, ColorScheme scheme) {
-    switch (state) {
-      case 0:
-        return scheme.primary;
-      case 1:
-        return scheme.tertiary;
-      case 2:
-        return scheme.secondary;
-      case 3:
-        return scheme.error;
-      default:
-        return scheme.outline;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -516,16 +487,15 @@ class _CardTile extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: _stateColor(
-                              card.state,
-                              scheme,
-                            ).withValues(alpha: 0.15),
+                            color: scheme
+                                .cardStateColor(card.state)
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            _stateName(card.state, l10n),
+                            cardStateName(card.state, l10n),
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: _stateColor(card.state, scheme),
+                              color: scheme.cardStateColor(card.state),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

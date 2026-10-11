@@ -87,35 +87,6 @@ void main() {
       expect(deckTagsMap[card2], hasLength(2));
     });
 
-    test('watchCardsByDeckFiltered filters cards by tag', () async {
-      final deckId = await decksDao.createDeck(name: 'Math');
-      final card1 = await cardsDao.createCard(
-        deckId: deckId,
-        front: '2+2',
-        back: '4',
-      );
-      final card2 = await cardsDao.createCard(
-        deckId: deckId,
-        front: 'd/dx x^2',
-        back: '2x',
-      );
-
-      final tagCalculus = await tagsDao.getOrCreateTag('Calculus');
-      await tagsDao.setCardTags(card2, [tagCalculus]);
-
-      // All cards when filterTagId is null
-      final allCards = await tagsDao.watchCardsByDeckFiltered(deckId).first;
-      expect(allCards, hasLength(2));
-      expect(allCards.map((c) => c.id), containsAll([card1, card2]));
-
-      // Filtered to Calculus
-      final calculusCards = await tagsDao
-          .watchCardsByDeckFiltered(deckId, filterTagId: tagCalculus)
-          .first;
-      expect(calculusCards, hasLength(1));
-      expect(calculusCards.first.id, equals(card2));
-    });
-
     test('deleting a tag cascades and removes card association', () async {
       final deckId = await decksDao.createDeck(name: 'History');
       final cardId = await cardsDao.createCard(

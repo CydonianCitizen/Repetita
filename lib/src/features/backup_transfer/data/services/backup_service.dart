@@ -15,6 +15,8 @@ class BackupService {
     final decksList = await db.select(db.decks).get();
     final cardsList = await db.select(db.cards).get();
     final reviewLogsList = await db.select(db.reviewLogs).get();
+    final tagsList = await db.select(db.tags).get();
+    final cardTagsList = await db.select(db.cardTags).get();
 
     final payload = BackupPayload(
       version: 1,
@@ -47,6 +49,7 @@ class BackupService {
               createdAt: c.createdAt,
               isSuspended: c.isSuspended,
               buriedUntil: c.buriedUntil,
+              clozeIndex: c.clozeIndex,
             ),
           )
           .toList(),
@@ -66,6 +69,19 @@ class BackupService {
               reviewedAt: r.reviewedAt,
             ),
           )
+          .toList(),
+      tags: tagsList
+          .map(
+            (t) => TagPayload(
+              id: t.id,
+              name: t.name,
+              color: t.color,
+              createdAt: t.createdAt,
+            ),
+          )
+          .toList(),
+      cardTags: cardTagsList
+          .map((ct) => CardTagPayload(cardId: ct.cardId, tagId: ct.tagId))
           .toList(),
     );
 
@@ -87,6 +103,8 @@ class BackupService {
 
     await db.transaction(() async {
       if (replaceExisting) {
+        await db.delete(db.cardTags).go();
+        await db.delete(db.tags).go();
         await db.delete(db.reviewLogs).go();
         await db.delete(db.cards).go();
         await db.delete(db.decks).go();
@@ -127,6 +145,7 @@ class BackupService {
                 createdAt: Value(card.createdAt),
                 isSuspended: Value(card.isSuspended),
                 buriedUntil: Value(card.buriedUntil),
+                clozeIndex: Value(card.clozeIndex),
               ),
             );
         cardIdMap[card.id] = newCardId;
@@ -150,6 +169,41 @@ class BackupService {
                 reviewedAt: log.reviewedAt,
               ),
             );
+      }
+
+      final tagIdMap = <int, int>{};
+      for (final tag in payload.tags) {
+        final existingTag = await (db.select(
+          db.tags,
+        )..where((t) => t.name.equals(tag.name))).getSingleOrNull();
+        final int targetTagId;
+        if (existingTag != null) {
+          targetTagId = existingTag.id;
+        } else {
+          targetTagId = await db
+              .into(db.tags)
+              .insert(
+                TagsCompanion.insert(
+                  name: tag.name,
+                  color: Value(tag.color),
+                  createdAt: Value(tag.createdAt),
+                ),
+              );
+        }
+        tagIdMap[tag.id] = targetTagId;
+      }
+
+      for (final ct in payload.cardTags) {
+        final newCardId = cardIdMap[ct.cardId];
+        final newTagId = tagIdMap[ct.tagId];
+        if (newCardId != null && newTagId != null) {
+          await db
+              .into(db.cardTags)
+              .insert(
+                CardTagsCompanion.insert(cardId: newCardId, tagId: newTagId),
+                mode: InsertMode.insertOrIgnore,
+              );
+        }
       }
     });
   }

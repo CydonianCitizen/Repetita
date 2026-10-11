@@ -648,4 +648,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectTags => 'Select Tags';
+
+  @override
+  String get failedToLoadDecks => 'Failed to load decks';
+
+  @override
+  String deckStatsTitle(String deckName) {
+    return '$deckName Stats';
+  }
+
+  @override
+  String get errorLoadingStats => 'Error loading statistics';
+
+  @override
+  String get cardOptions => 'Card options';
+
+  @override
+  String get errorLoadingStudySession => 'Error loading study session';
+
+  @override
+  String get backupRestoredSuccess => 'Backup restored successfully!';
+
+  @override
+  String get restoreFailed => 'Restore failed';
+
+  @override
+  String get exportedCsvTitle => 'Exported CSV';
+
+  @override
+  String get csvExportedSuccess => 'CSV exported successfully!';
+
+  @override
+  String get exportFailed => 'Export failed';
+
+  @override
+  String get createDeckFirstNotice =>
+      'Please create a deck first before importing cards.';
+
+  @override
+  String importCardsSuccess(int importedCount, int skippedCount) {
+    return 'Imported $importedCount cards ($skippedCount skipped).';
+  }
+
+  @override
+  String get importFailed => 'Import failed';
+
+  @override
+  String get csvSectionDescription =>
+      'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.';
+
+  @override
+  String get restoreBackupTitle => 'Restore Backup';
+
+  @override
+  String get restoreWarning =>
+      'Warning: Restoring a backup will overwrite all existing decks and cards.';
+
+  @override
+  String get pasteBackupJsonHint => 'Paste backup JSON here...';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get importCsvTitle => 'Import Cards from CSV';
+
+  @override
+  String get targetDeck => 'Target Deck';
+
+  @override
+  String get import => 'Import';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard!';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/card_state_colors.dart';
 import '../../domain/stats_models.dart';
 
 class StateDistributionBar extends StatelessWidget {
@@ -17,24 +18,24 @@ class StateDistributionBar extends StatelessWidget {
 
     final segments = [
       _Segment(
-        name: l10n?.stateNew ?? 'New',
+        name: cardStateName(0, l10n),
         count: counts.newCount,
-        color: colorScheme.primary,
+        color: colorScheme.cardStateColor(0),
       ),
       _Segment(
-        name: l10n?.stateLearning ?? 'Learning',
+        name: cardStateName(1, l10n),
         count: counts.learningCount,
-        color: colorScheme.tertiary,
+        color: colorScheme.cardStateColor(1),
       ),
       _Segment(
-        name: l10n?.stateReview ?? 'Review',
+        name: cardStateName(2, l10n),
         count: counts.reviewCount,
-        color: colorScheme.secondary,
+        color: colorScheme.cardStateColor(2),
       ),
       _Segment(
-        name: l10n?.stateRelearning ?? 'Relearning',
+        name: cardStateName(3, l10n),
         count: counts.relearningCount,
-        color: colorScheme.error,
+        color: colorScheme.cardStateColor(3),
       ),
     ];
 

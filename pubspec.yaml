@@ -56,7 +56,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "repetita-circle-icon-1024.png"
-  min_sdk_android: 21
+  min_sdk_android: 30
   adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "repetita-adaptive-foreground-1024.png"
 

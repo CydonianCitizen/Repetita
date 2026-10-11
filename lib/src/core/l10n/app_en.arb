@@ -280,7 +280,46 @@
   "newTagHint": "Enter tag name...",
   "filterAll": "All",
   "noTags": "No tags",
-  "selectTags": "Select Tags"
+  "selectTags": "Select Tags",
+  "failedToLoadDecks": "Failed to load decks",
+  "deckStatsTitle": "{deckName} Stats",
+  "@deckStatsTitle": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingStats": "Error loading statistics",
+  "cardOptions": "Card options",
+  "errorLoadingStudySession": "Error loading study session",
+  "backupRestoredSuccess": "Backup restored successfully!",
+  "restoreFailed": "Restore failed",
+  "exportedCsvTitle": "Exported CSV",
+  "csvExportedSuccess": "CSV exported successfully!",
+  "exportFailed": "Export failed",
+  "createDeckFirstNotice": "Please create a deck first before importing cards.",
+  "importCardsSuccess": "Imported {importedCount} cards ({skippedCount} skipped).",
+  "@importCardsSuccess": {
+    "placeholders": {
+      "importedCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Import failed",
+  "csvSectionDescription": "Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.",
+  "restoreBackupTitle": "Restore Backup",
+  "restoreWarning": "Warning: Restoring a backup will overwrite all existing decks and cards.",
+  "pasteBackupJsonHint": "Paste backup JSON here...",
+  "restore": "Restore",
+  "importCsvTitle": "Import Cards from CSV",
+  "targetDeck": "Target Deck",
+  "import": "Import",
+  "copiedToClipboard": "Copied to clipboard!"
 }
 
 

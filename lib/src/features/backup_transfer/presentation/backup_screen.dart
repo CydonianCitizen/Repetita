@@ -50,12 +50,20 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             .read(backupControllerProvider.notifier)
             .importJson(jsonText.trim());
         if (mounted) {
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Backup restored successfully!')),
+            SnackBar(
+              content: Text(
+                l10n?.backupRestoredSuccess ?? 'Backup restored successfully!',
+              ),
+            ),
           );
         }
       } catch (e) {
-        if (mounted) _showErrorSnackBar('Restore failed: $e');
+        if (mounted) {
+          final l10n = AppLocalizations.of(context);
+          _showErrorSnackBar('${l10n?.restoreFailed ?? "Restore failed"}: $e');
+        }
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -70,23 +78,32 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .exportCsv();
 
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       _showResultDialog(
-        title: 'Exported CSV',
+        title: l10n?.exportedCsvTitle ?? 'Exported CSV',
         content: csvString,
-        successMessage: 'CSV exported successfully!',
+        successMessage:
+            l10n?.csvExportedSuccess ?? 'CSV exported successfully!',
       );
     } catch (e) {
-      if (mounted) _showErrorSnackBar('Export failed: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        _showErrorSnackBar('${l10n?.exportFailed ?? "Export failed"}: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleImportCsv() async {
+    final l10n = AppLocalizations.of(context);
     final decks =
         ref.read(deckListControllerProvider).value ?? <DeckWithCounts>[];
     if (decks.isEmpty) {
-      _showErrorSnackBar('Please create a deck first before importing cards.');
+      _showErrorSnackBar(
+        l10n?.createDeckFirstNotice ??
+            'Please create a deck first before importing cards.',
+      );
       return;
     }
 
@@ -102,16 +119,24 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             .read(backupControllerProvider.notifier)
             .importCardsFromCsv(result.csv.trim(), targetDeckId: result.deckId);
         if (mounted) {
+          final snackL10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Imported ${importResult.importedCount} cards (${importResult.skippedCount} skipped).',
+                snackL10n?.importCardsSuccess(
+                      importResult.importedCount,
+                      importResult.skippedCount,
+                    ) ??
+                    'Imported ${importResult.importedCount} cards (${importResult.skippedCount} skipped).',
               ),
             ),
           );
         }
       } catch (e) {
-        if (mounted) _showErrorSnackBar('Import failed: $e');
+        if (mounted) {
+          final errL10n = AppLocalizations.of(context);
+          _showErrorSnackBar('${errL10n?.importFailed ?? "Import failed"}: $e');
+        }
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -145,6 +170,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -181,7 +208,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 title:
                     l10n?.flashcardsInterchange ??
                     'Flashcards Interchange (CSV)',
-                description: 'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.',
+                description: l10n?.csvSectionDescription ?? 'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.',
                 actions: [
                   FilledButton.icon(
                     key: const Key('export_csv_button'),
@@ -201,9 +228,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ],
           ),
           if (_isLoading)
-            const ColoredBox(
-              color: Colors.black26,
-              child: Center(child: CircularProgressIndicator()),
+            ColoredBox(
+              color: colorScheme.scrim.withValues(alpha: 0.32),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
@@ -237,9 +264,10 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
-      title: const Text('Restore Backup'),
+      title: Text(l10n?.restoreBackupTitle ?? 'Restore Backup'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -252,7 +280,7 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Warning: Restoring a backup will overwrite all existing decks and cards.',
+                l10n?.restoreWarning ?? 'Warning: Restoring a backup will overwrite all existing decks and cards.',
                 style: TextStyle(
                   color: colorScheme.onErrorContainer,
                   fontWeight: FontWeight.bold,
@@ -264,9 +292,10 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
               key: const Key('json_input_field'),
               controller: _controller,
               maxLines: 8,
-              decoration: const InputDecoration(
-                hintText: 'Paste backup JSON here...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText:
+                    l10n?.pasteBackupJsonHint ?? 'Paste backup JSON here...',
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -275,12 +304,12 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const Key('confirm_restore_button'),
           onPressed: () => Navigator.of(context).pop(_controller.text),
-          child: const Text('Restore'),
+          child: Text(l10n?.restore ?? 'Restore'),
         ),
       ],
     );
@@ -315,8 +344,10 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('Import Cards from CSV'),
+      title: Text(l10n?.importCsvTitle ?? 'Import Cards from CSV'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -325,9 +356,9 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
             DropdownButtonFormField<int>(
               key: const Key('deck_dropdown'),
               initialValue: _selectedDeckId,
-              decoration: const InputDecoration(
-                labelText: 'Target Deck',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n?.targetDeck ?? 'Target Deck',
+                border: const OutlineInputBorder(),
               ),
               items: widget.decks.map((d) {
                 return DropdownMenuItem<int>(
@@ -357,14 +388,14 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const Key('confirm_import_csv_button'),
           onPressed: () =>
               Navigator.of(context)
                   .pop((deckId: _selectedDeckId, csv: _controller.text)),
-          child: const Text('Import'),
+          child: Text(l10n?.import ?? 'Import'),
         ),
       ],
     );
@@ -394,7 +425,11 @@ class _DisplayResultDialog extends StatelessWidget {
           onPressed: () {
             Clipboard.setData(ClipboardData(text: content));
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Copied to clipboard!')),
+              SnackBar(
+                content: Text(
+                  l10n?.copiedToClipboard ?? 'Copied to clipboard!',
+                ),
+              ),
             );
           },
         ),

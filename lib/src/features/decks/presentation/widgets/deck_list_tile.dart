@@ -18,9 +18,9 @@ class DeckListTile extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback? onTap;
 
-  void _showDeleteConfirmation(BuildContext context) {
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n?.deleteDeckConfirmTitle ?? 'Delete Deck?'),
@@ -43,23 +43,21 @@ class DeckListTile extends StatelessWidget {
           ),
         ],
       ),
-    ).then((confirmed) {
-      if (confirmed == true) {
-        onDelete();
-      }
-    });
+    );
+    if (confirmed == true) {
+      onDelete();
+    }
   }
 
-  void _showEditDialog(BuildContext context) {
-    DeckFormDialog.show(
+  Future<void> _showEditDialog(BuildContext context) async {
+    final result = await DeckFormDialog.show(
       context,
       initialName: deckWithCounts.deck.name,
       initialDescription: deckWithCounts.deck.description,
-    ).then((result) {
-      if (result != null) {
-        onEdit(result.name, result.description);
-      }
-    });
+    );
+    if (result != null) {
+      onEdit(result.name, result.description);
+    }
   }
 
   @override

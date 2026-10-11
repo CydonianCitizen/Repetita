@@ -30,7 +30,7 @@ class StatsScreen extends ConsumerWidget {
     final statsAsync = ref.watch(statsControllerProvider(deckId: deckId));
 
     final title = deckName != null
-        ? '$deckName Stats'
+        ? (l10n?.deckStatsTitle(deckName!) ?? '$deckName Stats')
         : (l10n?.stats ?? 'Statistics');
 
     return Scaffold(
@@ -53,7 +53,7 @@ class StatsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Error loading statistics',
+                  l10n?.errorLoadingStats ?? 'Error loading statistics',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

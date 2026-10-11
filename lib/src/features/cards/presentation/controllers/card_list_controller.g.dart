@@ -51,7 +51,7 @@ final class CardListControllerProvider
 }
 
 String _$cardListControllerHash() =>
-    r'99c32621b9c69798bc45afcca0feb770f0c7348a';
+    r'604e9806c5db3854685a0e22455ad70206b71c23';
 
 final class CardListControllerFamily extends $Family
     with

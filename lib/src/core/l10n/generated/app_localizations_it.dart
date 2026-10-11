@@ -649,4 +649,79 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get selectTags => 'Seleziona Tag';
+
+  @override
+  String get failedToLoadDecks => 'Impossibile caricare i mazzi';
+
+  @override
+  String deckStatsTitle(String deckName) {
+    return 'Statistiche di $deckName';
+  }
+
+  @override
+  String get errorLoadingStats =>
+      'Errore durante il caricamento delle statistiche';
+
+  @override
+  String get cardOptions => 'Opzioni carta';
+
+  @override
+  String get errorLoadingStudySession =>
+      'Errore durante il caricamento della sessione di studio';
+
+  @override
+  String get backupRestoredSuccess => 'Backup ripristinato con successo!';
+
+  @override
+  String get restoreFailed => 'Ripristino fallito';
+
+  @override
+  String get exportedCsvTitle => 'CSV Esportato';
+
+  @override
+  String get csvExportedSuccess => 'CSV esportato con successo!';
+
+  @override
+  String get exportFailed => 'Esportazione fallita';
+
+  @override
+  String get createDeckFirstNotice =>
+      'Crea prima un mazzo prima di importare le carte.';
+
+  @override
+  String importCardsSuccess(int importedCount, int skippedCount) {
+    return 'Importate $importedCount carte ($skippedCount ignorate).';
+  }
+
+  @override
+  String get importFailed => 'Importazione fallita';
+
+  @override
+  String get csvSectionDescription =>
+      'Esporta o importa carte in formato CSV con campi Fronte e Retro per l\'interscambio con fogli di calcolo e altri strumenti.';
+
+  @override
+  String get restoreBackupTitle => 'Ripristina Backup';
+
+  @override
+  String get restoreWarning =>
+      'Attenzione: Il ripristino di un backup sovrascriverà tutti i mazzi e le carte esistenti.';
+
+  @override
+  String get pasteBackupJsonHint => 'Incolla il JSON di backup qui...';
+
+  @override
+  String get restore => 'Ripristina';
+
+  @override
+  String get importCsvTitle => 'Importa Carte da CSV';
+
+  @override
+  String get targetDeck => 'Mazzo di destinazione';
+
+  @override
+  String get import => 'Importa';
+
+  @override
+  String get copiedToClipboard => 'Copiato negli appunti!';
 }

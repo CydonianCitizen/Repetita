@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../decks/presentation/deck_list_screen.dart';
+import '../../settings/data/haptic_service.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../stats/presentation/stats_screen.dart';
@@ -30,9 +30,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   void _onDestinationSelected(int index) {
     if (_currentIndex == index) return;
     final hapticIntensity = ref.read(hapticFeedbackControllerProvider);
-    if (!hapticIntensity.isOff) {
-      HapticFeedback.selectionClick();
-    }
+    ref.read(hapticServiceProvider).triggerSelection(hapticIntensity);
     setState(() => _currentIndex = index);
   }
 

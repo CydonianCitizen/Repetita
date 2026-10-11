@@ -60,6 +60,7 @@ class CardPayload {
     required this.createdAt,
     this.isSuspended = false,
     this.buriedUntil,
+    this.clozeIndex,
   });
 
   final int id;
@@ -76,6 +77,7 @@ class CardPayload {
   final DateTime createdAt;
   final bool isSuspended;
   final DateTime? buriedUntil;
+  final int? clozeIndex;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -92,6 +94,7 @@ class CardPayload {
     'createdAt': createdAt.toUtc().toIso8601String(),
     'isSuspended': isSuspended,
     'buriedUntil': buriedUntil?.toUtc().toIso8601String(),
+    if (clozeIndex != null) 'clozeIndex': clozeIndex,
   };
 
   factory CardPayload.fromJson(Map<String, dynamic> json) => CardPayload(
@@ -113,6 +116,7 @@ class CardPayload {
     buriedUntil: json['buriedUntil'] != null
         ? DateTime.parse(json['buriedUntil'] as String).toUtc()
         : null,
+    clozeIndex: json['clozeIndex'] as int?,
   );
 
   @override
@@ -133,7 +137,8 @@ class CardPayload {
           lapses == other.lapses &&
           createdAt == other.createdAt &&
           isSuspended == other.isSuspended &&
-          buriedUntil == other.buriedUntil;
+          buriedUntil == other.buriedUntil &&
+          clozeIndex == other.clozeIndex;
 
   @override
   int get hashCode => Object.hash(
@@ -151,6 +156,7 @@ class CardPayload {
     createdAt,
     isSuspended,
     buriedUntil,
+    clozeIndex,
   );
 }
 
@@ -243,6 +249,72 @@ class ReviewLogPayload {
   );
 }
 
+class TagPayload {
+  const TagPayload({
+    required this.id,
+    required this.name,
+    this.color = 0,
+    required this.createdAt,
+  });
+
+  final int id;
+  final String name;
+  final int color;
+  final DateTime createdAt;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'color': color,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+  };
+
+  factory TagPayload.fromJson(Map<String, dynamic> json) => TagPayload(
+    id: json['id'] as int,
+    name: json['name'] as String,
+    color: (json['color'] as int?) ?? 0,
+    createdAt: DateTime.parse(json['createdAt'] as String).toUtc(),
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TagPayload &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          color == other.color &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode => Object.hash(id, name, color, createdAt);
+}
+
+class CardTagPayload {
+  const CardTagPayload({required this.cardId, required this.tagId});
+
+  final int cardId;
+  final int tagId;
+
+  Map<String, dynamic> toJson() => {'cardId': cardId, 'tagId': tagId};
+
+  factory CardTagPayload.fromJson(Map<String, dynamic> json) => CardTagPayload(
+    cardId: json['cardId'] as int,
+    tagId: json['tagId'] as int,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CardTagPayload &&
+          runtimeType == other.runtimeType &&
+          cardId == other.cardId &&
+          tagId == other.tagId;
+
+  @override
+  int get hashCode => Object.hash(cardId, tagId);
+}
+
 class BackupPayload {
   const BackupPayload({
     this.version = 1,
@@ -250,6 +322,8 @@ class BackupPayload {
     required this.decks,
     required this.cards,
     required this.reviewLogs,
+    this.tags = const [],
+    this.cardTags = const [],
   });
 
   final int version;
@@ -257,6 +331,8 @@ class BackupPayload {
   final List<DeckPayload> decks;
   final List<CardPayload> cards;
   final List<ReviewLogPayload> reviewLogs;
+  final List<TagPayload> tags;
+  final List<CardTagPayload> cardTags;
 
   Map<String, dynamic> toJson() => {
     'version': version,
@@ -264,6 +340,8 @@ class BackupPayload {
     'decks': decks.map((d) => d.toJson()).toList(),
     'cards': cards.map((c) => c.toJson()).toList(),
     'reviewLogs': reviewLogs.map((r) => r.toJson()).toList(),
+    'tags': tags.map((t) => t.toJson()).toList(),
+    'cardTags': cardTags.map((ct) => ct.toJson()).toList(),
   };
 
   factory BackupPayload.fromJson(Map<String, dynamic> json) {
@@ -295,6 +373,16 @@ class BackupPayload {
     final reviewLogsList = (json['reviewLogs'] as List)
         .map((r) => ReviewLogPayload.fromJson(r as Map<String, dynamic>))
         .toList();
+    final tagsList =
+        (json['tags'] as List?)
+            ?.map((t) => TagPayload.fromJson(t as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    final cardTagsList =
+        (json['cardTags'] as List?)
+            ?.map((ct) => CardTagPayload.fromJson(ct as Map<String, dynamic>))
+            .toList() ??
+        const [];
 
     return BackupPayload(
       version: json['version'] as int,
@@ -302,6 +390,8 @@ class BackupPayload {
       decks: decksList,
       cards: cardsList,
       reviewLogs: reviewLogsList,
+      tags: tagsList,
+      cardTags: cardTagsList,
     );
   }
 }

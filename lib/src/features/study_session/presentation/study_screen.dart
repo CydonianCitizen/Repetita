@@ -40,7 +40,7 @@ class StudyScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               key: const Key('study_card_actions_menu'),
               icon: const Icon(Icons.more_vert),
-              tooltip: 'Card options',
+              tooltip: l10n?.cardOptions ?? 'Card options',
               onSelected: (value) async {
                 final controller = ref.read(
                   studySessionControllerProvider(deckId).notifier,
@@ -102,7 +102,7 @@ class StudyScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: Text(
-            'Error loading study session: $error',
+            '${l10n?.errorLoadingStudySession ?? "Error loading study session"}: $error',
             style: TextStyle(color: colorScheme.error),
           ),
         ),

@@ -87,7 +87,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: currentStreak > 0
-                        ? Colors.deepOrange.withValues(alpha: 0.15)
+                        ? scheme.tertiary.withValues(alpha: 0.15)
                         : scheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -98,7 +98,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                         Icons.local_fire_department_rounded,
                         size: 16,
                         color: currentStreak > 0
-                            ? Colors.deepOrange
+                            ? scheme.tertiary
                             : scheme.outline,
                       ),
                       const SizedBox(width: 4),
@@ -107,7 +107,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                             '$currentStreak ${currentStreak == 1 ? "day" : "days"}',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: currentStreak > 0
-                              ? Colors.deepOrange
+                              ? scheme.tertiary
                               : scheme.outline,
                           fontWeight: FontWeight.bold,
                         ),

@@ -14,10 +14,6 @@ class RatingBar extends StatelessWidget {
   final Map<Rating, String> intervals;
   final ValueChanged<Rating> onRatingSelected;
 
-  void _handleTap(Rating rating) {
-    onRatingSelected(rating);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -72,7 +68,7 @@ class RatingBar extends StatelessWidget {
                         label: 'Rate ${cfg.label}, next review in $interval',
                         child: FilledButton.tonal(
                           key: cfg.key,
-                          onPressed: () => _handleTap(cfg.rating),
+                          onPressed: () => onRatingSelected(cfg.rating),
                           style: FilledButton.styleFrom(
                             backgroundColor: cfg.backgroundColor,
                             foregroundColor: cfg.foregroundColor,

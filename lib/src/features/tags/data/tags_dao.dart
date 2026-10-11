@@ -101,31 +101,4 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
       return map;
     });
   }
-
-  Stream<List<Card>> watchCardsByDeckFiltered(int deckId, {int? filterTagId}) {
-    if (filterTagId == null) {
-      return (select(cards)
-            ..where((t) => t.deckId.equals(deckId))
-            ..orderBy([
-              (t) => OrderingTerm.desc(t.createdAt),
-              (t) => OrderingTerm.desc(t.id),
-            ]))
-          .watch();
-    }
-
-    final query =
-        select(cards)
-            .join([innerJoin(cardTags, cardTags.cardId.equalsExp(cards.id))])
-          ..where(
-            cards.deckId.equals(deckId) & cardTags.tagId.equals(filterTagId),
-          )
-          ..orderBy([
-            OrderingTerm.desc(cards.createdAt),
-            OrderingTerm.desc(cards.id),
-          ]);
-
-    return query.watch().map(
-      (rows) => rows.map((r) => r.readTable(cards)).toList(),
-    );
-  }
 }

@@ -32,7 +32,7 @@ class DeckListScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Failed to load decks',
+                  l10n?.failedToLoadDecks ?? 'Failed to load decks',
                   style: Theme.of(context).textTheme.titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -47,7 +47,7 @@ class DeckListScreen extends ConsumerWidget {
                 FilledButton.tonalIcon(
                   onPressed: () => ref.invalidate(deckListControllerProvider),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Retry'),
+                  label: Text(l10n?.retry ?? 'Retry'),
                 ),
               ],
             ),

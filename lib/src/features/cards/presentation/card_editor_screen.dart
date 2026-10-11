@@ -96,132 +96,144 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   Future<void> _showAddTagDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final textController = TextEditingController();
-    final allTagsAsync = ref.read(tagsControllerProvider);
-    final allTags = allTagsAsync.value ?? [];
 
     await showDialog<void>(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text(l10n?.selectTags ?? 'Select Tags'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+        return Consumer(
+          builder: (context, ref, _) {
+            final allTagsAsync = ref.watch(tagsControllerProvider);
+            final allTags = allTagsAsync.value ?? [];
+
+            return StatefulBuilder(
+              builder: (context, setDialogState) {
+                return AlertDialog(
+                  title: Text(l10n?.selectTags ?? 'Select Tags'),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            key: const Key('new_tag_field'),
-                            controller: textController,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              hintText: l10n?.newTagHint ?? 'Enter tag name...',
-                              isDense: true,
-                              border: const OutlineInputBorder(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                key: const Key('new_tag_field'),
+                                controller: textController,
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  hintText:
+                                      l10n?.newTagHint ?? 'Enter tag name...',
+                                  isDense: true,
+                                  border: const OutlineInputBorder(),
+                                ),
+                                onSubmitted: (value) async {
+                                  final name = value.trim();
+                                  if (name.isNotEmpty) {
+                                    final tagId = await ref
+                                        .read(tagsControllerProvider.notifier)
+                                        .createTag(name);
+                                    final newTag = TagEntity(
+                                      id: tagId,
+                                      name: name,
+                                      createdAt: DateTime.now().toUtc(),
+                                    );
+                                    if (!_selectedTags.any(
+                                      (t) => t.id == tagId,
+                                    )) {
+                                      setState(() => _selectedTags.add(newTag));
+                                    }
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  }
+                                },
+                              ),
                             ),
-                            onSubmitted: (value) async {
-                              final name = value.trim();
-                              if (name.isNotEmpty) {
-                                final tagId = await ref
-                                    .read(tagsControllerProvider.notifier)
-                                    .createTag(name);
-                                final newTag = TagEntity(
-                                  id: tagId,
-                                  name: name,
-                                  createdAt: DateTime.now().toUtc(),
-                                );
-                                if (!_selectedTags.any((t) => t.id == tagId)) {
-                                  setState(() => _selectedTags.add(newTag));
+                            const SizedBox(width: 8),
+                            IconButton.filledTonal(
+                              key: const Key('confirm_add_tag_button'),
+                              icon: const Icon(Icons.add),
+                              onPressed: () async {
+                                final name = textController.text.trim();
+                                if (name.isNotEmpty) {
+                                  final tagId = await ref
+                                      .read(tagsControllerProvider.notifier)
+                                      .createTag(name);
+                                  final newTag = TagEntity(
+                                    id: tagId,
+                                    name: name,
+                                    createdAt: DateTime.now().toUtc(),
+                                  );
+                                  if (!_selectedTags.any(
+                                    (t) => t.id == tagId,
+                                  )) {
+                                    setState(() => _selectedTags.add(newTag));
+                                  }
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
                                 }
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                }
-                              }
-                            },
+                              },
+                            ),
+                          ],
+                        ),
+                        if (allTags.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n?.tags ?? 'Tags',
+                            style: Theme.of(context).textTheme.labelMedium,
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton.filledTonal(
-                          key: const Key('confirm_add_tag_button'),
-                          icon: const Icon(Icons.add),
-                          onPressed: () async {
-                            final name = textController.text.trim();
-                            if (name.isNotEmpty) {
-                              final tagId = await ref
-                                  .read(tagsControllerProvider.notifier)
-                                  .createTag(name);
-                              final newTag = TagEntity(
-                                id: tagId,
-                                name: name,
-                                createdAt: DateTime.now().toUtc(),
-                              );
-                              if (!_selectedTags.any((t) => t.id == tagId)) {
-                                setState(() => _selectedTags.add(newTag));
-                              }
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            }
-                          },
-                        ),
+                          const SizedBox(height: 8),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 180),
+                            child: SingleChildScrollView(
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: allTags.map((tag) {
+                                  final isSelected = _selectedTags.any(
+                                    (t) => t.id == tag.id,
+                                  );
+                                  return FilterChip(
+                                    label: Text(tag.name),
+                                    selected: isSelected,
+                                    onSelected: (selected) {
+                                      setDialogState(() {
+                                        if (selected) {
+                                          if (!_selectedTags.any(
+                                            (t) => t.id == tag.id,
+                                          )) {
+                                            _selectedTags.add(tag);
+                                          }
+                                        } else {
+                                          _selectedTags.removeWhere(
+                                            (t) => t.id == tag.id,
+                                          );
+                                        }
+                                      });
+                                      setState(() {});
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                    if (allTags.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n?.tags ?? 'Tags',
-                        style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        MaterialLocalizations.of(context).okButtonLabel,
                       ),
-                      const SizedBox(height: 8),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 180),
-                        child: SingleChildScrollView(
-                          child: Wrap(
-                            spacing: 6,
-                            runSpacing: 6,
-                            children: allTags.map((tag) {
-                              final isSelected = _selectedTags.any(
-                                (t) => t.id == tag.id,
-                              );
-                              return FilterChip(
-                                label: Text(tag.name),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  setDialogState(() {
-                                    if (selected) {
-                                      if (!_selectedTags.any(
-                                        (t) => t.id == tag.id,
-                                      )) {
-                                        _selectedTags.add(tag);
-                                      }
-                                    } else {
-                                      _selectedTags.removeWhere(
-                                        (t) => t.id == tag.id,
-                                      );
-                                    }
-                                  });
-                                  setState(() {});
-                                },
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(MaterialLocalizations.of(context).okButtonLabel),
-                ),
-              ],
+                );
+              },
             );
           },
         );
@@ -297,6 +309,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final title = widget.isEditing
         ? (l10n?.editCard ?? 'Edit Card')
@@ -370,14 +384,12 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                   const SizedBox(width: 8),
                   Chip(
                     visualDensity: VisualDensity.compact,
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer,
+                    backgroundColor: colorScheme.primaryContainer,
                     label: Text(
                       '${ClozeParser.extractClozeIndices(_frontController.text).length} Cloze',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        color: colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -418,13 +430,14 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                 Icon(
                   Icons.label_outline_rounded,
                   size: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   l10n?.tags ?? 'Tags',
-                  style: Theme.of(context).textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),

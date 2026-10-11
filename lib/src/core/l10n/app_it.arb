@@ -235,7 +235,46 @@
   "newTagHint": "Inserisci nome tag...",
   "filterAll": "Tutte",
   "noTags": "Nessun tag",
-  "selectTags": "Seleziona Tag"
+  "selectTags": "Seleziona Tag",
+  "failedToLoadDecks": "Impossibile caricare i mazzi",
+  "deckStatsTitle": "Statistiche di {deckName}",
+  "@deckStatsTitle": {
+    "placeholders": {
+      "deckName": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingStats": "Errore durante il caricamento delle statistiche",
+  "cardOptions": "Opzioni carta",
+  "errorLoadingStudySession": "Errore durante il caricamento della sessione di studio",
+  "backupRestoredSuccess": "Backup ripristinato con successo!",
+  "restoreFailed": "Ripristino fallito",
+  "exportedCsvTitle": "CSV Esportato",
+  "csvExportedSuccess": "CSV esportato con successo!",
+  "exportFailed": "Esportazione fallita",
+  "createDeckFirstNotice": "Crea prima un mazzo prima di importare le carte.",
+  "importCardsSuccess": "Importate {importedCount} carte ({skippedCount} ignorate).",
+  "@importCardsSuccess": {
+    "placeholders": {
+      "importedCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Importazione fallita",
+  "csvSectionDescription": "Esporta o importa carte in formato CSV con campi Fronte e Retro per l'interscambio con fogli di calcolo e altri strumenti.",
+  "restoreBackupTitle": "Ripristina Backup",
+  "restoreWarning": "Attenzione: Il ripristino di un backup sovrascriverà tutti i mazzi e le carte esistenti.",
+  "pasteBackupJsonHint": "Incolla il JSON di backup qui...",
+  "restore": "Ripristina",
+  "importCsvTitle": "Importa Carte da CSV",
+  "targetDeck": "Mazzo di destinazione",
+  "import": "Importa",
+  "copiedToClipboard": "Copiato negli appunti!"
 }
 
 
