@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../data/haptic_service.dart';
 import '../domain/animation_level.dart';
+import '../domain/haptic_intensity.dart';
 import 'controllers/animation_level_controller.dart';
+import 'controllers/haptic_controller.dart';
 import 'controllers/locale_controller.dart';
 import 'controllers/reminder_controller.dart';
 import 'controllers/theme_mode_controller.dart';
@@ -602,6 +606,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final currentLocale = ref.watch(localeControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
     final animLevel = ref.watch(animationLevelControllerProvider);
+    final hapticIntensity = ref.watch(hapticFeedbackControllerProvider);
     final reminderSettings = ref.watch(reminderControllerProvider);
 
     return Scaffold(
@@ -618,13 +623,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.psychology_alt_rounded,
-                    color: colorScheme.onPrimaryContainer,
-                    size: 28,
+                  clipBehavior: Clip.antiAlias,
+                  child: SvgPicture.asset(
+                    'repetita-icon.svg',
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -924,6 +937,267 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               style: const TextStyle(fontSize: 12),
                             ),
                             onPressed: () => _triggerMotionPreview(animLevel),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(indent: 56, height: 1),
+
+              // Haptic Feedback Intensity Slider (Material Design 3 Expressive)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.vibration_rounded,
+                            color: colorScheme.primary,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n?.hapticFeedback ?? 'Haptic Feedback',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                l10n?.hapticFeedbackSubtitle ?? 'Vibrations on answer ratings and interactions',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Expressive level pill badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                switch (hapticIntensity) {
+                                  HapticIntensity.off =>
+                                    Icons.notifications_off_outlined,
+                                  HapticIntensity.light =>
+                                    Icons.touch_app_outlined,
+                                  HapticIntensity.medium =>
+                                    Icons.vibration_rounded,
+                                  HapticIntensity.strong =>
+                                    Icons.sensors_rounded,
+                                },
+                                size: 14,
+                                color: colorScheme.onSecondaryContainer,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                switch (hapticIntensity) {
+                                  HapticIntensity.off =>
+                                    l10n?.hapticOff ?? 'Off',
+                                  HapticIntensity.light =>
+                                    l10n?.hapticLight ?? 'Light',
+                                  HapticIntensity.medium =>
+                                    l10n?.hapticMedium ?? 'Medium',
+                                  HapticIntensity.strong =>
+                                    l10n?.hapticStrong ?? 'Strong',
+                                },
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSecondaryContainer,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Material 3 Slider with discrete step division
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 6,
+                        activeTrackColor: colorScheme.primary,
+                        inactiveTrackColor: colorScheme.surfaceContainerHighest,
+                        thumbColor: colorScheme.primary,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 10,
+                          elevation: 2,
+                        ),
+                        overlayColor: colorScheme.primary.withValues(
+                          alpha: 0.16,
+                        ),
+                        tickMarkShape: const RoundSliderTickMarkShape(
+                          tickMarkRadius: 3,
+                        ),
+                        activeTickMarkColor: colorScheme.onPrimary,
+                        inactiveTickMarkColor: colorScheme.outline,
+                      ),
+                      child: Slider(
+                        key: const Key('setting_haptic_slider'),
+                        value: hapticIntensity.level.toDouble(),
+                        min: 0.0,
+                        max: 3.0,
+                        divisions: 3,
+                        label: switch (hapticIntensity) {
+                          HapticIntensity.off => l10n?.hapticOff ?? 'Off',
+                          HapticIntensity.light => l10n?.hapticLight ?? 'Light',
+                          HapticIntensity.medium =>
+                            l10n?.hapticMedium ?? 'Medium',
+                          HapticIntensity.strong =>
+                            l10n?.hapticStrong ?? 'Strong',
+                        },
+                        onChanged: (val) {
+                          final newIntensity = HapticIntensity.fromLevel(
+                            val.round(),
+                          );
+                          ref
+                              .read(hapticFeedbackControllerProvider.notifier)
+                              .setIntensity(newIntensity);
+                          ref
+                              .read(hapticServiceProvider)
+                              .triggerTest(newIntensity);
+                        },
+                      ),
+                    ),
+
+                    // Step labels below slider
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n?.hapticOff ?? 'Off',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: hapticIntensity == HapticIntensity.off
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: hapticIntensity == HapticIntensity.off
+                                  ? colorScheme.primary
+                                  : colorScheme.outline,
+                            ),
+                          ),
+                          Text(
+                            l10n?.hapticLight ?? 'Light',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight:
+                                  hapticIntensity == HapticIntensity.light
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: hapticIntensity == HapticIntensity.light
+                                  ? colorScheme.primary
+                                  : colorScheme.outline,
+                            ),
+                          ),
+                          Text(
+                            l10n?.hapticMedium ?? 'Medium',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight:
+                                  hapticIntensity == HapticIntensity.medium
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: hapticIntensity == HapticIntensity.medium
+                                  ? colorScheme.primary
+                                  : colorScheme.outline,
+                            ),
+                          ),
+                          Text(
+                            l10n?.hapticStrong ?? 'Strong',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight:
+                                  hapticIntensity == HapticIntensity.strong
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: hapticIntensity == HapticIntensity.strong
+                                  ? colorScheme.primary
+                                  : colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Contextual descriptive card with live test preview
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.45,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withValues(
+                            alpha: 0.3,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              switch (hapticIntensity) {
+                                HapticIntensity.off =>
+                                  l10n?.hapticOffDesc ?? 'Vibrations disabled',
+                                HapticIntensity.light =>
+                                  l10n?.hapticLightDesc ??
+                                      'Subtle tactile clicks',
+                                HapticIntensity.medium =>
+                                  l10n?.hapticMediumDesc ??
+                                      'Balanced physical response',
+                                HapticIntensity.strong =>
+                                  l10n?.hapticStrongDesc ??
+                                      'Prominent tactile buzz and pulses',
+                              },
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonalIcon(
+                            key: const Key('test_haptic_button'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                            icon: const Icon(Icons.vibration_rounded, size: 16),
+                            label: Text(
+                              l10n?.testHaptic ?? 'Test Haptics',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            onPressed: () => ref
+                                .read(hapticServiceProvider)
+                                .triggerTest(hapticIntensity),
                           ),
                         ],
                       ),

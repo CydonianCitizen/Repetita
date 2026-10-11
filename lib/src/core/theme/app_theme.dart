@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'font_theme.dart';
 import 'material_theme.dart';
 
 abstract final class AppTheme {
@@ -22,10 +23,16 @@ abstract final class AppTheme {
       _buildTheme(MaterialTheme.darkHighContrastScheme());
 
   static ThemeData _buildTheme(ColorScheme colorScheme) {
+    final textTheme = createAppTextTheme(brightness: colorScheme.brightness);
+
     return ThemeData(
       useMaterial3: true,
       brightness: colorScheme.brightness,
       colorScheme: colorScheme,
+      textTheme: textTheme.apply(
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
+      ),
       scaffoldBackgroundColor: colorScheme.surface,
       canvasColor: colorScheme.surface,
       appBarTheme: AppBarTheme(

@@ -105,6 +105,18 @@
   "animationExpressiveDesc": "Playful spring physics, bouncy feedback, and lively motion",
   "testMotion": "Test Motion",
 
+  "hapticFeedback": "Haptic Feedback",
+  "hapticFeedbackSubtitle": "Vibrations on answer ratings and interactions",
+  "hapticOff": "Off",
+  "hapticOffDesc": "Vibrations disabled",
+  "hapticLight": "Light",
+  "hapticLightDesc": "Subtle tactile clicks",
+  "hapticMedium": "Medium",
+  "hapticMediumDesc": "Balanced physical response",
+  "hapticStrong": "Strong",
+  "hapticStrongDesc": "Prominent tactile buzz and pulses",
+  "testHaptic": "Test Haptics",
+
   "sectionLanguage": "LANGUAGE & LOCALIZATION",
   "selectLanguage": "Select Language",
   "language": "Language",

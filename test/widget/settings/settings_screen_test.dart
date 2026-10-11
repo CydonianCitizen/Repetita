@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/l10n/generated/app_localizations.dart';
 import 'package:repetita/src/features/settings/data/update_service.dart';
 import 'package:repetita/src/features/settings/domain/animation_level.dart';
+import 'package:repetita/src/features/settings/domain/haptic_intensity.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/animation_level_controller.dart';
+import 'package:repetita/src/features/settings/presentation/controllers/haptic_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/locale_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/reminder_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/theme_mode_controller.dart';
@@ -26,7 +28,7 @@ void main() {
     testWidgets(
       'renders all settings sections, tiles, branding, and animation slider',
       (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(() {
           tester.view.resetPhysicalSize();
@@ -52,6 +54,7 @@ void main() {
           find.byKey(const Key('setting_animation_slider')),
           findsOneWidget,
         );
+        expect(find.byKey(const Key('setting_haptic_slider')), findsOneWidget);
         expect(find.byKey(const Key('setting_language_tile')), findsOneWidget);
         expect(find.byKey(const Key('setting_fsrs_tile')), findsOneWidget);
         expect(
@@ -189,6 +192,57 @@ void main() {
     );
 
     testWidgets(
+      'haptic feedback slider adjusts intensity and test button triggers haptic feedback',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 4000);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(buildSubject(container: container));
+
+        // Initial default is Medium (2)
+        expect(
+          container.read(hapticFeedbackControllerProvider),
+          HapticIntensity.medium,
+        );
+
+        // Find slider and drag to left (Off = 0)
+        final hapticSliderFinder = find.byKey(
+          const Key('setting_haptic_slider'),
+        );
+        expect(hapticSliderFinder, findsOneWidget);
+        await tester.drag(hapticSliderFinder, const Offset(-400, 0));
+        await tester.pumpAndSettle();
+
+        expect(
+          container.read(hapticFeedbackControllerProvider),
+          HapticIntensity.off,
+        );
+
+        // Drag to right (Strong = 3)
+        await tester.drag(hapticSliderFinder, const Offset(400, 0));
+        await tester.pumpAndSettle();
+
+        expect(
+          container.read(hapticFeedbackControllerProvider),
+          HapticIntensity.strong,
+        );
+
+        // Tap test haptic button
+        final testHapticButton = find.byKey(const Key('test_haptic_button'));
+        expect(testHapticButton, findsOneWidget);
+        await tester.tap(testHapticButton);
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
       'study reminders dialog toggles switch and dispatches test notification',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
@@ -236,7 +290,7 @@ void main() {
     testWidgets(
       'update check dialog displays up to date message on current version',
       (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(() {
           tester.view.resetPhysicalSize();
@@ -281,7 +335,7 @@ void main() {
     testWidgets(
       'update check dialog displays update available and release notes',
       (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(() {
           tester.view.resetPhysicalSize();

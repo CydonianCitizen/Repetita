@@ -256,6 +256,39 @@ class AppLocalizationsIt extends AppLocalizations {
   String get testMotion => 'Prova movimento';
 
   @override
+  String get hapticFeedback => 'Feedback aptico';
+
+  @override
+  String get hapticFeedbackSubtitle => 'Vibrazioni alla risposta e interazioni';
+
+  @override
+  String get hapticOff => 'Disattivato';
+
+  @override
+  String get hapticOffDesc => 'Vibrazioni disattivate';
+
+  @override
+  String get hapticLight => 'Leggero';
+
+  @override
+  String get hapticLightDesc => 'Click tattili delicati';
+
+  @override
+  String get hapticMedium => 'Medio';
+
+  @override
+  String get hapticMediumDesc => 'Risposta fisica bilanciata';
+
+  @override
+  String get hapticStrong => 'Forte';
+
+  @override
+  String get hapticStrongDesc => 'Vibrazioni decise e impulsi tattili';
+
+  @override
+  String get testHaptic => 'Prova vibrazione';
+
+  @override
   String get sectionLanguage => 'LINGUA E LOCALIZZAZIONE';
 
   @override

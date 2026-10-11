@@ -81,6 +81,18 @@
   "animationExpressiveDesc": "Fisica elastica dinamica, micro-interazioni ricche ed espressive",
   "testMotion": "Prova movimento",
 
+  "hapticFeedback": "Feedback aptico",
+  "hapticFeedbackSubtitle": "Vibrazioni alla risposta e interazioni",
+  "hapticOff": "Disattivato",
+  "hapticOffDesc": "Vibrazioni disattivate",
+  "hapticLight": "Leggero",
+  "hapticLightDesc": "Click tattili delicati",
+  "hapticMedium": "Medio",
+  "hapticMediumDesc": "Risposta fisica bilanciata",
+  "hapticStrong": "Forte",
+  "hapticStrongDesc": "Vibrazioni decise e impulsi tattili",
+  "testHaptic": "Prova vibrazione",
+
   "sectionLanguage": "LINGUA E LOCALIZZAZIONE",
   "selectLanguage": "Seleziona lingua",
   "language": "Lingua",

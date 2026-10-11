@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'controllers/study_session_controller.dart';
+import '../../settings/data/haptic_service.dart';
+import '../../settings/presentation/controllers/haptic_controller.dart';
 import 'widgets/flip_card_view.dart';
 import 'widgets/rating_bar.dart';
 
@@ -203,8 +205,14 @@ class StudyScreen extends ConsumerWidget {
                 else
                   RatingBar(
                     intervals: controller.getIntervalPreviews(),
-                    onRatingSelected: (rating) =>
-                        controller.submitRating(rating),
+                    onRatingSelected: (rating) {
+                      final haptic = ref.read(hapticServiceProvider);
+                      final intensity = ref.read(
+                        hapticFeedbackControllerProvider,
+                      );
+                      haptic.triggerRatingFeedback(rating, intensity);
+                      controller.submitRating(rating);
+                    },
                   ),
               ],
             ),

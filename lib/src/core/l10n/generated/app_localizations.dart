@@ -542,6 +542,72 @@ abstract class AppLocalizations {
   /// **'Test Motion'**
   String get testMotion;
 
+  /// No description provided for @hapticFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic Feedback'**
+  String get hapticFeedback;
+
+  /// No description provided for @hapticFeedbackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrations on answer ratings and interactions'**
+  String get hapticFeedbackSubtitle;
+
+  /// No description provided for @hapticOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get hapticOff;
+
+  /// No description provided for @hapticOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrations disabled'**
+  String get hapticOffDesc;
+
+  /// No description provided for @hapticLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get hapticLight;
+
+  /// No description provided for @hapticLightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle tactile clicks'**
+  String get hapticLightDesc;
+
+  /// No description provided for @hapticMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get hapticMedium;
+
+  /// No description provided for @hapticMediumDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced physical response'**
+  String get hapticMediumDesc;
+
+  /// No description provided for @hapticStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get hapticStrong;
+
+  /// No description provided for @hapticStrongDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prominent tactile buzz and pulses'**
+  String get hapticStrongDesc;
+
+  /// No description provided for @testHaptic.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Haptics'**
+  String get testHaptic;
+
   /// No description provided for @sectionLanguage.
   ///
   /// In en, this message translates to:
