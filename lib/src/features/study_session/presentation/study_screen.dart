@@ -3,27 +3,57 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
-import 'controllers/study_session_controller.dart';
 import '../../settings/data/haptic_service.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
+import '../domain/models/custom_study_config.dart';
+import 'controllers/study_session_controller.dart';
 import 'widgets/flip_card_view.dart';
 import 'widgets/rating_bar.dart';
 
 class StudyScreen extends ConsumerWidget {
-  const StudyScreen({super.key, required this.deckId});
+  const StudyScreen({super.key, required this.deckId, this.customStudyConfig});
 
   final int deckId;
+  final CustomStudyConfig? customStudyConfig;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final stateAsync = ref.watch(studySessionControllerProvider(deckId));
+    final provider = studySessionControllerProvider(deckId, customStudyConfig);
+    final stateAsync = ref.watch(provider);
+    final isCram =
+        stateAsync.value?.isCram ?? (customStudyConfig?.isCram ?? false);
+    final titleText = isCram
+        ? (l10n?.cramSessionTitle ?? 'Cram Session')
+        : (l10n?.studySessionTitle ?? 'Study Session');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n?.studySessionTitle ?? 'Study Session'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(titleText),
+            if (isCram) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: colorScheme.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  l10n?.cramBadge ?? 'CRAM',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onTertiaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         actions: [
           if (stateAsync.value?.canUndo == true)
             IconButton(
@@ -31,9 +61,7 @@ class StudyScreen extends ConsumerWidget {
               icon: const Icon(Icons.undo_rounded),
               tooltip: l10n?.undoReview ?? 'Undo Review',
               onPressed: () async {
-                await ref
-                    .read(studySessionControllerProvider(deckId).notifier)
-                    .undoReview();
+                await ref.read(provider.notifier).undoReview();
               },
             ),
           if (stateAsync.value?.currentCard != null)
@@ -42,9 +70,7 @@ class StudyScreen extends ConsumerWidget {
               icon: const Icon(Icons.more_vert),
               tooltip: l10n?.cardOptions ?? 'Card options',
               onSelected: (value) async {
-                final controller = ref.read(
-                  studySessionControllerProvider(deckId).notifier,
-                );
+                final controller = ref.read(provider.notifier);
                 if (value == 'suspend') {
                   await controller.suspendCurrentCard();
                   if (context.mounted) {
@@ -143,7 +169,11 @@ class StudyScreen extends ConsumerWidget {
                         ),
                     const SizedBox(height: 28),
                     Text(
-                          'All cards reviewed for today!',
+                          sessionState.isCram
+                              ? (l10n?.cramCompletedTitle ??
+                                    'Cram session completed!')
+                              : (l10n?.allCardsReviewedTitle ??
+                                    'All cards reviewed for today!'),
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: colorScheme.onSurface,
@@ -159,7 +189,11 @@ class StudyScreen extends ConsumerWidget {
                         ),
                     const SizedBox(height: 12),
                     Text(
-                      'Great job! Check back later for upcoming reviews.',
+                      sessionState.isCram
+                          ? (l10n?.cramCompletedDesc ??
+                                'You finished your practice run.')
+                          : (l10n?.greatJobUpcomingReviews ??
+                                'Great job! Check back later for upcoming reviews.'),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -170,7 +204,7 @@ class StudyScreen extends ConsumerWidget {
                           key: const Key('back_to_deck_button'),
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.arrow_back),
-                          label: const Text('Back to Deck'),
+                          label: Text(l10n?.backToDeck ?? 'Back to Deck'),
                         )
                         .animate()
                         .fadeIn(delay: 350.ms, duration: 300.ms)
@@ -188,9 +222,7 @@ class StudyScreen extends ConsumerWidget {
           final total = sessionState.totalCards;
           final currentNum = sessionState.currentIndex + 1;
           final progress = total > 0 ? currentNum / total : 0.0;
-          final controller = ref.read(
-            studySessionControllerProvider(deckId).notifier,
-          );
+          final controller = ref.read(provider.notifier);
 
           return SafeArea(
             child: Column(
@@ -206,14 +238,16 @@ class StudyScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Card $currentNum of $total',
+                            l10n?.cardProgress(currentNum, total) ??
+                                'Card $currentNum of $total',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           Text(
-                            '${sessionState.remainingCards} remaining',
+                            l10n?.cardsRemaining(sessionState.remainingCards) ??
+                                '${sessionState.remainingCards} remaining',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.outline,
                             ),
@@ -285,9 +319,9 @@ class StudyScreen extends ConsumerWidget {
                           controller.revealAnswer();
                         },
                         icon: const Icon(Icons.flip_rounded),
-                        label: const Text(
-                          'Show Answer',
-                          style: TextStyle(
+                        label: Text(
+                          l10n?.showAnswer ?? 'Show Answer',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

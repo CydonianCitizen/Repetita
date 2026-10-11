@@ -5,8 +5,10 @@ import '../../../../core/algorithms/fsrs/models/rating.dart';
 import '../../../cards/data/cards_dao.dart';
 import '../../../cards/data/cards_dao_provider.dart';
 import '../../../cards/domain/card_entity.dart';
+import '../../../../core/database/app_database.dart' show Card;
 import '../../../settings/presentation/controllers/fsrs_parameters_controller.dart';
 import '../../data/study_session_dao_provider.dart';
+import '../../domain/models/custom_study_config.dart';
 
 part 'study_session_controller.g.dart';
 
@@ -19,6 +21,8 @@ class StudySessionState {
     this.isCompleted = false,
     this.lastReviewedCard,
     this.lastReviewLogId,
+    this.isCram = false,
+    this.customStudyConfig,
   });
 
   final int deckId;
@@ -28,8 +32,14 @@ class StudySessionState {
   final bool isCompleted;
   final CardEntity? lastReviewedCard;
   final int? lastReviewLogId;
+  final bool isCram;
+  final CustomStudyConfig? customStudyConfig;
 
-  bool get canUndo => lastReviewedCard != null && lastReviewLogId != null;
+  bool get canUndo {
+    if (lastReviewedCard == null) return false;
+    if (isCram) return true;
+    return lastReviewLogId != null;
+  }
 
   CardEntity? get currentCard {
     if (isCompleted || currentIndex >= queue.length) return null;
@@ -47,6 +57,8 @@ class StudySessionState {
     bool? isCompleted,
     CardEntity? lastReviewedCard,
     int? lastReviewLogId,
+    bool? isCram,
+    CustomStudyConfig? customStudyConfig,
     bool clearUndo = false,
   }) {
     return StudySessionState(
@@ -61,6 +73,8 @@ class StudySessionState {
       lastReviewLogId: clearUndo
           ? null
           : (lastReviewLogId ?? this.lastReviewLogId),
+      isCram: isCram ?? this.isCram,
+      customStudyConfig: customStudyConfig ?? this.customStudyConfig,
     );
   }
 }
@@ -68,10 +82,26 @@ class StudySessionState {
 @riverpod
 class StudySessionController extends _$StudySessionController {
   @override
-  FutureOr<StudySessionState> build(int deckId) async {
+  FutureOr<StudySessionState> build(
+    int deckId, [
+    CustomStudyConfig? customStudyConfig,
+  ]) async {
     final dao = ref.watch(studySessionDaoProvider);
     final now = DateTime.now().toUtc();
-    final cards = await dao.fetchDueCards(deckId, cutoff: now);
+    final List<Card> cards;
+
+    if (customStudyConfig != null) {
+      cards = await dao.fetchCustomStudyCards(
+        deckId: deckId,
+        now: now,
+        scope: customStudyConfig.scope,
+        tagId: customStudyConfig.tagId,
+        daysAhead: customStudyConfig.daysAhead,
+      );
+    } else {
+      cards = await dao.fetchDueCards(deckId, cutoff: now);
+    }
+
     final cardEntities = cards.map((c) => c.toEntity()).toList();
 
     return StudySessionState(
@@ -80,6 +110,8 @@ class StudySessionController extends _$StudySessionController {
       currentIndex: 0,
       isAnswerRevealed: false,
       isCompleted: cardEntities.isEmpty,
+      isCram: customStudyConfig?.isCram ?? false,
+      customStudyConfig: customStudyConfig,
     );
   }
 
@@ -95,6 +127,28 @@ class StudySessionController extends _$StudySessionController {
 
     final currentCard = current.currentCard!;
     final now = DateTime.now().toUtc();
+
+    if (current.isCram) {
+      final updatedQueue = List<CardEntity>.from(current.queue);
+      if (rating == Rating.again) {
+        updatedQueue.add(currentCard);
+      }
+      final nextIndex = current.currentIndex + 1;
+      final isCompleted = nextIndex >= updatedQueue.length;
+
+      state = AsyncData(
+        current.copyWith(
+          queue: updatedQueue,
+          currentIndex: nextIndex,
+          isAnswerRevealed: false,
+          isCompleted: isCompleted,
+          lastReviewedCard: currentCard,
+          lastReviewLogId: null,
+        ),
+      );
+      return;
+    }
+
     final fsrsCard = currentCard.toFsrsCard();
     final fsrsParams = ref.read(fsrsParametersControllerProvider);
     final engine = FsrsEngine(fsrsParams);
@@ -126,8 +180,26 @@ class StudySessionController extends _$StudySessionController {
     if (current == null || !current.canUndo) return;
 
     final prevCard = current.lastReviewedCard!;
-    final prevLogId = current.lastReviewLogId!;
 
+    if (current.isCram) {
+      final prevIndex = current.currentIndex > 0 ? current.currentIndex - 1 : 0;
+      final updatedQueue = List<CardEntity>.from(current.queue);
+      if (updatedQueue.length > current.totalCards) {
+        updatedQueue.removeLast();
+      }
+      state = AsyncData(
+        current.copyWith(
+          queue: updatedQueue,
+          currentIndex: prevIndex,
+          isAnswerRevealed: false,
+          isCompleted: false,
+          clearUndo: true,
+        ),
+      );
+      return;
+    }
+
+    final prevLogId = current.lastReviewLogId!;
     final dao = ref.read(studySessionDaoProvider);
     await dao.undoReview(
       cardId: prevCard.id,
@@ -156,6 +228,15 @@ class StudySessionController extends _$StudySessionController {
     final current = state.value;
     final card = current?.currentCard;
     if (card == null) return {};
+
+    if (current?.isCram == true) {
+      return {
+        Rating.again: 'Re-queue',
+        Rating.hard: 'Pass',
+        Rating.good: 'Pass',
+        Rating.easy: 'Pass',
+      };
+    }
 
     final now = DateTime.now().toUtc();
     final fsrsCard = card.toFsrsCard();

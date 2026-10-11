@@ -724,4 +724,88 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get copiedToClipboard => 'Copiato negli appunti!';
+
+  @override
+  String get customStudy => 'Studio Personalizzato';
+
+  @override
+  String get customStudyScope => 'Ambito di Studio';
+
+  @override
+  String get customStudyAllCards => 'Tutte';
+
+  @override
+  String get customStudyAhead => 'In Anticipo';
+
+  @override
+  String get customStudyDaysAhead => 'Giorni in anticipo:';
+
+  @override
+  String customStudyDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count giorni',
+      one: '1 giorno',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectTag => 'Seleziona tag:';
+
+  @override
+  String get noTagsInDeck => 'Nessun tag trovato in questo mazzo.';
+
+  @override
+  String get cramModeTitle => 'Modalità Cram (Ripasso Libero)';
+
+  @override
+  String get cramModeDesc =>
+      'Esercitati sulle carte senza modificare gli intervalli FSRS o la cronologia';
+
+  @override
+  String get advanceReviewDesc =>
+      'Aggiorna gli intervalli FSRS e registra le recensioni normalmente';
+
+  @override
+  String get start => 'Inizia';
+
+  @override
+  String get cramSessionTitle => 'Sessione Cram';
+
+  @override
+  String get cramBadge => 'CRAM';
+
+  @override
+  String get cramCompletedTitle => 'Sessione di ripasso completata!';
+
+  @override
+  String get cramCompletedDesc => 'Hai terminato la sessione di ripasso.';
+
+  @override
+  String get allCardsReviewedTitle => 'Tutte le carte completate per oggi!';
+
+  @override
+  String get greatJobUpcomingReviews =>
+      'Ottimo lavoro! Torna più tardi per i prossimi ripassi.';
+
+  @override
+  String get backToDeck => 'Torna al mazzo';
+
+  @override
+  String cardProgress(int current, int total) {
+    return 'Carta $current di $total';
+  }
+
+  @override
+  String cardsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rimanenti',
+      one: '1 rimanente',
+    );
+    return '$_temp0';
+  }
 }

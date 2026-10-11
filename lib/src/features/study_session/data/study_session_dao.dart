@@ -5,10 +5,12 @@ import '../../../core/algorithms/fsrs/models/record_log.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/database/tables/cards_table.dart';
 import '../../../core/database/tables/review_logs_table.dart';
+import '../../../core/database/tables/tags_table.dart';
+import '../domain/models/custom_study_config.dart';
 
 part 'study_session_dao.g.dart';
 
-@DriftAccessor(tables: [Cards, ReviewLogs])
+@DriftAccessor(tables: [Cards, ReviewLogs, CardTags])
 class StudySessionDao extends DatabaseAccessor<AppDatabase>
     with _$StudySessionDaoMixin {
   StudySessionDao(super.db);
@@ -29,6 +31,70 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
             (t) => OrderingTerm.asc(t.id),
           ]))
         .get();
+  }
+
+  Future<List<Card>> fetchCustomStudyCards({
+    required int deckId,
+    required DateTime now,
+    required CustomStudyScope scope,
+    int? tagId,
+    int daysAhead = 1,
+  }) async {
+    final nowUtc = now.toUtc();
+    final baseCondition =
+        cards.deckId.equals(deckId) &
+        cards.isSuspended.equals(false) &
+        (cards.buriedUntil.isNull() |
+            cards.buriedUntil.isSmallerOrEqualValue(nowUtc));
+
+    switch (scope) {
+      case CustomStudyScope.allCards:
+        return (select(cards)
+              ..where((t) => baseCondition)
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.due),
+                (t) => OrderingTerm.asc(t.id),
+              ]))
+            .get();
+
+      case CustomStudyScope.reviewAhead:
+        final aheadCutoff = nowUtc.add(Duration(days: daysAhead));
+        return (select(cards)
+              ..where(
+                (t) =>
+                    baseCondition &
+                    (t.due.isSmallerOrEqualValue(aheadCutoff) |
+                        t.state.equals(0)),
+              )
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.due),
+                (t) => OrderingTerm.asc(t.id),
+              ]))
+            .get();
+
+      case CustomStudyScope.byTag:
+        if (tagId == null) {
+          return (select(cards)
+                ..where((t) => baseCondition)
+                ..orderBy([
+                  (t) => OrderingTerm.asc(t.due),
+                  (t) => OrderingTerm.asc(t.id),
+                ]))
+              .get();
+        }
+        final query =
+            select(
+                cards,
+                distinct: true,
+              ).join([innerJoin(cardTags, cardTags.cardId.equalsExp(cards.id))])
+              ..where(baseCondition & cardTags.tagId.equals(tagId))
+              ..orderBy([
+                OrderingTerm.asc(cards.due),
+                OrderingTerm.asc(cards.id),
+              ]);
+        final rows = await query.get();
+        return rows.map((r) => r.readTable(cards)).toList();
+    }
   }
 
   Future<int> recordReview({

@@ -319,7 +319,53 @@
   "importCsvTitle": "Import Cards from CSV",
   "targetDeck": "Target Deck",
   "import": "Import",
-  "copiedToClipboard": "Copied to clipboard!"
+  "copiedToClipboard": "Copied to clipboard!",
+  "customStudy": "Custom Study",
+  "customStudyScope": "Study Scope",
+  "customStudyAllCards": "All",
+  "customStudyAhead": "Ahead",
+  "customStudyDaysAhead": "Days in advance:",
+  "customStudyDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@customStudyDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectTag": "Select tag:",
+  "noTagsInDeck": "No tags found in this deck.",
+  "cramModeTitle": "Cram Mode (Free Practice)",
+  "cramModeDesc": "Practice cards without affecting FSRS intervals or review logs",
+  "advanceReviewDesc": "Update FSRS intervals and save reviews normally",
+  "start": "Start",
+  "cramSessionTitle": "Cram Session",
+  "cramBadge": "CRAM",
+  "cramCompletedTitle": "Cram session completed!",
+  "cramCompletedDesc": "You finished your practice run.",
+  "allCardsReviewedTitle": "All cards reviewed for today!",
+  "greatJobUpcomingReviews": "Great job! Check back later for upcoming reviews.",
+  "backToDeck": "Back to Deck",
+  "showAnswer": "Show Answer",
+  "cardProgress": "Card {current} of {total}",
+  "@cardProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardsRemaining": "{count, plural, =1{1 remaining} other{{count} remaining}}",
+  "@cardsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
 
 

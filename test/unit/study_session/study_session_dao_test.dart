@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/card_state.dart';
@@ -6,6 +7,7 @@ import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/record_log.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/features/study_session/data/study_session_dao.dart';
+import 'package:repetita/src/features/study_session/domain/models/custom_study_config.dart';
 
 void main() {
   late AppDatabase db;
@@ -319,5 +321,74 @@ void main() {
       )..where((t) => t.id.equals(logId))).get();
       expect(logs, isEmpty);
     });
+
+    test(
+      'fetchCustomStudyCards handles allCards, reviewAhead, and byTag scopes',
+      () async {
+        final now = DateTime.now().toUtc();
+
+        final card1 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Card 1',
+          back: 'Back 1',
+        );
+        final card2 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Card 2',
+          back: 'Back 2',
+        );
+        final card3 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Card 3',
+          back: 'Back 3',
+        );
+
+        // Make card 2 due in 2 days, card 3 due in 10 days
+        await (db.update(db.cards)..where((t) => t.id.equals(card2))).write(
+          CardsCompanion(
+            state: const Value(2),
+            due: Value(now.add(const Duration(days: 2))),
+          ),
+        );
+        await (db.update(db.cards)..where((t) => t.id.equals(card3))).write(
+          CardsCompanion(
+            state: const Value(2),
+            due: Value(now.add(const Duration(days: 10))),
+          ),
+        );
+
+        // Add tag to card 1
+        final tagBio = await db.tagsDao.getOrCreateTag('Biology');
+        await db.tagsDao.setCardTags(card1, [tagBio]);
+
+        // 1. allCards scope returns all 3 cards
+        final allCards = await studySessionDao.fetchCustomStudyCards(
+          deckId: testDeckId,
+          now: now,
+          scope: CustomStudyScope.allCards,
+        );
+        expect(allCards, hasLength(3));
+
+        // 2. reviewAhead scope with 3 days returns card1 (new/state 0) and card2 (due in 2 days)
+        final aheadCards = await studySessionDao.fetchCustomStudyCards(
+          deckId: testDeckId,
+          now: now,
+          scope: CustomStudyScope.reviewAhead,
+          daysAhead: 3,
+        );
+        expect(aheadCards, hasLength(2));
+        expect(aheadCards.map((c) => c.id), containsAll([card1, card2]));
+
+        // 3. byTag scope returns only card1
+        final tagCards = await studySessionDao.fetchCustomStudyCards(
+          deckId: testDeckId,
+          now: now,
+          scope: CustomStudyScope.byTag,
+          tagId: tagBio,
+        );
+        expect(tagCards, hasLength(1));
+        expect(tagCards.first.id, equals(card1));
+      },
+    );
   });
 }

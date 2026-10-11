@@ -16,7 +16,7 @@ final class StudySessionControllerProvider
     extends $AsyncNotifierProvider<StudySessionController, StudySessionState> {
   StudySessionControllerProvider._({
     required StudySessionControllerFamily super.from,
-    required int super.argument,
+    required (int, CustomStudyConfig?) super.argument,
   }) : super(
          retry: null,
          name: r'studySessionControllerProvider',
@@ -32,7 +32,7 @@ final class StudySessionControllerProvider
   String toString() {
     return r'studySessionControllerProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -52,7 +52,7 @@ final class StudySessionControllerProvider
 }
 
 String _$studySessionControllerHash() =>
-    r'707056ad1f1f8380ac95db6c8d3b7994faafe1c2';
+    r'c8a9818a5975fe872deb01a25def11e96e4880b8';
 
 final class StudySessionControllerFamily extends $Family
     with
@@ -61,7 +61,7 @@ final class StudySessionControllerFamily extends $Family
           AsyncValue<StudySessionState>,
           StudySessionState,
           FutureOr<StudySessionState>,
-          int
+          (int, CustomStudyConfig?)
         > {
   StudySessionControllerFamily._()
     : super(
@@ -72,8 +72,13 @@ final class StudySessionControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  StudySessionControllerProvider call(int deckId) =>
-      StudySessionControllerProvider._(argument: deckId, from: this);
+  StudySessionControllerProvider call(
+    int deckId, [
+    CustomStudyConfig? customStudyConfig,
+  ]) => StudySessionControllerProvider._(
+    argument: (deckId, customStudyConfig),
+    from: this,
+  );
 
   @override
   String toString() => r'studySessionControllerProvider';
@@ -81,10 +86,14 @@ final class StudySessionControllerFamily extends $Family
 
 abstract class _$StudySessionController
     extends $AsyncNotifier<StudySessionState> {
-  late final _$args = ref.$arg as int;
-  int get deckId => _$args;
+  late final _$args = ref.$arg as (int, CustomStudyConfig?);
+  int get deckId => _$args.$1;
+  CustomStudyConfig? get customStudyConfig => _$args.$2;
 
-  FutureOr<StudySessionState> build(int deckId);
+  FutureOr<StudySessionState> build(
+    int deckId, [
+    CustomStudyConfig? customStudyConfig,
+  ]);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -98,6 +107,6 @@ abstract class _$StudySessionController
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
   }
 }

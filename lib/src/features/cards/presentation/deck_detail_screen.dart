@@ -6,6 +6,7 @@ import '../../../core/database/app_database.dart' show Deck;
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/card_state_colors.dart';
 import '../../study_session/presentation/study_screen.dart';
+import '../../study_session/presentation/widgets/custom_study_dialog.dart';
 import '../../tags/domain/tag_entity.dart';
 import '../../tags/presentation/controllers/tags_controller.dart';
 import '../domain/card_entity.dart';
@@ -130,21 +131,60 @@ class DeckDetailScreen extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    FilledButton.icon(
-                      key: const Key('start_study_button'),
-                      onPressed: dueCount > 0
-                          ? () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => StudyScreen(deckId: deck.id),
-                                ),
-                              );
-                            }
-                          : null,
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(
-                        l10n?.startStudySession ?? 'Start Study Session',
-                      ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          key: const Key('start_study_button'),
+                          onPressed: dueCount > 0
+                              ? () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          StudyScreen(deckId: deck.id),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          icon: const Icon(Icons.play_arrow),
+                          label: Text(
+                            l10n?.startStudySession ?? 'Start Study Session',
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          key: const Key('custom_study_button'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colorScheme.onPrimaryContainer,
+                            side: BorderSide(
+                              color: colorScheme.onPrimaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          ),
+                          onPressed: cards.isEmpty
+                              ? null
+                              : () async {
+                                  final config = await CustomStudyDialog.show(
+                                    context,
+                                    deckId: deck.id,
+                                    initialTags: allDeckTags,
+                                  );
+                                  if (config != null && context.mounted) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => StudyScreen(
+                                          deckId: deck.id,
+                                          customStudyConfig: config,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.tune_rounded),
+                          label: Text(l10n?.customStudy ?? 'Custom Study'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

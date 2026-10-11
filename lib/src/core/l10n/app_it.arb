@@ -274,7 +274,53 @@
   "importCsvTitle": "Importa Carte da CSV",
   "targetDeck": "Mazzo di destinazione",
   "import": "Importa",
-  "copiedToClipboard": "Copiato negli appunti!"
+  "copiedToClipboard": "Copiato negli appunti!",
+  "customStudy": "Studio Personalizzato",
+  "customStudyScope": "Ambito di Studio",
+  "customStudyAllCards": "Tutte",
+  "customStudyAhead": "In Anticipo",
+  "customStudyDaysAhead": "Giorni in anticipo:",
+  "customStudyDays": "{count, plural, =1{1 giorno} other{{count} giorni}}",
+  "@customStudyDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectTag": "Seleziona tag:",
+  "noTagsInDeck": "Nessun tag trovato in questo mazzo.",
+  "cramModeTitle": "Modalità Cram (Ripasso Libero)",
+  "cramModeDesc": "Esercitati sulle carte senza modificare gli intervalli FSRS o la cronologia",
+  "advanceReviewDesc": "Aggiorna gli intervalli FSRS e registra le recensioni normalmente",
+  "start": "Inizia",
+  "cramSessionTitle": "Sessione Cram",
+  "cramBadge": "CRAM",
+  "cramCompletedTitle": "Sessione di ripasso completata!",
+  "cramCompletedDesc": "Hai terminato la sessione di ripasso.",
+  "allCardsReviewedTitle": "Tutte le carte completate per oggi!",
+  "greatJobUpcomingReviews": "Ottimo lavoro! Torna più tardi per i prossimi ripassi.",
+  "backToDeck": "Torna al mazzo",
+  "showAnswer": "Mostra risposta",
+  "cardProgress": "Carta {current} di {total}",
+  "@cardProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardsRemaining": "{count, plural, =1{1 rimanente} other{{count} rimanenti}}",
+  "@cardsRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
 
 

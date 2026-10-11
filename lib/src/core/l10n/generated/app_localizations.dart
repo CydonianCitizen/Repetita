@@ -1411,6 +1411,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copied to clipboard!'**
   String get copiedToClipboard;
+
+  /// No description provided for @customStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Study'**
+  String get customStudy;
+
+  /// No description provided for @customStudyScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Scope'**
+  String get customStudyScope;
+
+  /// No description provided for @customStudyAllCards.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get customStudyAllCards;
+
+  /// No description provided for @customStudyAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Ahead'**
+  String get customStudyAhead;
+
+  /// No description provided for @customStudyDaysAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Days in advance:'**
+  String get customStudyDaysAhead;
+
+  /// No description provided for @customStudyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String customStudyDays(int count);
+
+  /// No description provided for @selectTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Select tag:'**
+  String get selectTag;
+
+  /// No description provided for @noTagsInDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags found in this deck.'**
+  String get noTagsInDeck;
+
+  /// No description provided for @cramModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cram Mode (Free Practice)'**
+  String get cramModeTitle;
+
+  /// No description provided for @cramModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice cards without affecting FSRS intervals or review logs'**
+  String get cramModeDesc;
+
+  /// No description provided for @advanceReviewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Update FSRS intervals and save reviews normally'**
+  String get advanceReviewDesc;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @cramSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cram Session'**
+  String get cramSessionTitle;
+
+  /// No description provided for @cramBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'CRAM'**
+  String get cramBadge;
+
+  /// No description provided for @cramCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cram session completed!'**
+  String get cramCompletedTitle;
+
+  /// No description provided for @cramCompletedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You finished your practice run.'**
+  String get cramCompletedDesc;
+
+  /// No description provided for @allCardsReviewedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All cards reviewed for today!'**
+  String get allCardsReviewedTitle;
+
+  /// No description provided for @greatJobUpcomingReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Great job! Check back later for upcoming reviews.'**
+  String get greatJobUpcomingReviews;
+
+  /// No description provided for @backToDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Deck'**
+  String get backToDeck;
+
+  /// No description provided for @cardProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Card {current} of {total}'**
+  String cardProgress(int current, int total);
+
+  /// No description provided for @cardsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 remaining} other{{count} remaining}}'**
+  String cardsRemaining(int count);
 }
 
 class _AppLocalizationsDelegate

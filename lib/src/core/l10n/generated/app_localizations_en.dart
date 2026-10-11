@@ -721,4 +721,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copiedToClipboard => 'Copied to clipboard!';
+
+  @override
+  String get customStudy => 'Custom Study';
+
+  @override
+  String get customStudyScope => 'Study Scope';
+
+  @override
+  String get customStudyAllCards => 'All';
+
+  @override
+  String get customStudyAhead => 'Ahead';
+
+  @override
+  String get customStudyDaysAhead => 'Days in advance:';
+
+  @override
+  String customStudyDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectTag => 'Select tag:';
+
+  @override
+  String get noTagsInDeck => 'No tags found in this deck.';
+
+  @override
+  String get cramModeTitle => 'Cram Mode (Free Practice)';
+
+  @override
+  String get cramModeDesc =>
+      'Practice cards without affecting FSRS intervals or review logs';
+
+  @override
+  String get advanceReviewDesc =>
+      'Update FSRS intervals and save reviews normally';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get cramSessionTitle => 'Cram Session';
+
+  @override
+  String get cramBadge => 'CRAM';
+
+  @override
+  String get cramCompletedTitle => 'Cram session completed!';
+
+  @override
+  String get cramCompletedDesc => 'You finished your practice run.';
+
+  @override
+  String get allCardsReviewedTitle => 'All cards reviewed for today!';
+
+  @override
+  String get greatJobUpcomingReviews =>
+      'Great job! Check back later for upcoming reviews.';
+
+  @override
+  String get backToDeck => 'Back to Deck';
+
+  @override
+  String cardProgress(int current, int total) {
+    return 'Card $current of $total';
+  }
+
+  @override
+  String cardsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count remaining',
+      one: '1 remaining',
+    );
+    return '$_temp0';
+  }
 }

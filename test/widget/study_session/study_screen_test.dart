@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
+import 'package:repetita/src/features/study_session/domain/models/custom_study_config.dart';
 import 'package:repetita/src/features/study_session/presentation/study_screen.dart';
 
 void main() {
@@ -296,6 +297,41 @@ void main() {
         // Check card is buried in DB
         final cards = await db.cardsDao.getCardsByDeck(testDeckId);
         expect(cards.first.buriedUntil, isNotNull);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'renders cram badge and session title when customStudyConfig is Cram',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Cram Card',
+          back: 'Cram Answer',
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [databaseProvider.overrideWithValue(db)],
+            child: MaterialApp(
+              home: StudyScreen(
+                deckId: testDeckId,
+                customStudyConfig: const CustomStudyConfig(
+                  scope: CustomStudyScope.allCards,
+                  isCram: true,
+                ),
+              ),
+            ),
+          ),
+        );
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.text('CRAM'), findsOneWidget);
+        expect(find.text('Cram Session'), findsOneWidget);
 
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(milliseconds: 50));
