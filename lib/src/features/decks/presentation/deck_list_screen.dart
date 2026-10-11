@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/generated/app_localizations.dart';
 import '../../backup_transfer/presentation/backup_screen.dart';
 import '../../cards/presentation/deck_detail_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
@@ -15,15 +16,16 @@ class DeckListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decksAsync = ref.watch(deckListControllerProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Repetita'),
+        title: Text(l10n?.appTitle ?? 'Repetita'),
         actions: [
           IconButton(
             key: const Key('open_stats_button'),
             icon: const Icon(Icons.bar_chart),
-            tooltip: 'Statistics',
+            tooltip: l10n?.stats ?? 'Statistics',
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
@@ -33,7 +35,7 @@ class DeckListScreen extends ConsumerWidget {
           IconButton(
             key: const Key('open_backup_button'),
             icon: const Icon(Icons.backup_outlined),
-            tooltip: 'Backup & Restore',
+            tooltip: l10n?.backup ?? 'Backup & Restore',
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const BackupScreen()),
@@ -43,7 +45,7 @@ class DeckListScreen extends ConsumerWidget {
           IconButton(
             key: const Key('open_settings_button'),
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: l10n?.settings ?? 'Settings',
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
@@ -62,13 +64,13 @@ class DeckListScreen extends ConsumerWidget {
         ),
         data: (decks) {
           if (decks.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
-                  'No decks yet. Tap + to create one.',
+                  l10n?.noDecksYet ?? 'No decks yet. Tap + to create one.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             );
@@ -111,6 +113,7 @@ class DeckListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('create_deck_fab'),
+        tooltip: l10n?.createDeck ?? 'Create Deck',
         onPressed: () async {
           final result = await DeckFormDialog.show(context);
           if (result != null) {
