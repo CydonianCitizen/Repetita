@@ -203,7 +203,9 @@ class _CustomStudyDialogState extends ConsumerState<CustomStudyDialog> {
           key: const Key('confirm_custom_study_button'),
           icon: const Icon(Icons.play_arrow),
           label: Text(l10n?.start ?? 'Start'),
-          onPressed: (_scope == CustomStudyScope.byTag && deckTags.isEmpty)
+          onPressed:
+              (_scope == CustomStudyScope.byTag &&
+                  (_selectedTagId == null || deckTags.isEmpty))
               ? null
               : () {
                   final config = CustomStudyConfig(

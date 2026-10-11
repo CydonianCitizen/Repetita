@@ -25,13 +25,18 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           .exportJson();
 
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       _showResultDialog(
-        title: 'Full Backup JSON',
+        title: l10n?.fullBackupJson ?? 'Full Backup JSON',
         content: jsonString,
-        successMessage: 'Backup exported successfully!',
+        successMessage:
+            l10n?.backupExportedSuccess ?? 'Backup exported successfully!',
       );
     } catch (e) {
-      if (mounted) _showErrorSnackBar('Export failed: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        _showErrorSnackBar('${l10n?.exportFailed ?? "Export failed"}: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

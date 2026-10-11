@@ -51,7 +51,9 @@ class ThemeSelectorDialog extends ConsumerWidget {
               color: currentMode == ThemeMode.dark ? primaryColor : null,
             ),
             title: Text(l10n?.themeDark ?? 'Dark Theme'),
-            subtitle: const Text('Always use dark palette'),
+            subtitle: Text(
+              l10n?.themeDarkSubtitle ?? 'Always use dark palette',
+            ),
             onTap: () {
               ref
                   .read(themeModeControllerProvider.notifier)
@@ -67,7 +69,9 @@ class ThemeSelectorDialog extends ConsumerWidget {
               color: currentMode == ThemeMode.light ? primaryColor : null,
             ),
             title: Text(l10n?.themeLight ?? 'Light Theme'),
-            subtitle: const Text('Always use light palette'),
+            subtitle: Text(
+              l10n?.themeLightSubtitle ?? 'Always use light palette',
+            ),
             onTap: () {
               ref
                   .read(themeModeControllerProvider.notifier)

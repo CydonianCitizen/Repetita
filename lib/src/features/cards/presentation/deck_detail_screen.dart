@@ -122,7 +122,8 @@ class DeckDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '$dueCount cards due for review',
+                          l10n?.cardsDueForReview(dueCount) ??
+                              '$dueCount cards due for review',
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colorScheme.onPrimaryContainer,
                             fontWeight: FontWeight.w600,

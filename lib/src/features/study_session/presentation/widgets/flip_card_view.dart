@@ -148,6 +148,14 @@ class _FlipCardViewState extends State<FlipCardView> {
               const SizedBox(height: 28),
               Semantics(
                 label:
+                    l10n?.cardPromptSemantics(
+                      isCloze
+                          ? ClozeParser.renderClozePrompt(
+                              widget.card.front,
+                              activeIndex: widget.card.activeClozeIndex,
+                            )
+                          : widget.card.front,
+                    ) ??
                     'Card Prompt: ${isCloze ? ClozeParser.renderClozePrompt(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.front}',
                 readOnly: true,
                 child: isCloze
@@ -305,6 +313,14 @@ class _FlipCardViewState extends State<FlipCardView> {
             const SizedBox(height: 12),
             Semantics(
               label:
+                  l10n?.cardAnswerSemantics(
+                    isCloze
+                        ? ClozeParser.renderClozeAnswer(
+                            widget.card.front,
+                            activeIndex: widget.card.activeClozeIndex,
+                          )
+                        : widget.card.back,
+                  ) ??
                   'Card Answer: ${isCloze ? ClozeParser.renderClozeAnswer(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.back}',
               readOnly: true,
               child: isCloze

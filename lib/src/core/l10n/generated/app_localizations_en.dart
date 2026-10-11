@@ -805,4 +805,91 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get editDeck => 'Edit Deck';
+
+  @override
+  String get deckNameHint => 'e.g., Biology 101';
+
+  @override
+  String get deckNameRequired => 'Deck name is required';
+
+  @override
+  String get nameTooLong => 'Name must be 100 characters or less';
+
+  @override
+  String get deckDescriptionHint => 'Optional description of this deck';
+
+  @override
+  String get themeSystemSubtitle => 'Follow device theme settings';
+
+  @override
+  String get themeDarkSubtitle => 'Always use dark palette';
+
+  @override
+  String get themeLightSubtitle => 'Always use light palette';
+
+  @override
+  String cardsDueForReview(int count) {
+    return '$count cards due for review';
+  }
+
+  @override
+  String get heatmapLess => 'Less';
+
+  @override
+  String get heatmapMore => 'More';
+
+  @override
+  String reviewsInPeriod(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews in period',
+      one: '1 review in period',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String reminderAtTime(String time) {
+    return 'Daily review notification at $time';
+  }
+
+  @override
+  String rateButtonSemantics(String label, String interval) {
+    return 'Rate $label, next review in $interval';
+  }
+
+  @override
+  String get cramRequeue => 'Re-queue';
+
+  @override
+  String get cramPass => 'Pass';
+
+  @override
+  String get fullBackupJson => 'Full Backup JSON';
+
+  @override
+  String get backupExportedSuccess => 'Backup exported successfully!';
+
+  @override
+  String cardPromptSemantics(String content) {
+    return 'Card Prompt: $content';
+  }
+
+  @override
+  String cardAnswerSemantics(String content) {
+    return 'Card Answer: $content';
+  }
 }

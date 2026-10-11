@@ -197,7 +197,8 @@ class ReviewHeatmapWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '$totalVisibleReviews ${l10n?.reviews.toLowerCase() ?? "reviews"} in period',
+                  l10n?.reviewsInPeriod(totalVisibleReviews) ??
+                      '$totalVisibleReviews ${l10n?.reviews.toLowerCase() ?? "reviews"} in period',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
@@ -206,7 +207,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Less',
+                      l10n?.heatmapLess ?? 'Less',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.outline,
                         fontSize: 10,
@@ -219,7 +220,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                     _LegendBox(color: _cellColor(10, scheme)),
                     const SizedBox(width: 4),
                     Text(
-                      'More',
+                      l10n?.heatmapMore ?? 'More',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: scheme.outline,
                         fontSize: 10,

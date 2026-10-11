@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
+
 class DeckFormDialog extends StatefulWidget {
   const DeckFormDialog({super.key, this.initialName, this.initialDescription});
 
@@ -58,8 +60,14 @@ class _DeckFormDialogState extends State<DeckFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: Text(_isEditing ? 'Edit Deck' : 'Create Deck'),
+      title: Text(
+        _isEditing
+            ? (l10n?.editDeck ?? 'Edit Deck')
+            : (l10n?.createDeck ?? 'Create Deck'),
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -70,17 +78,18 @@ class _DeckFormDialogState extends State<DeckFormDialog> {
                 key: const Key('deck_name_field'),
                 controller: _nameController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Deck Name',
-                  hintText: 'e.g., Biology 101',
+                decoration: InputDecoration(
+                  labelText: l10n?.deckName ?? 'Deck Name',
+                  hintText: l10n?.deckNameHint ?? 'e.g., Biology 101',
                 ),
                 validator: (value) {
                   final trimmed = value?.trim() ?? '';
                   if (trimmed.isEmpty) {
-                    return 'Deck name is required';
+                    return l10n?.deckNameRequired ?? 'Deck name is required';
                   }
                   if (trimmed.length > 100) {
-                    return 'Name must be 100 characters or less';
+                    return l10n?.nameTooLong ??
+                        'Name must be 100 characters or less';
                   }
                   return null;
                 },
@@ -90,9 +99,11 @@ class _DeckFormDialogState extends State<DeckFormDialog> {
                 key: const Key('deck_description_field'),
                 controller: _descriptionController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
-                  hintText: 'Optional description of this deck',
+                decoration: InputDecoration(
+                  labelText: l10n?.deckDescription ?? 'Description (optional)',
+                  hintText:
+                      l10n?.deckDescriptionHint ??
+                      'Optional description of this deck',
                 ),
               ),
             ],
@@ -102,12 +113,14 @@ class _DeckFormDialogState extends State<DeckFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const Key('deck_form_submit_button'),
           onPressed: _submit,
-          child: Text(_isEditing ? 'Save' : 'Create'),
+          child: Text(
+            _isEditing ? (l10n?.save ?? 'Save') : (l10n?.create ?? 'Create'),
+          ),
         ),
       ],
     );

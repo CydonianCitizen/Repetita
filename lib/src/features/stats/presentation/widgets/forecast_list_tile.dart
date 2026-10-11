@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../domain/stats_models.dart';
 
 class ForecastListTile extends StatelessWidget {
@@ -14,24 +15,43 @@ class ForecastListTile extends StatelessWidget {
   final int index;
   final int maxCount;
 
-  String _formatDate(DateTime date, int index) {
-    if (index == 0) return 'Today';
-    if (index == 1) return 'Tomorrow';
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+  String _formatDate(BuildContext context, DateTime date, int index) {
+    final l10n = AppLocalizations.of(context);
+    if (index == 0) return l10n?.today ?? 'Today';
+    if (index == 1) return l10n?.tomorrow ?? 'Tomorrow';
+    final isIt = Localizations.localeOf(context).languageCode == 'it';
+    final weekdays = isIt
+        ? const ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
+        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final months = isIt
+        ? const [
+            'Gen',
+            'Feb',
+            'Mar',
+            'Apr',
+            'Mag',
+            'Giu',
+            'Lug',
+            'Ago',
+            'Set',
+            'Ott',
+            'Nov',
+            'Dic',
+          ]
+        : const [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ];
     return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
   }
 
@@ -50,7 +70,7 @@ class ForecastListTile extends StatelessWidget {
           SizedBox(
             width: 110,
             child: Text(
-              _formatDate(forecast.date, index),
+              _formatDate(context, forecast.date, index),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal,
                 color: index == 0 ? colorScheme.primary : colorScheme.onSurface,

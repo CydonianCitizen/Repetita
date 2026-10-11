@@ -745,7 +745,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 iconColor: colorScheme.primary,
                 title: l10n?.studyReminders ?? 'Study Reminders',
                 subtitle: reminderSettings.enabled
-                    ? 'Daily review notification at ${reminderSettings.formattedTime}'
+                    ? (l10n?.reminderAtTime(reminderSettings.formattedTime) ??
+                          'Daily review notification at ${reminderSettings.formattedTime}')
                     : (l10n?.studyRemindersSubtitle ??
                           'Daily review notifications'),
                 trailingText: reminderSettings.enabled

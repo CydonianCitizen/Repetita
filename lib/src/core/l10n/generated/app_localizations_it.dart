@@ -808,4 +808,97 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get create => 'Crea';
+
+  @override
+  String get editDeck => 'Modifica Mazzo';
+
+  @override
+  String get deckNameHint => 'es., Biologia 101';
+
+  @override
+  String get deckNameRequired => 'Il nome del mazzo è obbligatorio';
+
+  @override
+  String get nameTooLong => 'Il nome deve contenere al massimo 100 caratteri';
+
+  @override
+  String get deckDescriptionHint => 'Descrizione opzionale di questo mazzo';
+
+  @override
+  String get themeSystemSubtitle => 'Segui le impostazioni del dispositivo';
+
+  @override
+  String get themeDarkSubtitle => 'Usa sempre il tema scuro';
+
+  @override
+  String get themeLightSubtitle => 'Usa sempre il tema chiaro';
+
+  @override
+  String cardsDueForReview(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count carte da ripassare',
+      one: '1 carta da ripassare',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get heatmapLess => 'Meno';
+
+  @override
+  String get heatmapMore => 'Più';
+
+  @override
+  String reviewsInPeriod(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ripassi nel periodo',
+      one: '1 ripasso nel periodo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get today => 'Oggi';
+
+  @override
+  String get tomorrow => 'Domani';
+
+  @override
+  String reminderAtTime(String time) {
+    return 'Notifica di ripasso giornaliera alle $time';
+  }
+
+  @override
+  String rateButtonSemantics(String label, String interval) {
+    return 'Valuta $label, prossimo ripasso tra $interval';
+  }
+
+  @override
+  String get cramRequeue => 'Ripeti';
+
+  @override
+  String get cramPass => 'Passa';
+
+  @override
+  String get fullBackupJson => 'Backup JSON Completo';
+
+  @override
+  String get backupExportedSuccess => 'Backup esportato con successo!';
+
+  @override
+  String cardPromptSemantics(String content) {
+    return 'Domanda della carta: $content';
+  }
+
+  @override
+  String cardAnswerSemantics(String content) {
+    return 'Risposta della carta: $content';
+  }
 }

@@ -365,6 +365,74 @@
         "type": "int"
       }
     }
+  },
+  "create": "Create",
+  "editDeck": "Edit Deck",
+  "deckNameHint": "e.g., Biology 101",
+  "deckNameRequired": "Deck name is required",
+  "nameTooLong": "Name must be 100 characters or less",
+  "deckDescriptionHint": "Optional description of this deck",
+  "themeSystemSubtitle": "Follow device theme settings",
+  "themeDarkSubtitle": "Always use dark palette",
+  "themeLightSubtitle": "Always use light palette",
+  "cardsDueForReview": "{count} cards due for review",
+  "@cardsDueForReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "heatmapLess": "Less",
+  "heatmapMore": "More",
+  "reviewsInPeriod": "{count, plural, =1{1 review in period} other{{count} reviews in period}}",
+  "@reviewsInPeriod": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "reminderAtTime": "Daily review notification at {time}",
+  "@reminderAtTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rateButtonSemantics": "Rate {label}, next review in {interval}",
+  "@rateButtonSemantics": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "cramRequeue": "Re-queue",
+  "cramPass": "Pass",
+  "fullBackupJson": "Full Backup JSON",
+  "backupExportedSuccess": "Backup exported successfully!",
+  "cardPromptSemantics": "Card Prompt: {content}",
+  "@cardPromptSemantics": {
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "cardAnswerSemantics": "Card Answer: {content}",
+  "@cardAnswerSemantics": {
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
   }
 }
 

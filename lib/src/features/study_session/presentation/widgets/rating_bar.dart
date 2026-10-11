@@ -57,7 +57,12 @@ class RatingBar extends StatelessWidget {
         children: configs.asMap().entries.map((entry) {
           final index = entry.key;
           final cfg = entry.value;
-          final interval = intervals[cfg.rating] ?? '';
+          final rawInterval = intervals[cfg.rating] ?? '';
+          final interval = rawInterval == 'Re-queue'
+              ? (l10n?.cramRequeue ?? 'Re-queue')
+              : (rawInterval == 'Pass'
+                    ? (l10n?.cramPass ?? 'Pass')
+                    : rawInterval);
 
           return Expanded(
             child:
@@ -65,7 +70,9 @@ class RatingBar extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Semantics(
                         button: true,
-                        label: 'Rate ${cfg.label}, next review in $interval',
+                        label:
+                            l10n?.rateButtonSemantics(cfg.label, interval) ??
+                            'Rate ${cfg.label}, next review in $interval',
                         child: FilledButton.tonal(
                           key: cfg.key,
                           onPressed: () => onRatingSelected(cfg.rating),

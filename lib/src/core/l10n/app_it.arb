@@ -320,6 +320,74 @@
         "type": "int"
       }
     }
+  },
+  "create": "Crea",
+  "editDeck": "Modifica Mazzo",
+  "deckNameHint": "es., Biologia 101",
+  "deckNameRequired": "Il nome del mazzo è obbligatorio",
+  "nameTooLong": "Il nome deve contenere al massimo 100 caratteri",
+  "deckDescriptionHint": "Descrizione opzionale di questo mazzo",
+  "themeSystemSubtitle": "Segui le impostazioni del dispositivo",
+  "themeDarkSubtitle": "Usa sempre il tema scuro",
+  "themeLightSubtitle": "Usa sempre il tema chiaro",
+  "cardsDueForReview": "{count, plural, =1{1 carta da ripassare} other{{count} carte da ripassare}}",
+  "@cardsDueForReview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "heatmapLess": "Meno",
+  "heatmapMore": "Più",
+  "reviewsInPeriod": "{count, plural, =1{1 ripasso nel periodo} other{{count} ripassi nel periodo}}",
+  "@reviewsInPeriod": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "today": "Oggi",
+  "tomorrow": "Domani",
+  "reminderAtTime": "Notifica di ripasso giornaliera alle {time}",
+  "@reminderAtTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rateButtonSemantics": "Valuta {label}, prossimo ripasso tra {interval}",
+  "@rateButtonSemantics": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "interval": {
+        "type": "String"
+      }
+    }
+  },
+  "cramRequeue": "Ripeti",
+  "cramPass": "Passa",
+  "fullBackupJson": "Backup JSON Completo",
+  "backupExportedSuccess": "Backup esportato con successo!",
+  "cardPromptSemantics": "Domanda della carta: {content}",
+  "@cardPromptSemantics": {
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "cardAnswerSemantics": "Risposta della carta: {content}",
+  "@cardAnswerSemantics": {
+    "placeholders": {
+      "content": {
+        "type": "String"
+      }
+    }
   }
 }
 

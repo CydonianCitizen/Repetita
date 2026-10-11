@@ -1537,6 +1537,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 remaining} other{{count} remaining}}'**
   String cardsRemaining(int count);
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @editDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Deck'**
+  String get editDeck;
+
+  /// No description provided for @deckNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Biology 101'**
+  String get deckNameHint;
+
+  /// No description provided for @deckNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Deck name is required'**
+  String get deckNameRequired;
+
+  /// No description provided for @nameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be 100 characters or less'**
+  String get nameTooLong;
+
+  /// No description provided for @deckDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional description of this deck'**
+  String get deckDescriptionHint;
+
+  /// No description provided for @themeSystemSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow device theme settings'**
+  String get themeSystemSubtitle;
+
+  /// No description provided for @themeDarkSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Always use dark palette'**
+  String get themeDarkSubtitle;
+
+  /// No description provided for @themeLightSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Always use light palette'**
+  String get themeLightSubtitle;
+
+  /// No description provided for @cardsDueForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cards due for review'**
+  String cardsDueForReview(int count);
+
+  /// No description provided for @heatmapLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get heatmapLess;
+
+  /// No description provided for @heatmapMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get heatmapMore;
+
+  /// No description provided for @reviewsInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 review in period} other{{count} reviews in period}}'**
+  String reviewsInPeriod(int count);
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @reminderAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily review notification at {time}'**
+  String reminderAtTime(String time);
+
+  /// No description provided for @rateButtonSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate {label}, next review in {interval}'**
+  String rateButtonSemantics(String label, String interval);
+
+  /// No description provided for @cramRequeue.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-queue'**
+  String get cramRequeue;
+
+  /// No description provided for @cramPass.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get cramPass;
+
+  /// No description provided for @fullBackupJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Backup JSON'**
+  String get fullBackupJson;
+
+  /// No description provided for @backupExportedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup exported successfully!'**
+  String get backupExportedSuccess;
+
+  /// No description provided for @cardPromptSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Prompt: {content}'**
+  String cardPromptSemantics(String content);
+
+  /// No description provided for @cardAnswerSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Answer: {content}'**
+  String cardAnswerSemantics(String content);
 }
 
 class _AppLocalizationsDelegate
