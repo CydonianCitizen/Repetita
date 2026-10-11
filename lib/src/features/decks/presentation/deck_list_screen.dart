@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
-import '../../backup_transfer/presentation/backup_screen.dart';
 import '../../cards/presentation/deck_detail_screen.dart';
-import '../../settings/presentation/settings_screen.dart';
-import '../../stats/presentation/stats_screen.dart';
 import 'controllers/deck_list_controller.dart';
 import 'widgets/deck_form_dialog.dart';
 import 'widgets/deck_list_tile.dart';
@@ -19,41 +16,7 @@ class DeckListScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n?.appTitle ?? 'Repetita'),
-        actions: [
-          IconButton(
-            key: const Key('open_stats_button'),
-            icon: const Icon(Icons.bar_chart),
-            tooltip: l10n?.stats ?? 'Statistics',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            key: const Key('open_backup_button'),
-            icon: const Icon(Icons.backup_outlined),
-            tooltip: l10n?.backup ?? 'Backup & Restore',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const BackupScreen()),
-              );
-            },
-          ),
-          IconButton(
-            key: const Key('open_settings_button'),
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: l10n?.settings ?? 'Settings',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n?.appTitle ?? 'repetita')),
       body: decksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(

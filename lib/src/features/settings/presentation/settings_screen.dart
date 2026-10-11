@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../backup_transfer/presentation/backup_screen.dart';
 import '../data/haptic_service.dart';
+import '../data/update_service.dart';
 import '../domain/animation_level.dart';
 import '../domain/haptic_intensity.dart';
 import 'controllers/animation_level_controller.dart';
+import 'controllers/fsrs_parameters_controller.dart';
 import 'controllers/haptic_controller.dart';
 import 'controllers/locale_controller.dart';
 import 'controllers/reminder_controller.dart';
@@ -14,9 +16,11 @@ import 'controllers/theme_mode_controller.dart';
 import 'controllers/update_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.isEmbedded = false});
 
-  static const String appVersion = 'v0.0.5';
+  final bool isEmbedded;
+
+  static const String appVersion = 'v0.1.0';
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -298,7 +302,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                               enabled,
                               title:
                                   l10n?.notificationTitle ??
-                                  'Time to review with Repetita!',
+                                  'Time to review with repetita!',
                               body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
                             );
                       },
@@ -343,7 +347,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                                   minute: picked.minute,
                                   title:
                                       l10n?.notificationTitle ??
-                                      'Time to review with Repetita!',
+                                      'Time to review with repetita!',
                                   body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
                                 );
                           }
@@ -378,7 +382,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                             .sendTestNotification(
                               title:
                                   l10n?.notificationTitle ??
-                                  'Time to review with Repetita!',
+                                  'Time to review with repetita!',
                               body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
                             );
                         if (context.mounted) {
@@ -456,8 +460,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   l10n?.updateCheckFailed ?? 'Could not check for updates',
                 ),
                 content: Text(
-                  l10n?.updateCheckFailedDesc ??
-                      'Please check your internet connection and try again.',
+                  err is UpdateCheckException
+                      ? err.message
+                      : (l10n?.updateCheckFailedDesc ??
+                            'Please check your internet connection and try again.'),
                 ),
                 actions: [
                   TextButton(
@@ -556,7 +562,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   title: Text(l10n?.upToDate ?? 'Up to Date'),
                   content: Text(
                     l10n?.upToDateDesc(info.currentVersion) ??
-                        'Repetita is currently running the latest version: ${info.currentVersion}.',
+                        'repetita is currently running the latest version: ${info.currentVersion}.',
                   ),
                   actions: [
                     TextButton(
@@ -573,6 +579,212 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     );
   }
 
+  void _showFsrsSettingsDialog(BuildContext context, AppLocalizations? l10n) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final fsrsParams = ref.watch(fsrsParametersControllerProvider);
+            final controller = ref.read(
+              fsrsParametersControllerProvider.notifier,
+            );
+
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.tune_rounded, color: colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n?.fsrsParameters ?? 'FSRS Scheduling Parameters',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Desired Retention
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n?.desiredRetention ?? 'Desired Retention',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${(fsrsParams.requestRetention * 100).round()}%',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n?.desiredRetentionDesc ?? 'Target recall probability at review time. Higher retention requires more frequent reviews.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Slider(
+                      key: const Key('fsrs_retention_slider'),
+                      value: fsrsParams.requestRetention,
+                      min: 0.70,
+                      max: 0.98,
+                      divisions: 28,
+                      label: '${(fsrsParams.requestRetention * 100).round()}%',
+                      onChanged: (val) {
+                        controller.setRequestRetention(
+                          double.parse(val.toStringAsFixed(2)),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Maximum Interval
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          l10n?.maxInterval ?? 'Maximum Interval',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            fsrsParams.maximumInterval >= 36500
+                                ? '100 years'
+                                : '${fsrsParams.maximumInterval} days',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSecondaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n?.maxIntervalDesc ??
+                          'Maximum spacing interval between reviews in days.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [30, 90, 180, 365, 3650, 36500].map((days) {
+                        final isSelected = fsrsParams.maximumInterval == days;
+                        return ChoiceChip(
+                          key: Key('fsrs_interval_$days'),
+                          label: Text(
+                            days == 36500 ? 'Max (36500d)' : '${days}d',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          selected: isSelected,
+                          onSelected: (_) =>
+                              controller.setMaximumInterval(days),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Weights summary & Reset
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: Text(
+                        l10n?.fsrsWeights ?? 'FSRS Model Weights',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '17 model parameters (v4.5 / v5)',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.outline,
+                        ),
+                      ),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            fsrsParams.w
+                                .asMap()
+                                .entries
+                                .map((e) => 'w${e.key}: ${e.value}')
+                                .join(', '),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      key: const Key('fsrs_reset_button'),
+                      icon: const Icon(Icons.restore_rounded, size: 16),
+                      label: Text(
+                        l10n?.resetFsrsDefaults ?? 'Reset to Defaults',
+                      ),
+                      onPressed: () => controller.resetToDefaults(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                FilledButton(
+                  key: const Key('fsrs_save_button'),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n?.ok ?? 'OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showLicenseDialog(BuildContext context, AppLocalizations? l10n) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -581,26 +793,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          icon: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: SvgPicture.asset(
-              'repetita-circle-icon.svg',
-              fit: BoxFit.cover,
-            ),
-          ),
           title: Text(l10n?.licenseDialogTitle ?? 'MIT License'),
           content: SingleChildScrollView(
             child: Column(
@@ -617,7 +809,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    l10n?.licenseCopyright ?? 'Copyright (c) 2026 Thomasdg00',
+                    l10n?.licenseCopyright ?? 'Copyright (c) 2026 repetita',
                     style: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -669,10 +861,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   onPressed: () {
                     showLicensePage(
                       context: context,
-                      applicationName: l10n?.appTitle ?? 'Repetita',
+                      applicationName: l10n?.appTitle ?? 'repetita',
                       applicationVersion: SettingsScreen.appVersion,
                       applicationLegalese:
-                          'Copyright (c) 2026 Thomasdg00\nMIT License',
+                          'Copyright (c) 2026 repetita\nMIT License',
                     );
                   },
                 ),
@@ -740,8 +932,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final hapticIntensity = ref.watch(hapticFeedbackControllerProvider);
     final reminderSettings = ref.watch(reminderControllerProvider);
 
+    final fsrsParams = ref.watch(fsrsParametersControllerProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.settingsTitle ?? 'Settings')),
+      appBar: AppBar(
+        title: Text(l10n?.settingsTitle ?? 'Settings'),
+        automaticallyImplyLeading: !widget.isEmbedded,
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
@@ -750,38 +947,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: SvgPicture.asset(
-                    'repetita-circle-icon.svg',
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        l10n?.appTitle ?? 'Repetita',
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        l10n?.appTitle ?? 'repetita',
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
                         ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         l10n?.appSubtitle(SettingsScreen.appVersion) ??
                             'Offline Spaced Repetition Engine • ${SettingsScreen.appVersion}',
@@ -794,7 +971,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: 10,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
@@ -1379,9 +1556,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 subtitle:
                     l10n?.fsrsParametersSubtitle ??
                     'Desired retention, max intervals, request weights',
-                trailingText: l10n?.retentionTarget ?? '90% retention',
-                onTap: () =>
-                    _showPlaceholderNotice(context, 'FSRS parameter tuning'),
+                trailingText: '${(fsrsParams.requestRetention * 100).round()}%',
+                onTap: () => _showFsrsSettingsDialog(context, l10n),
               ),
               const Divider(indent: 56, height: 1),
               _SettingsTile(
@@ -1404,7 +1580,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
           const SizedBox(height: 20),
 
-          // Section 4: Updates & Maintenance
+          // Section 4: Data & Backup
+          _buildSectionHeader(
+            context,
+            l10n?.sectionDataBackup ?? 'DATA & BACKUP',
+          ),
+          _buildSettingsCard(
+            context,
+            children: [
+              _SettingsTile(
+                key: const Key('setting_backup_tile'),
+                icon: Icons.backup_outlined,
+                iconColor: colorScheme.primary,
+                title: l10n?.backup ?? 'Backup & Restore',
+                subtitle:
+                    l10n?.backupSubtitle ??
+                    'Export and import decks via JSON or CSV',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const BackupScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Section 5: Updates & Releases
           _buildSectionHeader(
             context,
             l10n?.sectionUpdates ?? 'UPDATES & RELEASES',
@@ -1427,23 +1631,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           ),
           const SizedBox(height: 20),
 
-          // Section 5: About & Privacy
+          // Section 6: About & License
           _buildSectionHeader(context, l10n?.sectionAbout ?? 'ABOUT & PRIVACY'),
           _buildSettingsCard(
             context,
             children: [
-              _SettingsTile(
-                key: const Key('setting_privacy_tile'),
-                icon: Icons.lock_outline_rounded,
-                iconColor: colorScheme.secondary,
-                title: l10n?.offlinePrivacy ?? 'Local & Offline-First',
-                subtitle:
-                    l10n?.offlinePrivacySubtitle ??
-                    'Zero cloud telemetry, zero remote tracking',
-                trailingText: l10n?.active ?? 'Active',
-                onTap: () => _showPlaceholderNotice(context, 'Privacy details'),
-              ),
-              const Divider(indent: 56, height: 1),
               _SettingsTile(
                 key: const Key('setting_license_tile'),
                 icon: Icons.description_outlined,

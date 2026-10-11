@@ -39,6 +39,24 @@ class UpdateService {
       final response = await request.close().timeout(
         const Duration(seconds: 6),
       );
+      if (response.statusCode == HttpStatus.notFound) {
+        // No releases published yet on this repository
+        final segments = uri.pathSegments;
+        final repoPath = segments.length >= 2
+            ? '${segments[0]}/${segments[1]}'
+            : '';
+        return jsonEncode(<String, dynamic>{
+          'tag_name': '',
+          'html_url': 'https://github.com/$repoPath',
+          'body': null,
+          'published_at': null,
+        });
+      }
+      if (response.statusCode == HttpStatus.forbidden) {
+        throw const UpdateCheckException(
+          'GitHub API rate limit reached. Please try again later.',
+        );
+      }
       if (response.statusCode != HttpStatus.ok) {
         throw UpdateCheckException(
           'GitHub returned status code ${response.statusCode}',
@@ -80,11 +98,13 @@ class UpdateService {
         ? DateTime.tryParse(publishedStr)
         : null;
 
-    final hasUpdate = UpdateInfo.isRemoteNewer(currentVersion, tagName);
+    final effectiveLatest = tagName.isEmpty ? currentVersion : tagName;
+    final hasUpdate =
+        tagName.isNotEmpty && UpdateInfo.isRemoteNewer(currentVersion, tagName);
 
     return UpdateInfo(
       currentVersion: currentVersion,
-      latestVersion: tagName,
+      latestVersion: effectiveLatest,
       hasUpdate: hasUpdate,
       releaseUrl: releaseUrl,
       releaseNotes: releaseNotes,

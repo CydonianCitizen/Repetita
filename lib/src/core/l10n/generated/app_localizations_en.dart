@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Repetita';
+  String get appTitle => 'repetita';
 
   @override
   String get close => 'Close';
@@ -34,7 +34,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get decksTitle => 'Repetita Decks';
+  String get navHome => 'Decks';
+
+  @override
+  String get navStats => 'Stats';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get decksTitle => 'repetita Decks';
 
   @override
   String get noDecksYet => 'No decks yet. Tap + to create one.';
@@ -335,6 +344,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retentionTarget => '90% retention';
 
   @override
+  String get desiredRetention => 'Desired Retention';
+
+  @override
+  String get desiredRetentionDesc =>
+      'Target recall probability at review time. Higher retention requires more frequent reviews.';
+
+  @override
+  String get maxInterval => 'Maximum Interval';
+
+  @override
+  String get maxIntervalDesc =>
+      'Maximum spacing interval between reviews in days.';
+
+  @override
+  String get resetFsrsDefaults => 'Reset to Defaults';
+
+  @override
+  String get fsrsWeights => 'FSRS Model Weights';
+
+  @override
   String get studyReminders => 'Study Reminders';
 
   @override
@@ -353,7 +382,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotification => 'Send Test Notification';
 
   @override
-  String get notificationTitle => 'Time to review with Repetita!';
+  String get notificationTitle => 'Time to review with repetita!';
 
   @override
   String get notificationBody =>
@@ -365,6 +394,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderDesc =>
       'Receive a gentle reminder each day to keep your review streak active and retain flashcards.';
+
+  @override
+  String get sectionDataBackup => 'DATA & BACKUP';
+
+  @override
+  String get backupSubtitle => 'Export and import decks via JSON or CSV';
 
   @override
   String get sectionUpdates => 'UPDATES & RELEASES';
@@ -384,7 +419,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String upToDateDesc(String version) {
-    return 'Repetita is currently running the latest version: $version.';
+    return 'repetita is currently running the latest version: $version.';
   }
 
   @override
@@ -392,7 +427,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updateAvailableDesc(String version) {
-    return 'A new version of Repetita ($version) is available.';
+    return 'A new version of repetita ($version) is available.';
   }
 
   @override
@@ -409,13 +444,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionAbout => 'ABOUT & PRIVACY';
 
   @override
-  String get offlinePrivacy => 'Local & Offline-First';
-
-  @override
-  String get offlinePrivacySubtitle =>
-      'Zero cloud telemetry, zero remote tracking';
-
-  @override
   String get licenseAndCredits => 'License & Credits';
 
   @override
@@ -425,7 +453,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenseDialogTitle => 'MIT License';
 
   @override
-  String get licenseCopyright => 'Copyright (c) 2026 Thomasdg00';
+  String get licenseCopyright => 'Copyright (c) 2026 repetita';
 
   @override
   String get viewAllLicenses => 'View All Open Source Licenses';

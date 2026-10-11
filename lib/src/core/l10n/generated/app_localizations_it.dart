@@ -10,7 +10,7 @@ class AppLocalizationsIt extends AppLocalizations {
   AppLocalizationsIt([String locale = 'it']) : super(locale);
 
   @override
-  String get appTitle => 'Repetita';
+  String get appTitle => 'repetita';
 
   @override
   String get close => 'Chiudi';
@@ -34,7 +34,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get search => 'Cerca';
 
   @override
-  String get decksTitle => 'Mazzi Repetita';
+  String get navHome => 'Mazzi';
+
+  @override
+  String get navStats => 'Statistiche';
+
+  @override
+  String get navSettings => 'Impostazioni';
+
+  @override
+  String get decksTitle => 'Mazzi repetita';
 
   @override
   String get noDecksYet => 'Nessun mazzo presente. Tocca + per crearne uno.';
@@ -335,6 +344,26 @@ class AppLocalizationsIt extends AppLocalizations {
   String get retentionTarget => '90% ritenzione';
 
   @override
+  String get desiredRetention => 'Ritenzione desiderata';
+
+  @override
+  String get desiredRetentionDesc =>
+      'Probabilità di ricordo stimata al ripasso. Una ritenzione più alta richiede ripassi più frequenti.';
+
+  @override
+  String get maxInterval => 'Intervallo massimo';
+
+  @override
+  String get maxIntervalDesc =>
+      'Intervallo massimo di ripasso espresso in giorni.';
+
+  @override
+  String get resetFsrsDefaults => 'Ripristina predefiniti';
+
+  @override
+  String get fsrsWeights => 'Pesi del modello FSRS';
+
+  @override
   String get studyReminders => 'Promemoria di studio';
 
   @override
@@ -353,7 +382,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get testNotification => 'Invia notifica di prova';
 
   @override
-  String get notificationTitle => 'È ora di ripassare con Repetita!';
+  String get notificationTitle => 'È ora di ripassare con repetita!';
 
   @override
   String get notificationBody =>
@@ -365,6 +394,12 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get reminderDesc =>
       'Ricevi un promemoria ogni giorno all\'orario stabilito per mantenere costante la tua memoria.';
+
+  @override
+  String get sectionDataBackup => 'DATI E BACKUP';
+
+  @override
+  String get backupSubtitle => 'Esporta e importa mazzi tramite JSON o CSV';
 
   @override
   String get sectionUpdates => 'AGGIORNAMENTI E RELEASE';
@@ -384,7 +419,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String upToDateDesc(String version) {
-    return 'Repetita è attualmente aggiornata all\'ultima versione: $version.';
+    return 'repetita è attualmente aggiornata all\'ultima versione: $version.';
   }
 
   @override
@@ -392,7 +427,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String updateAvailableDesc(String version) {
-    return 'Una nuova versione di Repetita ($version) è disponibile su GitHub.';
+    return 'Una nuova versione di repetita ($version) è disponibile su GitHub.';
   }
 
   @override
@@ -409,13 +444,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sectionAbout => 'INFO E PRIVACY';
 
   @override
-  String get offlinePrivacy => 'Locale e Offline-First';
-
-  @override
-  String get offlinePrivacySubtitle =>
-      'Zero telemetria cloud, nessun tracciamento remoto';
-
-  @override
   String get licenseAndCredits => 'Licenza e riconoscimenti';
 
   @override
@@ -425,7 +453,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get licenseDialogTitle => 'Licenza MIT';
 
   @override
-  String get licenseCopyright => 'Copyright (c) 2026 Thomasdg00';
+  String get licenseCopyright => 'Copyright (c) 2026 repetita';
 
   @override
   String get viewAllLicenses => 'Tutte le licenze open source';

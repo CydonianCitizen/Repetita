@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "Repetita",
+  "appTitle": "repetita",
   "@appTitle": {
     "description": "App title"
   },
@@ -12,7 +12,11 @@
   "ok": "OK",
   "search": "Search",
 
-  "decksTitle": "Repetita Decks",
+  "navHome": "Decks",
+  "navStats": "Stats",
+  "navSettings": "Settings",
+
+  "decksTitle": "repetita Decks",
   "noDecksYet": "No decks yet. Tap + to create one.",
   "createFirstDeckPrompt": "Create your first deck to begin spaced repetition studying.",
   "createDeck": "Create Deck",
@@ -133,23 +137,32 @@
   "fsrsParameters": "FSRS Scheduling Parameters",
   "fsrsParametersSubtitle": "Desired retention, max intervals, request weights",
   "retentionTarget": "90% retention",
+  "desiredRetention": "Desired Retention",
+  "desiredRetentionDesc": "Target recall probability at review time. Higher retention requires more frequent reviews.",
+  "maxInterval": "Maximum Interval",
+  "maxIntervalDesc": "Maximum spacing interval between reviews in days.",
+  "resetFsrsDefaults": "Reset to Defaults",
+  "fsrsWeights": "FSRS Model Weights",
   "studyReminders": "Study Reminders",
   "studyRemindersSubtitle": "Daily review notifications",
   "remindersOff": "Off",
   "enableReminders": "Daily Study Reminders",
   "reminderTime": "Reminder Time",
   "testNotification": "Send Test Notification",
-  "notificationTitle": "Time to review with Repetita!",
+  "notificationTitle": "Time to review with repetita!",
   "notificationBody": "You have spaced repetition flashcards due for review today.",
   "notificationSent": "Test notification dispatched!",
   "reminderDesc": "Receive a gentle reminder each day to keep your review streak active and retain flashcards.",
+
+  "sectionDataBackup": "DATA & BACKUP",
+  "backupSubtitle": "Export and import decks via JSON or CSV",
 
   "sectionUpdates": "UPDATES & RELEASES",
   "checkForUpdates": "Check for Updates",
   "checkForUpdatesSubtitle": "Verify installed version against GitHub releases",
   "checkingForUpdates": "Checking GitHub releases...",
   "upToDate": "Up to Date",
-  "upToDateDesc": "Repetita is currently running the latest version: {version}.",
+  "upToDateDesc": "repetita is currently running the latest version: {version}.",
   "@upToDateDesc": {
     "placeholders": {
       "version": {
@@ -158,7 +171,7 @@
     }
   },
   "updateAvailable": "Update Available!",
-  "updateAvailableDesc": "A new version of Repetita ({version}) is available.",
+  "updateAvailableDesc": "A new version of repetita ({version}) is available.",
   "@updateAvailableDesc": {
     "placeholders": {
       "version": {
@@ -171,12 +184,10 @@
   "updateCheckFailedDesc": "Please check your internet connection and try again.",
 
   "sectionAbout": "ABOUT & PRIVACY",
-  "offlinePrivacy": "Local & Offline-First",
-  "offlinePrivacySubtitle": "Zero cloud telemetry, zero remote tracking",
   "licenseAndCredits": "License & Credits",
   "licenseSubtitle": "MIT License • Open Source",
   "licenseDialogTitle": "MIT License",
-  "licenseCopyright": "Copyright (c) 2026 Thomasdg00",
+  "licenseCopyright": "Copyright (c) 2026 repetita",
   "viewAllLicenses": "View All Open Source Licenses",
   "comingSoonNotice": "{feature} feature coming in an upcoming release!",
   "@comingSoonNotice": {

@@ -9,10 +9,16 @@ import 'widgets/metric_summary_card.dart';
 import 'widgets/state_distribution_bar.dart';
 
 class StatsScreen extends ConsumerWidget {
-  const StatsScreen({super.key, this.deckId, this.deckName});
+  const StatsScreen({
+    super.key,
+    this.deckId,
+    this.deckName,
+    this.isEmbedded = false,
+  });
 
   final int? deckId;
   final String? deckName;
+  final bool isEmbedded;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +29,10 @@ class StatsScreen extends ConsumerWidget {
     final title = deckName != null ? '$deckName Stats' : 'Statistics';
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        title: Text(title),
+        automaticallyImplyLeading: !isEmbedded,
+      ),
       body: statsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(

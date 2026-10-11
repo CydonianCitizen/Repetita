@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// App title
   ///
   /// In en, this message translates to:
-  /// **'Repetita'**
+  /// **'repetita'**
   String get appTitle;
 
   /// No description provided for @close.
@@ -146,10 +146,28 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get search;
 
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Decks'**
+  String get navHome;
+
+  /// No description provided for @navStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get navStats;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
   /// No description provided for @decksTitle.
   ///
   /// In en, this message translates to:
-  /// **'Repetita Decks'**
+  /// **'repetita Decks'**
   String get decksTitle;
 
   /// No description provided for @noDecksYet.
@@ -698,6 +716,42 @@ abstract class AppLocalizations {
   /// **'90% retention'**
   String get retentionTarget;
 
+  /// No description provided for @desiredRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Desired Retention'**
+  String get desiredRetention;
+
+  /// No description provided for @desiredRetentionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Target recall probability at review time. Higher retention requires more frequent reviews.'**
+  String get desiredRetentionDesc;
+
+  /// No description provided for @maxInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Interval'**
+  String get maxInterval;
+
+  /// No description provided for @maxIntervalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum spacing interval between reviews in days.'**
+  String get maxIntervalDesc;
+
+  /// No description provided for @resetFsrsDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Defaults'**
+  String get resetFsrsDefaults;
+
+  /// No description provided for @fsrsWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'FSRS Model Weights'**
+  String get fsrsWeights;
+
   /// No description provided for @studyReminders.
   ///
   /// In en, this message translates to:
@@ -737,7 +791,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationTitle.
   ///
   /// In en, this message translates to:
-  /// **'Time to review with Repetita!'**
+  /// **'Time to review with repetita!'**
   String get notificationTitle;
 
   /// No description provided for @notificationBody.
@@ -757,6 +811,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Receive a gentle reminder each day to keep your review streak active and retain flashcards.'**
   String get reminderDesc;
+
+  /// No description provided for @sectionDataBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'DATA & BACKUP'**
+  String get sectionDataBackup;
+
+  /// No description provided for @backupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import decks via JSON or CSV'**
+  String get backupSubtitle;
 
   /// No description provided for @sectionUpdates.
   ///
@@ -791,7 +857,7 @@ abstract class AppLocalizations {
   /// No description provided for @upToDateDesc.
   ///
   /// In en, this message translates to:
-  /// **'Repetita is currently running the latest version: {version}.'**
+  /// **'repetita is currently running the latest version: {version}.'**
   String upToDateDesc(String version);
 
   /// No description provided for @updateAvailable.
@@ -803,7 +869,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateAvailableDesc.
   ///
   /// In en, this message translates to:
-  /// **'A new version of Repetita ({version}) is available.'**
+  /// **'A new version of repetita ({version}) is available.'**
   String updateAvailableDesc(String version);
 
   /// No description provided for @viewOnGitHub.
@@ -830,18 +896,6 @@ abstract class AppLocalizations {
   /// **'ABOUT & PRIVACY'**
   String get sectionAbout;
 
-  /// No description provided for @offlinePrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Local & Offline-First'**
-  String get offlinePrivacy;
-
-  /// No description provided for @offlinePrivacySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Zero cloud telemetry, zero remote tracking'**
-  String get offlinePrivacySubtitle;
-
   /// No description provided for @licenseAndCredits.
   ///
   /// In en, this message translates to:
@@ -863,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @licenseCopyright.
   ///
   /// In en, this message translates to:
-  /// **'Copyright (c) 2026 Thomasdg00'**
+  /// **'Copyright (c) 2026 repetita'**
   String get licenseCopyright;
 
   /// No description provided for @viewAllLicenses.

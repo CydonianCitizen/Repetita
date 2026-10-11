@@ -22,8 +22,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(MaterialApp), findsOneWidget);
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.text('Repetita'), findsOneWidget);
+    expect(find.byType(Scaffold), findsWidgets);
+    expect(find.text('repetita'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(milliseconds: 50));

@@ -4,6 +4,7 @@ import '../../../../core/algorithms/fsrs/fsrs_engine.dart';
 import '../../../../core/algorithms/fsrs/models/rating.dart';
 import '../../../cards/data/cards_dao.dart';
 import '../../../cards/domain/card_entity.dart';
+import '../../../settings/presentation/controllers/fsrs_parameters_controller.dart';
 import '../../data/study_session_dao_provider.dart';
 
 part 'study_session_controller.g.dart';
@@ -79,7 +80,8 @@ class StudySessionController extends _$StudySessionController {
     final currentCard = current.currentCard!;
     final now = DateTime.now().toUtc();
     final fsrsCard = currentCard.toFsrsCard();
-    const engine = FsrsEngine();
+    final fsrsParams = ref.read(fsrsParametersControllerProvider);
+    final engine = FsrsEngine(fsrsParams);
     final recordLog = engine.schedule(fsrsCard, rating, now);
 
     final dao = ref.read(studySessionDaoProvider);
@@ -108,7 +110,8 @@ class StudySessionController extends _$StudySessionController {
 
     final now = DateTime.now().toUtc();
     final fsrsCard = card.toFsrsCard();
-    const engine = FsrsEngine();
+    final fsrsParams = ref.read(fsrsParametersControllerProvider);
+    final engine = FsrsEngine(fsrsParams);
     final repeats = engine.repeat(fsrsCard, now);
 
     return repeats.map((rating, recordLog) {

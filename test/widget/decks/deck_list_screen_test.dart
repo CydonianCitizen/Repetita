@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
-import 'package:repetita/src/features/backup_transfer/presentation/backup_screen.dart';
 import 'package:repetita/src/features/decks/presentation/deck_list_screen.dart';
-import 'package:repetita/src/features/stats/presentation/stats_screen.dart';
 
 void main() {
   late AppDatabase db;
@@ -161,44 +159,20 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('tapping stats icon button navigates to StatsScreen', (
-      tester,
-    ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+    testWidgets(
+      'AppBar shows title repetita and top action buttons are removed',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      final statsButton = find.byKey(const Key('open_stats_button'));
-      expect(statsButton, findsOneWidget);
+        expect(find.text('repetita'), findsOneWidget);
+        expect(find.byKey(const Key('open_stats_button')), findsNothing);
+        expect(find.byKey(const Key('open_backup_button')), findsNothing);
+        expect(find.byKey(const Key('open_settings_button')), findsNothing);
 
-      await tester.tap(statsButton);
-      for (int i = 0; i < 5; i++) {
+        await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(milliseconds: 50));
-      }
-
-      expect(find.byType(StatsScreen), findsOneWidget);
-
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
-
-    testWidgets('tapping backup icon button navigates to BackupScreen', (
-      tester,
-    ) async {
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
-
-      final backupButton = find.byKey(const Key('open_backup_button'));
-      expect(backupButton, findsOneWidget);
-
-      await tester.tap(backupButton);
-      for (int i = 0; i < 5; i++) {
-        await tester.pump(const Duration(milliseconds: 50));
-      }
-
-      expect(find.byType(BackupScreen), findsOneWidget);
-
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
+      },
+    );
   });
 }

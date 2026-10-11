@@ -8,6 +8,7 @@ import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/backup_transfer/presentation/backup_screen.dart';
 import 'package:repetita/src/features/cards/presentation/card_editor_screen.dart';
 import 'package:repetita/src/features/cards/presentation/deck_detail_screen.dart';
+import 'package:repetita/src/features/settings/presentation/settings_screen.dart';
 import 'package:repetita/src/features/stats/presentation/stats_screen.dart';
 import 'package:repetita/src/features/study_session/presentation/study_screen.dart';
 
@@ -38,11 +39,18 @@ void main() {
   testWidgets(
     'Repetita End-to-End User Journey: Deck -> Card -> Study -> Stats -> Backup',
     (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       // 1. Boot RepetitaApp
       await tester.pumpWidget(buildApp());
       await pumpFrames(tester);
 
-      expect(find.text('Repetita'), findsOneWidget);
+      expect(find.text('repetita'), findsOneWidget);
       expect(find.text('No decks yet. Tap + to create one.'), findsOneWidget);
 
       // 2. Flow 1: Create a new deck ("Japanese Basics")
@@ -122,13 +130,13 @@ void main() {
       await tester.tap(find.byKey(const Key('back_to_deck_button')));
       await pumpFrames(tester);
 
-      // 5. Flow 4: Navigate back to DeckListScreen and open StatsScreen
+      // 5. Flow 4: Navigate back to home and switch to Stats tab via bottom navbar
       await tester.tap(find.byTooltip('Back'));
       await pumpFrames(tester);
 
-      final statsButton = find.byKey(const Key('open_stats_button'));
-      expect(statsButton, findsOneWidget);
-      await tester.tap(statsButton);
+      final navStats = find.byKey(const Key('nav_stats'));
+      expect(navStats, findsOneWidget);
+      await tester.tap(navStats);
       await pumpFrames(tester);
 
       expect(find.byType(StatsScreen), findsOneWidget);
@@ -137,13 +145,17 @@ void main() {
       expect(find.text('1'), findsWidgets); // 1 review
       expect(find.text('Reviews'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Back'));
+      // 6. Flow 5: Switch to Settings tab via bottom navbar and open BackupScreen
+      final navSettings = find.byKey(const Key('nav_settings'));
+      expect(navSettings, findsOneWidget);
+      await tester.tap(navSettings);
       await pumpFrames(tester);
 
-      // 6. Flow 5: Open BackupScreen and verify Export Backup
-      final backupButton = find.byKey(const Key('open_backup_button'));
-      expect(backupButton, findsOneWidget);
-      await tester.tap(backupButton);
+      expect(find.byType(SettingsScreen), findsOneWidget);
+      final backupTile = find.byKey(const Key('setting_backup_tile'));
+      await tester.scrollUntilVisible(backupTile, 200);
+      expect(backupTile, findsOneWidget);
+      await tester.tap(backupTile);
       await pumpFrames(tester);
 
       expect(find.byType(BackupScreen), findsOneWidget);

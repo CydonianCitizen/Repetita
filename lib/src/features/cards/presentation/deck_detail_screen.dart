@@ -300,6 +300,42 @@ class _CardTile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    if (card.state == 0)
+                      Text(
+                        'New card • Unreviewed',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.outline,
+                        ),
+                      )
+                    else ...[
+                      Text(
+                        'S: ${card.stability.toStringAsFixed(1)}d',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'D: ${card.difficulty.toStringAsFixed(1)}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Reps: ${card.reps}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.outline,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),

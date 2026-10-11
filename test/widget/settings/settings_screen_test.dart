@@ -38,13 +38,14 @@ void main() {
         await tester.pumpWidget(buildSubject());
 
         expect(find.text('Settings'), findsOneWidget);
-        expect(find.text('Repetita'), findsOneWidget);
-        expect(find.textContaining('v0.0.5'), findsWidgets);
+        expect(find.text('repetita'), findsOneWidget);
+        expect(find.textContaining('v0.1.0'), findsWidgets);
 
         // Section headers
         expect(find.text('APPEARANCE'), findsOneWidget);
         expect(find.text('LANGUAGE & LOCALIZATION'), findsOneWidget);
         expect(find.text('STUDY & ALGORITHM'), findsOneWidget);
+        expect(find.text('DATA & BACKUP'), findsOneWidget);
         expect(find.text('UPDATES & RELEASES'), findsOneWidget);
         expect(find.text('ABOUT & PRIVACY'), findsOneWidget);
 
@@ -61,6 +62,7 @@ void main() {
           find.byKey(const Key('setting_notifications_tile')),
           findsOneWidget,
         );
+        expect(find.byKey(const Key('setting_backup_tile')), findsOneWidget);
         expect(
           find.byKey(const Key('setting_github_update_tile')),
           findsOneWidget,
@@ -300,8 +302,8 @@ void main() {
         final mockService = UpdateService(
           fetcher: (uri) async => '''
         {
-          "tag_name": "v0.0.5",
-          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.0.5",
+          "tag_name": "v0.1.0",
+          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.1.0",
           "body": "Latest release."
         }
         ''',
@@ -320,7 +322,7 @@ void main() {
         expect(find.text('Up to Date'), findsOneWidget);
         expect(
           find.textContaining(
-            'Repetita is currently running the latest version',
+            'repetita is currently running the latest version',
           ),
           findsOneWidget,
         );
@@ -345,8 +347,8 @@ void main() {
         final mockService = UpdateService(
           fetcher: (uri) async => '''
         {
-          "tag_name": "v0.1.0",
-          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.1.0",
+          "tag_name": "v0.2.0",
+          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.2.0",
           "body": "Exciting new features and fixes."
         }
         ''',
@@ -363,7 +365,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Update Available!'), findsOneWidget);
-        expect(find.textContaining('v0.1.0'), findsWidgets);
+        expect(find.textContaining('v0.2.0'), findsWidgets);
         expect(find.text('Exciting new features and fixes.'), findsOneWidget);
         expect(find.text('View on GitHub'), findsOneWidget);
 
@@ -391,7 +393,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('MIT License'), findsWidgets);
-        expect(find.text('Copyright (c) 2026 Thomasdg00'), findsOneWidget);
+        expect(find.text('Copyright (c) 2026 repetita'), findsOneWidget);
         expect(
           find.byKey(const Key('view_all_licenses_button')),
           findsOneWidget,
@@ -402,6 +404,39 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(SnackBar), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping FSRS tile opens parameters dialog, slider and interval chips interact cleanly',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 4000);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(buildSubject());
+
+        // Tap FSRS tile
+        await tester.tap(find.byKey(const Key('setting_fsrs_tile')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('FSRS Scheduling Parameters'), findsWidgets);
+        expect(find.byKey(const Key('fsrs_retention_slider')), findsOneWidget);
+        expect(find.byKey(const Key('fsrs_interval_365')), findsOneWidget);
+        expect(find.byKey(const Key('fsrs_reset_button')), findsOneWidget);
+
+        // Select interval 365d
+        await tester.tap(find.byKey(const Key('fsrs_interval_365')));
+        await tester.pumpAndSettle();
+
+        // Tap OK
+        await tester.tap(find.byKey(const Key('fsrs_save_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('FSRS Scheduling Parameters'), findsOneWidget);
       },
     );
   });
