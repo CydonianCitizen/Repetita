@@ -347,8 +347,8 @@ void main() {
         final mockService = UpdateService(
           fetcher: (uri) async => '''
         {
-          "tag_name": "v0.3.0",
-          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.3.0",
+          "tag_name": "v0.4.0",
+          "html_url": "https://github.com/CydonianCitizen/Repetita/releases/tag/v0.4.0",
           "body": "Exciting new features and fixes."
         }
         ''',
@@ -365,7 +365,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Update Available!'), findsOneWidget);
-        expect(find.textContaining('v0.3.0'), findsWidgets);
+        expect(find.textContaining('v0.4.0'), findsWidgets);
         expect(find.text('Exciting new features and fixes.'), findsOneWidget);
         expect(find.text('View on GitHub'), findsOneWidget);
 

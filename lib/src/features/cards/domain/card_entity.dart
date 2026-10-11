@@ -1,3 +1,4 @@
+import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/algorithms/fsrs/models/card_state.dart';
 import '../../../core/algorithms/fsrs/models/fsrs_card.dart';
 
@@ -17,6 +18,7 @@ class CardEntity {
     required this.createdAt,
     this.isSuspended = false,
     this.buriedUntil,
+    this.clozeIndex,
   });
 
   final int id;
@@ -33,6 +35,12 @@ class CardEntity {
   final DateTime createdAt;
   final bool isSuspended;
   final DateTime? buriedUntil;
+  final int? clozeIndex;
+
+  bool get isCloze => ClozeParser.isCloze(front);
+
+  int get activeClozeIndex =>
+      clozeIndex ?? (ClozeParser.extractClozeIndices(front).firstOrNull ?? 1);
 
   bool isBuried(DateTime now) {
     if (buriedUntil == null) return false;
@@ -54,6 +62,7 @@ class CardEntity {
     DateTime? createdAt,
     bool? isSuspended,
     DateTime? buriedUntil,
+    int? clozeIndex,
   }) {
     return CardEntity(
       id: id ?? this.id,
@@ -70,6 +79,7 @@ class CardEntity {
       createdAt: createdAt ?? this.createdAt,
       isSuspended: isSuspended ?? this.isSuspended,
       buriedUntil: buriedUntil ?? this.buriedUntil,
+      clozeIndex: clozeIndex ?? this.clozeIndex,
     );
   }
 
@@ -104,7 +114,8 @@ class CardEntity {
           lapses == other.lapses &&
           createdAt == other.createdAt &&
           isSuspended == other.isSuspended &&
-          buriedUntil == other.buriedUntil;
+          buriedUntil == other.buriedUntil &&
+          clozeIndex == other.clozeIndex;
 
   @override
   int get hashCode => Object.hash(
@@ -122,5 +133,6 @@ class CardEntity {
     createdAt,
     isSuspended,
     buriedUntil,
+    clozeIndex,
   );
 }

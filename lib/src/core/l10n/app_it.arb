@@ -217,7 +217,25 @@
   "ratingGood": "Buono",
   "ratingEasy": "Facile",
   "saveAndAddAnother": "Salva e aggiungi un'altra",
-  "cardSaved": "Carta salvata"
+  "cardSaved": "Carta salvata",
+  "insertCloze": "Cloze [...]",
+  "insertClozeTooltip": "Racchiudi selezione in testo a scomparsa Cloze",
+  "cardBackNotes": "Retro (Note aggiuntive, opzionale)",
+  "clozeBadge": "Cloze c{index}",
+  "@clozeBadge": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "tags": "Tag",
+  "addTag": "Aggiungi Tag",
+  "manageTags": "Gestisci Tag",
+  "newTagHint": "Inserisci nome tag...",
+  "filterAll": "Tutte",
+  "noTags": "Nessun tag",
+  "selectTags": "Seleziona Tag"
 }
 
 

@@ -1213,6 +1213,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Card saved'**
   String get cardSaved;
+
+  /// No description provided for @insertCloze.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloze [...]'**
+  String get insertCloze;
+
+  /// No description provided for @insertClozeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrap selection with Cloze deletion'**
+  String get insertClozeTooltip;
+
+  /// No description provided for @cardBackNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Back (Extra Notes, Optional)'**
+  String get cardBackNotes;
+
+  /// No description provided for @clozeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloze c{index}'**
+  String clozeBadge(int index);
+
+  /// No description provided for @tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get tags;
+
+  /// No description provided for @addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Tag'**
+  String get addTag;
+
+  /// No description provided for @manageTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Tags'**
+  String get manageTags;
+
+  /// No description provided for @newTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter tag name...'**
+  String get newTagHint;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @noTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags'**
+  String get noTags;
+
+  /// No description provided for @selectTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tags'**
+  String get selectTags;
 }
 
 class _AppLocalizationsDelegate

@@ -84,19 +84,20 @@ Checklist operativa generata dall'audit del codice (Caveman, Ponytail, Impeccabl
 
 ---
 
-## Fase 6: Audit & Polish v0.2.1 (Caveman, Ponytail, Impeccable)
-- [x] **Taglio codice morto & dipendenze (Ponytail)**:
-  - [x] Rimosso `cupertino_icons` da `pubspec.yaml`
-  - [x] Rimossi metodi/classi non utilizzati da `material_theme.dart` (theme generators non usati, ~80 righe tagliate)
-  - [x] Ignorata cartella `.vscode/` nel `.gitignore`
-- [x] **Coerenza dati & persistenza (Drift/Backup)**:
-  - [x] Allineato calcolo `dueCards` in `watchAllDecksWithCounts` escludendo carte sospese o rinviate (`isSuspended == false` e `buriedUntil <= now`)
-  - [x] Aggiunto supporto a `isSuspended` e `buriedUntil` nel payload JSON di backup/ripristino
-- [x] **UX & i18n (Impeccable)**:
-  - [x] Localizzati dialog di eliminazione deck, badge (Due, Total, Prompt, Answer) e pulsanti rating
-  - [x] Supporto scroll `SingleChildScrollView` in `FlipCardView` contro overflow su schermi piccoli
-  - [x] Aggiunta azione "Salva e aggiungi un'altra" (`Save & Add Another`) in `CardEditorScreen`
-- [x] **Verifica completa**:
-  - [x] `flutter analyze`: 0 errori, 0 warning
-  - [x] `flutter test`: 108/108 test superati
+## Fase 7: Rilascio v0.3.0 (Cloze Deletion & Sistema Tag)
+- [x] **Cloze Deletion (Testo a Scomparsa)**:
+  - [x] Parser puro Dart deterministico `ClozeParser` con supporto a `{{c1::answer}}` e `{{c1::answer::hint}}`
+  - [x] Generazione carte separate per cloze multipli in `CardEditorScreen`
+  - [x] Rendering prompt mascherato e answer evidenziata in `FlipCardView`
+  - [x] Azione rapida `Cloze [...]` nella toolbar dell'editor
+- [x] **Sistema Tag / Etichette (Drift)**:
+  - [x] Migrazione schema SQLite a v3: tabelle `tags` e `card_tags`, campo `cloze_index` in `cards`
+  - [x] `TagsDao`, controller Riverpod e gestione tag chips in `CardEditorScreen`
+  - [x] Filtro orizzontale `FilterChip` ("Tutte" + tag presenti) e badge colorati in `DeckDetailScreen`
+- [x] **Verifica completa & test**:
+  - [x] 100% test di unità per `ClozeParser` e `TagsDao`
+  - [x] Test widget completi per flusso cloze e integrazione tag/filtri
+  - [x] `flutter analyze`: 0 errori, 0 warning, 0 info
+  - [x] `flutter test`: 138/138 test passati con successo
+
 

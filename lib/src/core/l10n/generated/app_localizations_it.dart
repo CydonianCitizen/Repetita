@@ -613,4 +613,40 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get cardSaved => 'Carta salvata';
+
+  @override
+  String get insertCloze => 'Cloze [...]';
+
+  @override
+  String get insertClozeTooltip =>
+      'Racchiudi selezione in testo a scomparsa Cloze';
+
+  @override
+  String get cardBackNotes => 'Retro (Note aggiuntive, opzionale)';
+
+  @override
+  String clozeBadge(int index) {
+    return 'Cloze c$index';
+  }
+
+  @override
+  String get tags => 'Tag';
+
+  @override
+  String get addTag => 'Aggiungi Tag';
+
+  @override
+  String get manageTags => 'Gestisci Tag';
+
+  @override
+  String get newTagHint => 'Inserisci nome tag...';
+
+  @override
+  String get filterAll => 'Tutte';
+
+  @override
+  String get noTags => 'Nessun tag';
+
+  @override
+  String get selectTags => 'Seleziona Tag';
 }

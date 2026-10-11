@@ -57,9 +57,9 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 2. v0.3.0: Formati Carte & Organizzazione
+### 2. v0.3.0: Formati Carte & Organizzazione [COMPLETATO]
 
-#### 2.1 Cloze Deletion (Testo a Scomparsa / Riempimento)
+#### 2.1 Cloze Deletion (Testo a Scomparsa / Riempimento) [COMPLETATO]
 * **Obiettivo**: Supportare flashcard con parti di frase nascoste, standard per lingue, definizioni e formule.
 * **Specifiche**:
   * Sintassi standard: `{{c1::risposta}}` e con suggerimento opzionale: `{{c1::risposta::suggerimento}}`.
@@ -68,7 +68,7 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
   * Retro carta: mostra la risposta evidenziata nel colore primario del tema M3.
   * Supporto per cloze multipli (`c1`, `c2`) che generano carte indipendenti o mostrano contesti unificati.
 
-#### 2.2 Sistema Tag / Etichette
+#### 2.2 Sistema Tag / Etichette [COMPLETATO]
 * **Obiettivo**: Organizzazione trasversale delle carte, indipendente dalla gerarchia dei mazzi.
 * **Specifiche**:
   * Tabelle Drift: `Tags` (id, name, color) e tabella ponte `CardTags` (cardId, tagId) con cascading delete.

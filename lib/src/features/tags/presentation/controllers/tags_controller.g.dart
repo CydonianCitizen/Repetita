@@ -1,0 +1,221 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'tags_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(TagsController)
+final tagsControllerProvider = TagsControllerProvider._();
+
+final class TagsControllerProvider
+    extends $StreamNotifierProvider<TagsController, List<TagEntity>> {
+  TagsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tagsControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tagsControllerHash();
+
+  @$internal
+  @override
+  TagsController create() => TagsController();
+}
+
+String _$tagsControllerHash() => r'9658d2126f3df808ebc66114d00f8f26ad2fc06e';
+
+abstract class _$TagsController extends $StreamNotifier<List<TagEntity>> {
+  Stream<List<TagEntity>> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<TagEntity>>, List<TagEntity>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<TagEntity>>, List<TagEntity>>,
+              AsyncValue<List<TagEntity>>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(deckTags)
+final deckTagsProvider = DeckTagsFamily._();
+
+final class DeckTagsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<int, List<TagEntity>>>,
+          Map<int, List<TagEntity>>,
+          Stream<Map<int, List<TagEntity>>>
+        >
+    with
+        $FutureModifier<Map<int, List<TagEntity>>>,
+        $StreamProvider<Map<int, List<TagEntity>>> {
+  DeckTagsProvider._({
+    required DeckTagsFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'deckTagsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$deckTagsHash();
+
+  @override
+  String toString() {
+    return r'deckTagsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<int, List<TagEntity>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<int, List<TagEntity>>> create(Ref ref) {
+    final argument = this.argument as int;
+    return deckTags(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeckTagsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deckTagsHash() => r'767095874f790f13541bee2a8bcba8ae056140c1';
+
+final class DeckTagsFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<Map<int, List<TagEntity>>>, int> {
+  DeckTagsFamily._()
+    : super(
+        retry: null,
+        name: r'deckTagsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  DeckTagsProvider call(int deckId) =>
+      DeckTagsProvider._(argument: deckId, from: this);
+
+  @override
+  String toString() => r'deckTagsProvider';
+}
+
+@ProviderFor(DeckTagFilter)
+final deckTagFilterProvider = DeckTagFilterFamily._();
+
+final class DeckTagFilterProvider
+    extends $NotifierProvider<DeckTagFilter, int?> {
+  DeckTagFilterProvider._({
+    required DeckTagFilterFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'deckTagFilterProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$deckTagFilterHash();
+
+  @override
+  String toString() {
+    return r'deckTagFilterProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  DeckTagFilter create() => DeckTagFilter();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeckTagFilterProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deckTagFilterHash() => r'2134bba94781c222227951bbd06cb7447cc9ff89';
+
+final class DeckTagFilterFamily extends $Family
+    with $ClassFamilyOverride<DeckTagFilter, int?, int?, int?, int> {
+  DeckTagFilterFamily._()
+    : super(
+        retry: null,
+        name: r'deckTagFilterProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  DeckTagFilterProvider call(int deckId) =>
+      DeckTagFilterProvider._(argument: deckId, from: this);
+
+  @override
+  String toString() => r'deckTagFilterProvider';
+}
+
+abstract class _$DeckTagFilter extends $Notifier<int?> {
+  late final _$args = ref.$arg as int;
+  int get deckId => _$args;
+
+  int? build(int deckId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int?, int?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int?, int?>,
+              int?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
+  }
+}

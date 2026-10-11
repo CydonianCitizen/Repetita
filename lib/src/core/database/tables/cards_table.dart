@@ -18,4 +18,5 @@ class Cards extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isSuspended => boolean().withDefault(const Constant(false))();
   DateTimeColumn get buriedUntil => dateTime().nullable()();
+  IntColumn get clozeIndex => integer().nullable()();
 }

@@ -22,6 +22,7 @@ extension CardToEntity on Card {
     createdAt: createdAt,
     isSuspended: isSuspended,
     buriedUntil: buriedUntil,
+    clozeIndex: clozeIndex,
   );
 }
 
@@ -68,6 +69,7 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     required int deckId,
     required String front,
     required String back,
+    int? clozeIndex,
   }) {
     final now = DateTime.now().toUtc();
     return into(cards).insert(
@@ -83,6 +85,7 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
         lapses: const Value(0),
         createdAt: Value(now),
         isSuspended: const Value(false),
+        clozeIndex: Value(clozeIndex),
       ),
     );
   }

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../tags/data/tags_dao.dart';
+import '../../tags/data/tags_dao_provider.dart';
+import '../../tags/domain/tag_entity.dart';
+import '../../tags/presentation/controllers/tags_controller.dart';
 import 'controllers/card_list_controller.dart';
 
 class CardEditorScreen extends ConsumerStatefulWidget {
@@ -28,20 +33,200 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _frontController;
   late final TextEditingController _backController;
+  final List<TagEntity> _selectedTags = [];
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _frontController = TextEditingController(text: widget.initialFront);
+    _frontController.addListener(_onFrontChanged);
     _backController = TextEditingController(text: widget.initialBack);
+    if (widget.isEditing) {
+      _loadExistingTags();
+    }
+  }
+
+  Future<void> _loadExistingTags() async {
+    final tagsDao = ref.read(tagsDaoProvider);
+    final tags = await tagsDao.getTagsForCard(widget.cardId!);
+    if (mounted) {
+      setState(() {
+        _selectedTags.addAll(tags.map((t) => t.toEntity()));
+      });
+    }
+  }
+
+  void _onFrontChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _frontController.removeListener(_onFrontChanged);
     _frontController.dispose();
     _backController.dispose();
     super.dispose();
+  }
+
+  void _insertCloze() {
+    final text = _frontController.text;
+    final selection = _frontController.selection;
+    final start = selection.start >= 0 ? selection.start : text.length;
+    final end = selection.end >= 0 ? selection.end : text.length;
+    final nextIdx = ClozeParser.getNextClozeIndex(text);
+    final newText = ClozeParser.wrapSelectionWithCloze(
+      text,
+      start,
+      end,
+      index: nextIdx,
+    );
+
+    final selectedLength = end - start;
+    final newCursorOffset = selectedLength > 0
+        ? start + newText.length - text.length
+        : start + '{{c$nextIdx::'.length;
+
+    _frontController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newCursorOffset),
+    );
+  }
+
+  Future<void> _showAddTagDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final textController = TextEditingController();
+    final allTagsAsync = ref.read(tagsControllerProvider);
+    final allTags = allTagsAsync.value ?? [];
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n?.selectTags ?? 'Select Tags'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            key: const Key('new_tag_field'),
+                            controller: textController,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: l10n?.newTagHint ?? 'Enter tag name...',
+                              isDense: true,
+                              border: const OutlineInputBorder(),
+                            ),
+                            onSubmitted: (value) async {
+                              final name = value.trim();
+                              if (name.isNotEmpty) {
+                                final tagId = await ref
+                                    .read(tagsControllerProvider.notifier)
+                                    .createTag(name);
+                                final newTag = TagEntity(
+                                  id: tagId,
+                                  name: name,
+                                  createdAt: DateTime.now().toUtc(),
+                                );
+                                if (!_selectedTags.any((t) => t.id == tagId)) {
+                                  setState(() => _selectedTags.add(newTag));
+                                }
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          key: const Key('confirm_add_tag_button'),
+                          icon: const Icon(Icons.add),
+                          onPressed: () async {
+                            final name = textController.text.trim();
+                            if (name.isNotEmpty) {
+                              final tagId = await ref
+                                  .read(tagsControllerProvider.notifier)
+                                  .createTag(name);
+                              final newTag = TagEntity(
+                                id: tagId,
+                                name: name,
+                                createdAt: DateTime.now().toUtc(),
+                              );
+                              if (!_selectedTags.any((t) => t.id == tagId)) {
+                                setState(() => _selectedTags.add(newTag));
+                              }
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    if (allTags.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n?.tags ?? 'Tags',
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 180),
+                        child: SingleChildScrollView(
+                          child: Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: allTags.map((tag) {
+                              final isSelected = _selectedTags.any(
+                                (t) => t.id == tag.id,
+                              );
+                              return FilterChip(
+                                label: Text(tag.name),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setDialogState(() {
+                                    if (selected) {
+                                      if (!_selectedTags.any(
+                                        (t) => t.id == tag.id,
+                                      )) {
+                                        _selectedTags.add(tag);
+                                      }
+                                    } else {
+                                      _selectedTags.removeWhere(
+                                        (t) => t.id == tag.id,
+                                      );
+                                    }
+                                  });
+                                  setState(() {});
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(MaterialLocalizations.of(context).okButtonLabel),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _save({bool addAnother = false}) async {
@@ -51,15 +236,40 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     try {
       final front = _frontController.text.trim();
       final back = _backController.text.trim();
+      final tagIds = _selectedTags.map((t) => t.id).toList();
 
       if (widget.isEditing) {
         await ref
             .read(cardListControllerProvider(widget.deckId).notifier)
-            .updateCard(id: widget.cardId!, front: front, back: back);
+            .updateCard(
+              id: widget.cardId!,
+              front: front,
+              back: back,
+              tagIds: tagIds,
+            );
       } else {
-        await ref
-            .read(cardListControllerProvider(widget.deckId).notifier)
-            .createCard(front: front, back: back);
+        final indices = ClozeParser.extractClozeIndices(front);
+        if (indices.length > 1) {
+          for (final idx in indices) {
+            await ref
+                .read(cardListControllerProvider(widget.deckId).notifier)
+                .createCard(
+                  front: front,
+                  back: back,
+                  clozeIndex: idx,
+                  tagIds: tagIds,
+                );
+          }
+        } else {
+          await ref
+              .read(cardListControllerProvider(widget.deckId).notifier)
+              .createCard(
+                front: front,
+                back: back,
+                clozeIndex: indices.firstOrNull,
+                tagIds: tagIds,
+              );
+        }
       }
 
       if (mounted) {
@@ -91,6 +301,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final title = widget.isEditing
         ? (l10n?.editCard ?? 'Edit Card')
         : (l10n?.newCard ?? 'New Card');
+    final isCloze = ClozeParser.isCloze(_frontController.text);
 
     return Scaffold(
       appBar: AppBar(
@@ -143,6 +354,37 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                 return null;
               },
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                ActionChip(
+                  key: const Key('insert_cloze_button'),
+                  avatar: const Icon(Icons.data_array_rounded, size: 16),
+                  label: Text(l10n?.insertCloze ?? 'Cloze [...]'),
+                  tooltip:
+                      l10n?.insertClozeTooltip ??
+                      'Wrap selection with Cloze deletion',
+                  onPressed: _insertCloze,
+                ),
+                if (isCloze) ...[
+                  const SizedBox(width: 8),
+                  Chip(
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer,
+                    label: Text(
+                      '${ClozeParser.extractClozeIndices(_frontController.text).length} Cloze',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
             const SizedBox(height: 16),
             TextFormField(
               key: const Key('card_back_field'),
@@ -150,18 +392,66 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               maxLines: 5,
               minLines: 3,
               decoration: InputDecoration(
-                labelText: l10n?.cardBack ?? 'Back (Answer)',
-                hintText: l10n?.answerHint ?? 'Enter answer...',
+                labelText: isCloze
+                    ? (l10n?.cardBackNotes ?? 'Back (Extra Notes, Optional)')
+                    : (l10n?.cardBack ?? 'Back (Answer)'),
+                hintText: isCloze
+                    ? (l10n?.cardBackNotes ??
+                          'Optional notes or explanation...')
+                    : (l10n?.answerHint ?? 'Enter answer...'),
                 alignLabelWithHint: true,
                 border: const OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n?.backAnswerCannotBeEmpty ??
-                      'Back answer cannot be empty';
+                if (!isCloze) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n?.backAnswerCannotBeEmpty ??
+                        'Back answer cannot be empty';
+                  }
                 }
                 return null;
               },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Icon(
+                  Icons.label_outline_rounded,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n?.tags ?? 'Tags',
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                ..._selectedTags.map(
+                  (tag) => InputChip(
+                    key: Key('tag_chip_${tag.id}'),
+                    label: Text(tag.name),
+                    onDeleted: () {
+                      setState(() {
+                        _selectedTags.removeWhere((t) => t.id == tag.id);
+                      });
+                    },
+                  ),
+                ),
+                ActionChip(
+                  key: const Key('add_tag_button'),
+                  avatar: const Icon(Icons.add, size: 16),
+                  label: Text(l10n?.addTag ?? 'Add Tag'),
+                  onPressed: () => _showAddTagDialog(context),
+                ),
+              ],
             ),
           ],
         ),

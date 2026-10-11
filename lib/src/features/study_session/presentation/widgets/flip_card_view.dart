@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../cards/domain/card_entity.dart';
 
@@ -77,6 +78,12 @@ class _FlipCardViewState extends State<FlipCardView> {
     ThemeData theme,
     AppLocalizations? l10n,
   ) {
+    final isCloze = widget.card.isCloze;
+    final promptBadgeText = isCloze
+        ? (l10n?.clozeBadge(widget.card.activeClozeIndex) ??
+              'CLOZE c${widget.card.activeClozeIndex}')
+        : (l10n?.promptBadge ?? 'PROMPT');
+
     return Card(
       elevation: 2,
       shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
@@ -121,7 +128,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          l10n?.promptBadge ?? 'PROMPT',
+                          promptBadgeText,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -140,17 +147,52 @@ class _FlipCardViewState extends State<FlipCardView> {
               ),
               const SizedBox(height: 28),
               Semantics(
-                label: 'Card Prompt: ${widget.card.front}',
+                label:
+                    'Card Prompt: ${isCloze ? ClozeParser.renderClozePrompt(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.front}',
                 readOnly: true,
-                child: Text(
-                  widget.card.front,
-                  key: const Key('card_front_text'),
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
-                ),
+                child: isCloze
+                    ? Text.rich(
+                        TextSpan(
+                          children:
+                              ClozeParser.getPromptSegments(
+                                widget.card.front,
+                                activeIndex: widget.card.activeClozeIndex,
+                              ).map((s) {
+                                if (s.isActive) {
+                                  return TextSpan(
+                                    text: s.text,
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          color: colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: colorScheme.primary
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                  );
+                                }
+                                return TextSpan(
+                                  text: s.text,
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurface,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.4,
+                                      ),
+                                );
+                              }).toList(),
+                        ),
+                        key: const Key('card_front_text'),
+                      )
+                    : Text(
+                        widget.card.front,
+                        key: const Key('card_front_text'),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
               ),
               const SizedBox(height: 28),
               Row(
@@ -183,6 +225,8 @@ class _FlipCardViewState extends State<FlipCardView> {
     ThemeData theme,
     AppLocalizations? l10n,
   ) {
+    final isCloze = widget.card.isCloze;
+
     return Card(
       elevation: 3,
       shadowColor: colorScheme.primary.withValues(alpha: 0.12),
@@ -243,7 +287,12 @@ class _FlipCardViewState extends State<FlipCardView> {
             ),
             const SizedBox(height: 16),
             Text(
-              widget.card.front,
+              isCloze
+                  ? ClozeParser.renderClozePrompt(
+                      widget.card.front,
+                      activeIndex: widget.card.activeClozeIndex,
+                    )
+                  : widget.card.front,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -255,19 +304,85 @@ class _FlipCardViewState extends State<FlipCardView> {
             Divider(color: colorScheme.outlineVariant.withValues(alpha: 0.4)),
             const SizedBox(height: 12),
             Semantics(
-              label: 'Card Answer: ${widget.card.back}',
+              label:
+                  'Card Answer: ${isCloze ? ClozeParser.renderClozeAnswer(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.back}',
               readOnly: true,
-              child: Text(
-                widget.card.back,
-                key: const Key('card_back_text'),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18,
-                  height: 1.5,
+              child: isCloze
+                  ? Text.rich(
+                      TextSpan(
+                        children:
+                            ClozeParser.getAnswerSegments(
+                              widget.card.front,
+                              activeIndex: widget.card.activeClozeIndex,
+                            ).map((s) {
+                              if (s.isActive) {
+                                return TextSpan(
+                                  text: s.text,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 19,
+                                    backgroundColor: colorScheme
+                                        .primaryContainer
+                                        .withValues(alpha: 0.45),
+                                  ),
+                                );
+                              }
+                              return TextSpan(
+                                text: s.text,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                  height: 1.5,
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                      key: const Key('card_back_text'),
+                    )
+                  : Text(
+                      widget.card.back,
+                      key: const Key('card_back_text'),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        height: 1.5,
+                      ),
+                    ),
+            ),
+            if (isCloze && widget.card.back.trim().isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.notes_rounded,
+                      size: 16,
+                      color: colorScheme.outline,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.card.back,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
             const SizedBox(height: 16),
           ],
         ),

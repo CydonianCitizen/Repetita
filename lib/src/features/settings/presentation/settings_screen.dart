@@ -24,7 +24,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
   final bool isEmbedded;
 
-  static const String appVersion = 'v0.2.1';
+  static const String appVersion = 'v0.3.0';
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
