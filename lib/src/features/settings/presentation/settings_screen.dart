@@ -6,6 +6,7 @@ import '../domain/animation_level.dart';
 import 'controllers/animation_level_controller.dart';
 import 'controllers/locale_controller.dart';
 import 'controllers/reminder_controller.dart';
+import 'controllers/theme_mode_controller.dart';
 import 'controllers/update_controller.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -177,49 +178,84 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n?.themeMode ?? 'Theme Mode'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.check_circle_rounded, color: primaryColor),
-              title: Text(l10n?.themeSystem ?? 'System Default'),
-              subtitle: Text(
-                l10n?.themeModeSubtitle ?? 'Follow device theme settings',
+      builder: (dialogContext) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final currentMode = ref.watch(themeModeControllerProvider);
+
+            return AlertDialog(
+              title: Text(l10n?.themeMode ?? 'Theme Mode'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: Icon(
+                      currentMode == ThemeMode.system
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked,
+                      color: currentMode == ThemeMode.system
+                          ? primaryColor
+                          : null,
+                    ),
+                    title: Text(l10n?.themeSystem ?? 'System Default'),
+                    subtitle: Text(
+                      l10n?.themeModeSubtitle ?? 'Follow device theme settings',
+                    ),
+                    onTap: () {
+                      ref
+                          .read(themeModeControllerProvider.notifier)
+                          .setThemeMode(ThemeMode.system);
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      currentMode == ThemeMode.dark
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked,
+                      color: currentMode == ThemeMode.dark
+                          ? primaryColor
+                          : null,
+                    ),
+                    title: Text(l10n?.themeDark ?? 'Dark Theme'),
+                    subtitle: const Text('Always use dark palette'),
+                    onTap: () {
+                      ref
+                          .read(themeModeControllerProvider.notifier)
+                          .setThemeMode(ThemeMode.dark);
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      currentMode == ThemeMode.light
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked,
+                      color: currentMode == ThemeMode.light
+                          ? primaryColor
+                          : null,
+                    ),
+                    title: Text(l10n?.themeLight ?? 'Light Theme'),
+                    subtitle: const Text('Always use light palette'),
+                    onTap: () {
+                      ref
+                          .read(themeModeControllerProvider.notifier)
+                          .setThemeMode(ThemeMode.light);
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
+                ],
               ),
-              onTap: () {
-                Navigator.of(dialogContext).pop();
-                _showPlaceholderNotice(context, 'Theme mode');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.radio_button_unchecked),
-              title: Text(l10n?.themeDark ?? 'Dark Theme'),
-              subtitle: const Text('Always use dark palette'),
-              onTap: () {
-                Navigator.of(dialogContext).pop();
-                _showPlaceholderNotice(context, 'Theme mode');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.radio_button_unchecked),
-              title: Text(l10n?.themeLight ?? 'Light Theme'),
-              subtitle: const Text('Always use light palette'),
-              onTap: () {
-                Navigator.of(dialogContext).pop();
-                _showPlaceholderNotice(context, 'Theme mode');
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n?.close ?? 'Close'),
-          ),
-        ],
-      ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n?.close ?? 'Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -546,6 +582,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     return l10n?.english ?? 'English';
   }
 
+  String _themeModeLabel(ThemeMode mode, AppLocalizations? l10n) {
+    switch (mode) {
+      case ThemeMode.system:
+        return l10n?.themeSystem ?? 'System Default';
+      case ThemeMode.dark:
+        return l10n?.themeDark ?? 'Dark Theme';
+      case ThemeMode.light:
+        return l10n?.themeLight ?? 'Light Theme';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -553,6 +600,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final l10n = AppLocalizations.of(context);
 
     final currentLocale = ref.watch(localeControllerProvider);
+    final themeMode = ref.watch(themeModeControllerProvider);
     final animLevel = ref.watch(animationLevelControllerProvider);
     final reminderSettings = ref.watch(reminderControllerProvider);
 
@@ -634,7 +682,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 title: l10n?.themeMode ?? 'Theme Mode',
                 subtitle:
                     l10n?.themeModeSubtitle ?? 'System default, Light, or Dark',
-                trailingText: 'System',
+                trailingText: _themeModeLabel(themeMode, l10n),
                 onTap: () => _showThemeSelectorDialog(context, l10n),
               ),
               const Divider(indent: 56, height: 1),

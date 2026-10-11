@@ -7,6 +7,7 @@ import 'package:repetita/src/features/settings/domain/animation_level.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/animation_level_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/locale_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/reminder_controller.dart';
+import 'package:repetita/src/features/settings/presentation/controllers/theme_mode_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/update_controller.dart';
 import 'package:repetita/src/features/settings/presentation/settings_screen.dart';
 
@@ -98,6 +99,39 @@ void main() {
         // Language in Italian now renders 'Impostazioni' and 'ASPETTO'
         expect(find.text('Impostazioni'), findsOneWidget);
         expect(find.text('ASPETTO'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'tapping Theme Mode tile opens dialog and selecting Dark Theme updates mode',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+
+        await tester.pumpWidget(buildSubject(container: container));
+
+        expect(container.read(themeModeControllerProvider), ThemeMode.system);
+
+        await tester.tap(find.byKey(const Key('setting_theme_tile')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Theme Mode'), findsWidgets);
+        expect(find.text('System Default'), findsWidgets);
+        expect(find.text('Dark Theme'), findsOneWidget);
+        expect(find.text('Light Theme'), findsOneWidget);
+
+        // Tap Dark Theme in the dialog
+        await tester.tap(find.widgetWithText(ListTile, 'Dark Theme'));
+        await tester.pumpAndSettle();
+
+        expect(container.read(themeModeControllerProvider), ThemeMode.dark);
       },
     );
 

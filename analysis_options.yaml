@@ -22,6 +22,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - material-theme/**
 
 linter:
   rules:
