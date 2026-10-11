@@ -1,0 +1,103 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'study_session_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(StudySessionController)
+final studySessionControllerProvider = StudySessionControllerFamily._();
+
+final class StudySessionControllerProvider
+    extends $AsyncNotifierProvider<StudySessionController, StudySessionState> {
+  StudySessionControllerProvider._({
+    required StudySessionControllerFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'studySessionControllerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$studySessionControllerHash();
+
+  @override
+  String toString() {
+    return r'studySessionControllerProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  StudySessionController create() => StudySessionController();
+
+  @override
+  bool operator ==(Object other) {
+    return other is StudySessionControllerProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$studySessionControllerHash() =>
+    r'ff908091d884155ca6e56c6ce3e9c849e5eab5c1';
+
+final class StudySessionControllerFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          StudySessionController,
+          AsyncValue<StudySessionState>,
+          StudySessionState,
+          FutureOr<StudySessionState>,
+          int
+        > {
+  StudySessionControllerFamily._()
+    : super(
+        retry: null,
+        name: r'studySessionControllerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  StudySessionControllerProvider call(int deckId) =>
+      StudySessionControllerProvider._(argument: deckId, from: this);
+
+  @override
+  String toString() => r'studySessionControllerProvider';
+}
+
+abstract class _$StudySessionController
+    extends $AsyncNotifier<StudySessionState> {
+  late final _$args = ref.$arg as int;
+  int get deckId => _$args;
+
+  FutureOr<StudySessionState> build(int deckId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<StudySessionState>, StudySessionState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<StudySessionState>, StudySessionState>,
+              AsyncValue<StudySessionState>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
+  }
+}

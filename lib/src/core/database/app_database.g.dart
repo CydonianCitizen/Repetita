@@ -1,0 +1,2989 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'app_database.dart';
+
+// ignore_for_file: type=lint
+class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'decks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Deck> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Deck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Deck(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DecksTable createAlias(String alias) {
+    return $DecksTable(attachedDatabase, alias);
+  }
+}
+
+class Deck extends DataClass implements Insertable<Deck> {
+  final int id;
+  final String name;
+  final String? description;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Deck({
+    required this.id,
+    required this.name,
+    this.description,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DecksCompanion toCompanion(bool nullToAbsent) {
+    return DecksCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Deck.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Deck(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Deck copyWith({
+    int? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Deck(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Deck copyWithCompanion(DecksCompanion data) {
+    return Deck(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Deck(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, description, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Deck &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DecksCompanion extends UpdateCompanion<Deck> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const DecksCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  DecksCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.description = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<Deck> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  DecksCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return DecksCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecksCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CardsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
+  @override
+  late final GeneratedColumn<int> deckId = GeneratedColumn<int>(
+    'deck_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES decks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _frontMeta = const VerificationMeta('front');
+  @override
+  late final GeneratedColumn<String> front = GeneratedColumn<String>(
+    'front',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _backMeta = const VerificationMeta('back');
+  @override
+  late final GeneratedColumn<String> back = GeneratedColumn<String>(
+    'back',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<int> state = GeneratedColumn<int>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _stabilityMeta = const VerificationMeta(
+    'stability',
+  );
+  @override
+  late final GeneratedColumn<double> stability = GeneratedColumn<double>(
+    'stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<double> difficulty = GeneratedColumn<double>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _dueMeta = const VerificationMeta('due');
+  @override
+  late final GeneratedColumn<DateTime> due = GeneratedColumn<DateTime>(
+    'due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastReviewMeta = const VerificationMeta(
+    'lastReview',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastReview = GeneratedColumn<DateTime>(
+    'last_review',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repsMeta = const VerificationMeta('reps');
+  @override
+  late final GeneratedColumn<int> reps = GeneratedColumn<int>(
+    'reps',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lapsesMeta = const VerificationMeta('lapses');
+  @override
+  late final GeneratedColumn<int> lapses = GeneratedColumn<int>(
+    'lapses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    deckId,
+    front,
+    back,
+    state,
+    stability,
+    difficulty,
+    due,
+    lastReview,
+    reps,
+    lapses,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'cards';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Card> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('deck_id')) {
+      context.handle(
+        _deckIdMeta,
+        deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deckIdMeta);
+    }
+    if (data.containsKey('front')) {
+      context.handle(
+        _frontMeta,
+        front.isAcceptableOrUnknown(data['front']!, _frontMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_frontMeta);
+    }
+    if (data.containsKey('back')) {
+      context.handle(
+        _backMeta,
+        back.isAcceptableOrUnknown(data['back']!, _backMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_backMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('stability')) {
+      context.handle(
+        _stabilityMeta,
+        stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta),
+      );
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('due')) {
+      context.handle(
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueMeta);
+    }
+    if (data.containsKey('last_review')) {
+      context.handle(
+        _lastReviewMeta,
+        lastReview.isAcceptableOrUnknown(data['last_review']!, _lastReviewMeta),
+      );
+    }
+    if (data.containsKey('reps')) {
+      context.handle(
+        _repsMeta,
+        reps.isAcceptableOrUnknown(data['reps']!, _repsMeta),
+      );
+    }
+    if (data.containsKey('lapses')) {
+      context.handle(
+        _lapsesMeta,
+        lapses.isAcceptableOrUnknown(data['lapses']!, _lapsesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Card map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Card(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      deckId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deck_id'],
+      )!,
+      front: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}front'],
+      )!,
+      back: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}back'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}state'],
+      )!,
+      stability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stability'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due'],
+      )!,
+      lastReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_review'],
+      ),
+      reps: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reps'],
+      )!,
+      lapses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}lapses'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CardsTable createAlias(String alias) {
+    return $CardsTable(attachedDatabase, alias);
+  }
+}
+
+class Card extends DataClass implements Insertable<Card> {
+  final int id;
+  final int deckId;
+  final String front;
+  final String back;
+  final int state;
+  final double stability;
+  final double difficulty;
+  final DateTime due;
+  final DateTime? lastReview;
+  final int reps;
+  final int lapses;
+  final DateTime createdAt;
+  const Card({
+    required this.id,
+    required this.deckId,
+    required this.front,
+    required this.back,
+    required this.state,
+    required this.stability,
+    required this.difficulty,
+    required this.due,
+    this.lastReview,
+    required this.reps,
+    required this.lapses,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['deck_id'] = Variable<int>(deckId);
+    map['front'] = Variable<String>(front);
+    map['back'] = Variable<String>(back);
+    map['state'] = Variable<int>(state);
+    map['stability'] = Variable<double>(stability);
+    map['difficulty'] = Variable<double>(difficulty);
+    map['due'] = Variable<DateTime>(due);
+    if (!nullToAbsent || lastReview != null) {
+      map['last_review'] = Variable<DateTime>(lastReview);
+    }
+    map['reps'] = Variable<int>(reps);
+    map['lapses'] = Variable<int>(lapses);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CardsCompanion toCompanion(bool nullToAbsent) {
+    return CardsCompanion(
+      id: Value(id),
+      deckId: Value(deckId),
+      front: Value(front),
+      back: Value(back),
+      state: Value(state),
+      stability: Value(stability),
+      difficulty: Value(difficulty),
+      due: Value(due),
+      lastReview: lastReview == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastReview),
+      reps: Value(reps),
+      lapses: Value(lapses),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Card.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Card(
+      id: serializer.fromJson<int>(json['id']),
+      deckId: serializer.fromJson<int>(json['deckId']),
+      front: serializer.fromJson<String>(json['front']),
+      back: serializer.fromJson<String>(json['back']),
+      state: serializer.fromJson<int>(json['state']),
+      stability: serializer.fromJson<double>(json['stability']),
+      difficulty: serializer.fromJson<double>(json['difficulty']),
+      due: serializer.fromJson<DateTime>(json['due']),
+      lastReview: serializer.fromJson<DateTime?>(json['lastReview']),
+      reps: serializer.fromJson<int>(json['reps']),
+      lapses: serializer.fromJson<int>(json['lapses']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'deckId': serializer.toJson<int>(deckId),
+      'front': serializer.toJson<String>(front),
+      'back': serializer.toJson<String>(back),
+      'state': serializer.toJson<int>(state),
+      'stability': serializer.toJson<double>(stability),
+      'difficulty': serializer.toJson<double>(difficulty),
+      'due': serializer.toJson<DateTime>(due),
+      'lastReview': serializer.toJson<DateTime?>(lastReview),
+      'reps': serializer.toJson<int>(reps),
+      'lapses': serializer.toJson<int>(lapses),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Card copyWith({
+    int? id,
+    int? deckId,
+    String? front,
+    String? back,
+    int? state,
+    double? stability,
+    double? difficulty,
+    DateTime? due,
+    Value<DateTime?> lastReview = const Value.absent(),
+    int? reps,
+    int? lapses,
+    DateTime? createdAt,
+  }) => Card(
+    id: id ?? this.id,
+    deckId: deckId ?? this.deckId,
+    front: front ?? this.front,
+    back: back ?? this.back,
+    state: state ?? this.state,
+    stability: stability ?? this.stability,
+    difficulty: difficulty ?? this.difficulty,
+    due: due ?? this.due,
+    lastReview: lastReview.present ? lastReview.value : this.lastReview,
+    reps: reps ?? this.reps,
+    lapses: lapses ?? this.lapses,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Card copyWithCompanion(CardsCompanion data) {
+    return Card(
+      id: data.id.present ? data.id.value : this.id,
+      deckId: data.deckId.present ? data.deckId.value : this.deckId,
+      front: data.front.present ? data.front.value : this.front,
+      back: data.back.present ? data.back.value : this.back,
+      state: data.state.present ? data.state.value : this.state,
+      stability: data.stability.present ? data.stability.value : this.stability,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      due: data.due.present ? data.due.value : this.due,
+      lastReview: data.lastReview.present
+          ? data.lastReview.value
+          : this.lastReview,
+      reps: data.reps.present ? data.reps.value : this.reps,
+      lapses: data.lapses.present ? data.lapses.value : this.lapses,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Card(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('front: $front, ')
+          ..write('back: $back, ')
+          ..write('state: $state, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('due: $due, ')
+          ..write('lastReview: $lastReview, ')
+          ..write('reps: $reps, ')
+          ..write('lapses: $lapses, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    deckId,
+    front,
+    back,
+    state,
+    stability,
+    difficulty,
+    due,
+    lastReview,
+    reps,
+    lapses,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Card &&
+          other.id == this.id &&
+          other.deckId == this.deckId &&
+          other.front == this.front &&
+          other.back == this.back &&
+          other.state == this.state &&
+          other.stability == this.stability &&
+          other.difficulty == this.difficulty &&
+          other.due == this.due &&
+          other.lastReview == this.lastReview &&
+          other.reps == this.reps &&
+          other.lapses == this.lapses &&
+          other.createdAt == this.createdAt);
+}
+
+class CardsCompanion extends UpdateCompanion<Card> {
+  final Value<int> id;
+  final Value<int> deckId;
+  final Value<String> front;
+  final Value<String> back;
+  final Value<int> state;
+  final Value<double> stability;
+  final Value<double> difficulty;
+  final Value<DateTime> due;
+  final Value<DateTime?> lastReview;
+  final Value<int> reps;
+  final Value<int> lapses;
+  final Value<DateTime> createdAt;
+  const CardsCompanion({
+    this.id = const Value.absent(),
+    this.deckId = const Value.absent(),
+    this.front = const Value.absent(),
+    this.back = const Value.absent(),
+    this.state = const Value.absent(),
+    this.stability = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.due = const Value.absent(),
+    this.lastReview = const Value.absent(),
+    this.reps = const Value.absent(),
+    this.lapses = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  CardsCompanion.insert({
+    this.id = const Value.absent(),
+    required int deckId,
+    required String front,
+    required String back,
+    this.state = const Value.absent(),
+    this.stability = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    required DateTime due,
+    this.lastReview = const Value.absent(),
+    this.reps = const Value.absent(),
+    this.lapses = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : deckId = Value(deckId),
+       front = Value(front),
+       back = Value(back),
+       due = Value(due);
+  static Insertable<Card> custom({
+    Expression<int>? id,
+    Expression<int>? deckId,
+    Expression<String>? front,
+    Expression<String>? back,
+    Expression<int>? state,
+    Expression<double>? stability,
+    Expression<double>? difficulty,
+    Expression<DateTime>? due,
+    Expression<DateTime>? lastReview,
+    Expression<int>? reps,
+    Expression<int>? lapses,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deckId != null) 'deck_id': deckId,
+      if (front != null) 'front': front,
+      if (back != null) 'back': back,
+      if (state != null) 'state': state,
+      if (stability != null) 'stability': stability,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (due != null) 'due': due,
+      if (lastReview != null) 'last_review': lastReview,
+      if (reps != null) 'reps': reps,
+      if (lapses != null) 'lapses': lapses,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  CardsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? deckId,
+    Value<String>? front,
+    Value<String>? back,
+    Value<int>? state,
+    Value<double>? stability,
+    Value<double>? difficulty,
+    Value<DateTime>? due,
+    Value<DateTime?>? lastReview,
+    Value<int>? reps,
+    Value<int>? lapses,
+    Value<DateTime>? createdAt,
+  }) {
+    return CardsCompanion(
+      id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
+      front: front ?? this.front,
+      back: back ?? this.back,
+      state: state ?? this.state,
+      stability: stability ?? this.stability,
+      difficulty: difficulty ?? this.difficulty,
+      due: due ?? this.due,
+      lastReview: lastReview ?? this.lastReview,
+      reps: reps ?? this.reps,
+      lapses: lapses ?? this.lapses,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (deckId.present) {
+      map['deck_id'] = Variable<int>(deckId.value);
+    }
+    if (front.present) {
+      map['front'] = Variable<String>(front.value);
+    }
+    if (back.present) {
+      map['back'] = Variable<String>(back.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<int>(state.value);
+    }
+    if (stability.present) {
+      map['stability'] = Variable<double>(stability.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<double>(difficulty.value);
+    }
+    if (due.present) {
+      map['due'] = Variable<DateTime>(due.value);
+    }
+    if (lastReview.present) {
+      map['last_review'] = Variable<DateTime>(lastReview.value);
+    }
+    if (reps.present) {
+      map['reps'] = Variable<int>(reps.value);
+    }
+    if (lapses.present) {
+      map['lapses'] = Variable<int>(lapses.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CardsCompanion(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('front: $front, ')
+          ..write('back: $back, ')
+          ..write('state: $state, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('due: $due, ')
+          ..write('lastReview: $lastReview, ')
+          ..write('reps: $reps, ')
+          ..write('lapses: $lapses, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReviewLogsTable extends ReviewLogs
+    with TableInfo<$ReviewLogsTable, ReviewLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReviewLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<int> cardId = GeneratedColumn<int>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cards (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
+  @override
+  late final GeneratedColumn<int> rating = GeneratedColumn<int>(
+    'rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<int> state = GeneratedColumn<int>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dueMeta = const VerificationMeta('due');
+  @override
+  late final GeneratedColumn<DateTime> due = GeneratedColumn<DateTime>(
+    'due',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stabilityMeta = const VerificationMeta(
+    'stability',
+  );
+  @override
+  late final GeneratedColumn<double> stability = GeneratedColumn<double>(
+    'stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<double> difficulty = GeneratedColumn<double>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _elapsedDaysMeta = const VerificationMeta(
+    'elapsedDays',
+  );
+  @override
+  late final GeneratedColumn<int> elapsedDays = GeneratedColumn<int>(
+    'elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastElapsedDaysMeta = const VerificationMeta(
+    'lastElapsedDays',
+  );
+  @override
+  late final GeneratedColumn<int> lastElapsedDays = GeneratedColumn<int>(
+    'last_elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scheduledDaysMeta = const VerificationMeta(
+    'scheduledDays',
+  );
+  @override
+  late final GeneratedColumn<int> scheduledDays = GeneratedColumn<int>(
+    'scheduled_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reviewedAtMeta = const VerificationMeta(
+    'reviewedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reviewedAt = GeneratedColumn<DateTime>(
+    'reviewed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    cardId,
+    rating,
+    state,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    lastElapsedDays,
+    scheduledDays,
+    reviewedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'review_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReviewLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('rating')) {
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ratingMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('due')) {
+      context.handle(
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dueMeta);
+    }
+    if (data.containsKey('stability')) {
+      context.handle(
+        _stabilityMeta,
+        stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stabilityMeta);
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_difficultyMeta);
+    }
+    if (data.containsKey('elapsed_days')) {
+      context.handle(
+        _elapsedDaysMeta,
+        elapsedDays.isAcceptableOrUnknown(
+          data['elapsed_days']!,
+          _elapsedDaysMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_elapsedDaysMeta);
+    }
+    if (data.containsKey('last_elapsed_days')) {
+      context.handle(
+        _lastElapsedDaysMeta,
+        lastElapsedDays.isAcceptableOrUnknown(
+          data['last_elapsed_days']!,
+          _lastElapsedDaysMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastElapsedDaysMeta);
+    }
+    if (data.containsKey('scheduled_days')) {
+      context.handle(
+        _scheduledDaysMeta,
+        scheduledDays.isAcceptableOrUnknown(
+          data['scheduled_days']!,
+          _scheduledDaysMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_scheduledDaysMeta);
+    }
+    if (data.containsKey('reviewed_at')) {
+      context.handle(
+        _reviewedAtMeta,
+        reviewedAt.isAcceptableOrUnknown(data['reviewed_at']!, _reviewedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reviewedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReviewLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReviewLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}card_id'],
+      )!,
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rating'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}state'],
+      )!,
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due'],
+      )!,
+      stability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stability'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      elapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}elapsed_days'],
+      )!,
+      lastElapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_elapsed_days'],
+      )!,
+      scheduledDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_days'],
+      )!,
+      reviewedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reviewed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ReviewLogsTable createAlias(String alias) {
+    return $ReviewLogsTable(attachedDatabase, alias);
+  }
+}
+
+class ReviewLog extends DataClass implements Insertable<ReviewLog> {
+  final int id;
+  final int cardId;
+  final int rating;
+  final int state;
+  final DateTime due;
+  final double stability;
+  final double difficulty;
+  final int elapsedDays;
+  final int lastElapsedDays;
+  final int scheduledDays;
+  final DateTime reviewedAt;
+  const ReviewLog({
+    required this.id,
+    required this.cardId,
+    required this.rating,
+    required this.state,
+    required this.due,
+    required this.stability,
+    required this.difficulty,
+    required this.elapsedDays,
+    required this.lastElapsedDays,
+    required this.scheduledDays,
+    required this.reviewedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['card_id'] = Variable<int>(cardId);
+    map['rating'] = Variable<int>(rating);
+    map['state'] = Variable<int>(state);
+    map['due'] = Variable<DateTime>(due);
+    map['stability'] = Variable<double>(stability);
+    map['difficulty'] = Variable<double>(difficulty);
+    map['elapsed_days'] = Variable<int>(elapsedDays);
+    map['last_elapsed_days'] = Variable<int>(lastElapsedDays);
+    map['scheduled_days'] = Variable<int>(scheduledDays);
+    map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    return map;
+  }
+
+  ReviewLogsCompanion toCompanion(bool nullToAbsent) {
+    return ReviewLogsCompanion(
+      id: Value(id),
+      cardId: Value(cardId),
+      rating: Value(rating),
+      state: Value(state),
+      due: Value(due),
+      stability: Value(stability),
+      difficulty: Value(difficulty),
+      elapsedDays: Value(elapsedDays),
+      lastElapsedDays: Value(lastElapsedDays),
+      scheduledDays: Value(scheduledDays),
+      reviewedAt: Value(reviewedAt),
+    );
+  }
+
+  factory ReviewLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReviewLog(
+      id: serializer.fromJson<int>(json['id']),
+      cardId: serializer.fromJson<int>(json['cardId']),
+      rating: serializer.fromJson<int>(json['rating']),
+      state: serializer.fromJson<int>(json['state']),
+      due: serializer.fromJson<DateTime>(json['due']),
+      stability: serializer.fromJson<double>(json['stability']),
+      difficulty: serializer.fromJson<double>(json['difficulty']),
+      elapsedDays: serializer.fromJson<int>(json['elapsedDays']),
+      lastElapsedDays: serializer.fromJson<int>(json['lastElapsedDays']),
+      scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
+      reviewedAt: serializer.fromJson<DateTime>(json['reviewedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'cardId': serializer.toJson<int>(cardId),
+      'rating': serializer.toJson<int>(rating),
+      'state': serializer.toJson<int>(state),
+      'due': serializer.toJson<DateTime>(due),
+      'stability': serializer.toJson<double>(stability),
+      'difficulty': serializer.toJson<double>(difficulty),
+      'elapsedDays': serializer.toJson<int>(elapsedDays),
+      'lastElapsedDays': serializer.toJson<int>(lastElapsedDays),
+      'scheduledDays': serializer.toJson<int>(scheduledDays),
+      'reviewedAt': serializer.toJson<DateTime>(reviewedAt),
+    };
+  }
+
+  ReviewLog copyWith({
+    int? id,
+    int? cardId,
+    int? rating,
+    int? state,
+    DateTime? due,
+    double? stability,
+    double? difficulty,
+    int? elapsedDays,
+    int? lastElapsedDays,
+    int? scheduledDays,
+    DateTime? reviewedAt,
+  }) => ReviewLog(
+    id: id ?? this.id,
+    cardId: cardId ?? this.cardId,
+    rating: rating ?? this.rating,
+    state: state ?? this.state,
+    due: due ?? this.due,
+    stability: stability ?? this.stability,
+    difficulty: difficulty ?? this.difficulty,
+    elapsedDays: elapsedDays ?? this.elapsedDays,
+    lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
+    scheduledDays: scheduledDays ?? this.scheduledDays,
+    reviewedAt: reviewedAt ?? this.reviewedAt,
+  );
+  ReviewLog copyWithCompanion(ReviewLogsCompanion data) {
+    return ReviewLog(
+      id: data.id.present ? data.id.value : this.id,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      rating: data.rating.present ? data.rating.value : this.rating,
+      state: data.state.present ? data.state.value : this.state,
+      due: data.due.present ? data.due.value : this.due,
+      stability: data.stability.present ? data.stability.value : this.stability,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      elapsedDays: data.elapsedDays.present
+          ? data.elapsedDays.value
+          : this.elapsedDays,
+      lastElapsedDays: data.lastElapsedDays.present
+          ? data.lastElapsedDays.value
+          : this.lastElapsedDays,
+      scheduledDays: data.scheduledDays.present
+          ? data.scheduledDays.value
+          : this.scheduledDays,
+      reviewedAt: data.reviewedAt.present
+          ? data.reviewedAt.value
+          : this.reviewedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewLog(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('rating: $rating, ')
+          ..write('state: $state, ')
+          ..write('due: $due, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('elapsedDays: $elapsedDays, ')
+          ..write('lastElapsedDays: $lastElapsedDays, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('reviewedAt: $reviewedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    cardId,
+    rating,
+    state,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    lastElapsedDays,
+    scheduledDays,
+    reviewedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReviewLog &&
+          other.id == this.id &&
+          other.cardId == this.cardId &&
+          other.rating == this.rating &&
+          other.state == this.state &&
+          other.due == this.due &&
+          other.stability == this.stability &&
+          other.difficulty == this.difficulty &&
+          other.elapsedDays == this.elapsedDays &&
+          other.lastElapsedDays == this.lastElapsedDays &&
+          other.scheduledDays == this.scheduledDays &&
+          other.reviewedAt == this.reviewedAt);
+}
+
+class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
+  final Value<int> id;
+  final Value<int> cardId;
+  final Value<int> rating;
+  final Value<int> state;
+  final Value<DateTime> due;
+  final Value<double> stability;
+  final Value<double> difficulty;
+  final Value<int> elapsedDays;
+  final Value<int> lastElapsedDays;
+  final Value<int> scheduledDays;
+  final Value<DateTime> reviewedAt;
+  const ReviewLogsCompanion({
+    this.id = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.rating = const Value.absent(),
+    this.state = const Value.absent(),
+    this.due = const Value.absent(),
+    this.stability = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.elapsedDays = const Value.absent(),
+    this.lastElapsedDays = const Value.absent(),
+    this.scheduledDays = const Value.absent(),
+    this.reviewedAt = const Value.absent(),
+  });
+  ReviewLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required int cardId,
+    required int rating,
+    required int state,
+    required DateTime due,
+    required double stability,
+    required double difficulty,
+    required int elapsedDays,
+    required int lastElapsedDays,
+    required int scheduledDays,
+    required DateTime reviewedAt,
+  }) : cardId = Value(cardId),
+       rating = Value(rating),
+       state = Value(state),
+       due = Value(due),
+       stability = Value(stability),
+       difficulty = Value(difficulty),
+       elapsedDays = Value(elapsedDays),
+       lastElapsedDays = Value(lastElapsedDays),
+       scheduledDays = Value(scheduledDays),
+       reviewedAt = Value(reviewedAt);
+  static Insertable<ReviewLog> custom({
+    Expression<int>? id,
+    Expression<int>? cardId,
+    Expression<int>? rating,
+    Expression<int>? state,
+    Expression<DateTime>? due,
+    Expression<double>? stability,
+    Expression<double>? difficulty,
+    Expression<int>? elapsedDays,
+    Expression<int>? lastElapsedDays,
+    Expression<int>? scheduledDays,
+    Expression<DateTime>? reviewedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (cardId != null) 'card_id': cardId,
+      if (rating != null) 'rating': rating,
+      if (state != null) 'state': state,
+      if (due != null) 'due': due,
+      if (stability != null) 'stability': stability,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (elapsedDays != null) 'elapsed_days': elapsedDays,
+      if (lastElapsedDays != null) 'last_elapsed_days': lastElapsedDays,
+      if (scheduledDays != null) 'scheduled_days': scheduledDays,
+      if (reviewedAt != null) 'reviewed_at': reviewedAt,
+    });
+  }
+
+  ReviewLogsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? cardId,
+    Value<int>? rating,
+    Value<int>? state,
+    Value<DateTime>? due,
+    Value<double>? stability,
+    Value<double>? difficulty,
+    Value<int>? elapsedDays,
+    Value<int>? lastElapsedDays,
+    Value<int>? scheduledDays,
+    Value<DateTime>? reviewedAt,
+  }) {
+    return ReviewLogsCompanion(
+      id: id ?? this.id,
+      cardId: cardId ?? this.cardId,
+      rating: rating ?? this.rating,
+      state: state ?? this.state,
+      due: due ?? this.due,
+      stability: stability ?? this.stability,
+      difficulty: difficulty ?? this.difficulty,
+      elapsedDays: elapsedDays ?? this.elapsedDays,
+      lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
+      scheduledDays: scheduledDays ?? this.scheduledDays,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<int>(cardId.value);
+    }
+    if (rating.present) {
+      map['rating'] = Variable<int>(rating.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<int>(state.value);
+    }
+    if (due.present) {
+      map['due'] = Variable<DateTime>(due.value);
+    }
+    if (stability.present) {
+      map['stability'] = Variable<double>(stability.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<double>(difficulty.value);
+    }
+    if (elapsedDays.present) {
+      map['elapsed_days'] = Variable<int>(elapsedDays.value);
+    }
+    if (lastElapsedDays.present) {
+      map['last_elapsed_days'] = Variable<int>(lastElapsedDays.value);
+    }
+    if (scheduledDays.present) {
+      map['scheduled_days'] = Variable<int>(scheduledDays.value);
+    }
+    if (reviewedAt.present) {
+      map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReviewLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('cardId: $cardId, ')
+          ..write('rating: $rating, ')
+          ..write('state: $state, ')
+          ..write('due: $due, ')
+          ..write('stability: $stability, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('elapsedDays: $elapsedDays, ')
+          ..write('lastElapsedDays: $lastElapsedDays, ')
+          ..write('scheduledDays: $scheduledDays, ')
+          ..write('reviewedAt: $reviewedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+abstract class _$AppDatabase extends GeneratedDatabase {
+  _$AppDatabase(QueryExecutor e) : super(e);
+  $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $DecksTable decks = $DecksTable(this);
+  late final $CardsTable cards = $CardsTable(this);
+  late final $ReviewLogsTable reviewLogs = $ReviewLogsTable(this);
+  late final DecksDao decksDao = DecksDao(this as AppDatabase);
+  late final CardsDao cardsDao = CardsDao(this as AppDatabase);
+  late final StudySessionDao studySessionDao = StudySessionDao(
+    this as AppDatabase,
+  );
+  late final StatsDao statsDao = StatsDao(this as AppDatabase);
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    decks,
+    cards,
+    reviewLogs,
+  ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'decks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('cards', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('review_logs', kind: UpdateKind.delete)],
+    ),
+  ]);
+}
+
+typedef $$DecksTableCreateCompanionBuilder = DecksCompanion Function({
+  Value<int> id,
+  required String name,
+  Value<String?> description,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+});
+typedef $$DecksTableUpdateCompanionBuilder = DecksCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<String?> description,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+});
+
+final class $$DecksTableReferences
+    extends BaseReferences<_$AppDatabase, $DecksTable, Deck> {
+  $$DecksTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$CardsTable, List<Card>> _cardsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.cards,
+    aliasName: 'decks__id__cards__deck_id',
+  );
+
+  $$CardsTableProcessedTableManager get cardsRefs {
+    final manager = $$CardsTableTableManager(
+      $_db,
+      $_db.cards,
+    ).filter((f) => f.deckId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_cardsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$DecksTableFilterComposer extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> cardsRefs(
+    Expression<bool> Function($$CardsTableFilterComposer f) f,
+  ) {
+    final $$CardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cards,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardsTableFilterComposer(
+            $db: $db,
+            $table: $db.cards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DecksTableOrderingComposer
+    extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DecksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> cardsRefs<T extends Object>(
+    Expression<T> Function($$CardsTableAnnotationComposer a) f,
+  ) {
+    final $$CardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.cards,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$DecksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DecksTable,
+          Deck,
+          $$DecksTableFilterComposer,
+          $$DecksTableOrderingComposer,
+          $$DecksTableAnnotationComposer,
+          $$DecksTableCreateCompanionBuilder,
+          $$DecksTableUpdateCompanionBuilder,
+          (Deck, $$DecksTableReferences),
+          Deck,
+          PrefetchHooks Function({bool cardsRefs})
+        > {
+  $$DecksTableTableManager(_$AppDatabase db, $DecksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DecksCompanion(
+                id: id,
+                name: name,
+                description: description,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => DecksCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DecksTable, Deck>(table),
+                  $$DecksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (cardsRefs) db.cards],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (cardsRefs)
+                    await $_getPrefetchedData<Deck, $DecksTable, Card>(
+                      currentTable: table,
+                      referencedTable: $$DecksTableReferences._cardsRefsTable(
+                        db,
+                      ),
+                      managerFromTypedResult: (p0) =>
+                          $$DecksTableReferences(db, table, p0).cardsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.deckId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DecksTable,
+      Deck,
+      $$DecksTableFilterComposer,
+      $$DecksTableOrderingComposer,
+      $$DecksTableAnnotationComposer,
+      $$DecksTableCreateCompanionBuilder,
+      $$DecksTableUpdateCompanionBuilder,
+      (Deck, $$DecksTableReferences),
+      Deck,
+      PrefetchHooks Function({bool cardsRefs})
+    >;
+typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
+  Value<int> id,
+  required int deckId,
+  required String front,
+  required String back,
+  Value<int> state,
+  Value<double> stability,
+  Value<double> difficulty,
+  required DateTime due,
+  Value<DateTime?> lastReview,
+  Value<int> reps,
+  Value<int> lapses,
+  Value<DateTime> createdAt,
+});
+typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
+  Value<int> id,
+  Value<int> deckId,
+  Value<String> front,
+  Value<String> back,
+  Value<int> state,
+  Value<double> stability,
+  Value<double> difficulty,
+  Value<DateTime> due,
+  Value<DateTime?> lastReview,
+  Value<int> reps,
+  Value<int> lapses,
+  Value<DateTime> createdAt,
+});
+
+final class $$CardsTableReferences
+    extends BaseReferences<_$AppDatabase, $CardsTable, Card> {
+  $$CardsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $DecksTable _deckIdTable(_$AppDatabase db) =>
+      db.decks.createAlias('cards__deck_id__decks__id');
+
+  $$DecksTableProcessedTableManager get deckId {
+    final $_column = $_itemColumn<int>('deck_id')!;
+
+    final manager = $$DecksTableTableManager(
+      $_db,
+      $_db.decks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_deckIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$ReviewLogsTable, List<ReviewLog>>
+  _reviewLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.reviewLogs,
+    aliasName: 'cards__id__review_logs__card_id',
+  );
+
+  $$ReviewLogsTableProcessedTableManager get reviewLogsRefs {
+    final manager = $$ReviewLogsTableTableManager(
+      $_db,
+      $_db.reviewLogs,
+    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_reviewLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$CardsTableFilterComposer extends Composer<_$AppDatabase, $CardsTable> {
+  $$CardsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get front => $composableBuilder(
+    column: $table.front,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get back => $composableBuilder(
+    column: $table.back,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reps => $composableBuilder(
+    column: $table.reps,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lapses => $composableBuilder(
+    column: $table.lapses,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DecksTableFilterComposer get deckId {
+    final $$DecksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.decks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecksTableFilterComposer(
+            $db: $db,
+            $table: $db.decks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> reviewLogsRefs(
+    Expression<bool> Function($$ReviewLogsTableFilterComposer f) f,
+  ) {
+    final $$ReviewLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewLogs,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.reviewLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CardsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CardsTable> {
+  $$CardsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get front => $composableBuilder(
+    column: $table.front,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get back => $composableBuilder(
+    column: $table.back,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reps => $composableBuilder(
+    column: $table.reps,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lapses => $composableBuilder(
+    column: $table.lapses,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DecksTableOrderingComposer get deckId {
+    final $$DecksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.decks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecksTableOrderingComposer(
+            $db: $db,
+            $table: $db.decks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CardsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CardsTable> {
+  $$CardsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get front =>
+      $composableBuilder(column: $table.front, builder: (column) => column);
+
+  GeneratedColumn<String> get back =>
+      $composableBuilder(column: $table.back, builder: (column) => column);
+
+  GeneratedColumn<int> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<double> get stability =>
+      $composableBuilder(column: $table.stability, builder: (column) => column);
+
+  GeneratedColumn<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get due =>
+      $composableBuilder(column: $table.due, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastReview => $composableBuilder(
+    column: $table.lastReview,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reps =>
+      $composableBuilder(column: $table.reps, builder: (column) => column);
+
+  GeneratedColumn<int> get lapses =>
+      $composableBuilder(column: $table.lapses, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$DecksTableAnnotationComposer get deckId {
+    final $$DecksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.decks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.decks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> reviewLogsRefs<T extends Object>(
+    Expression<T> Function($$ReviewLogsTableAnnotationComposer a) f,
+  ) {
+    final $$ReviewLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reviewLogs,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReviewLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reviewLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$CardsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CardsTable,
+          Card,
+          $$CardsTableFilterComposer,
+          $$CardsTableOrderingComposer,
+          $$CardsTableAnnotationComposer,
+          $$CardsTableCreateCompanionBuilder,
+          $$CardsTableUpdateCompanionBuilder,
+          (Card, $$CardsTableReferences),
+          Card,
+          PrefetchHooks Function({bool deckId, bool reviewLogsRefs})
+        > {
+  $$CardsTableTableManager(_$AppDatabase db, $CardsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CardsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CardsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CardsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> deckId = const Value.absent(),
+                Value<String> front = const Value.absent(),
+                Value<String> back = const Value.absent(),
+                Value<int> state = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<DateTime> due = const Value.absent(),
+                Value<DateTime?> lastReview = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CardsCompanion(
+                id: id,
+                deckId: deckId,
+                front: front,
+                back: back,
+                state: state,
+                stability: stability,
+                difficulty: difficulty,
+                due: due,
+                lastReview: lastReview,
+                reps: reps,
+                lapses: lapses,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int deckId,
+                required String front,
+                required String back,
+                Value<int> state = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                required DateTime due,
+                Value<DateTime?> lastReview = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CardsCompanion.insert(
+                id: id,
+                deckId: deckId,
+                front: front,
+                back: back,
+                state: state,
+                stability: stability,
+                difficulty: difficulty,
+                due: due,
+                lastReview: lastReview,
+                reps: reps,
+                lapses: lapses,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CardsTable, Card>(table),
+                  $$CardsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({deckId = false, reviewLogsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (reviewLogsRefs) db.reviewLogs],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (deckId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.deckId,
+                        referencedTable: $$CardsTableReferences._deckIdTable(
+                          db,
+                        ),
+                        referencedColumn: $$CardsTableReferences
+                            ._deckIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (reviewLogsRefs)
+                    await $_getPrefetchedData<Card, $CardsTable, ReviewLog>(
+                      currentTable: table,
+                      referencedTable: $$CardsTableReferences
+                          ._reviewLogsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$CardsTableReferences(db, table, p0).reviewLogsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.cardId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CardsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CardsTable,
+      Card,
+      $$CardsTableFilterComposer,
+      $$CardsTableOrderingComposer,
+      $$CardsTableAnnotationComposer,
+      $$CardsTableCreateCompanionBuilder,
+      $$CardsTableUpdateCompanionBuilder,
+      (Card, $$CardsTableReferences),
+      Card,
+      PrefetchHooks Function({bool deckId, bool reviewLogsRefs})
+    >;
+typedef $$ReviewLogsTableCreateCompanionBuilder = ReviewLogsCompanion Function({
+  Value<int> id,
+  required int cardId,
+  required int rating,
+  required int state,
+  required DateTime due,
+  required double stability,
+  required double difficulty,
+  required int elapsedDays,
+  required int lastElapsedDays,
+  required int scheduledDays,
+  required DateTime reviewedAt,
+});
+typedef $$ReviewLogsTableUpdateCompanionBuilder = ReviewLogsCompanion Function({
+  Value<int> id,
+  Value<int> cardId,
+  Value<int> rating,
+  Value<int> state,
+  Value<DateTime> due,
+  Value<double> stability,
+  Value<double> difficulty,
+  Value<int> elapsedDays,
+  Value<int> lastElapsedDays,
+  Value<int> scheduledDays,
+  Value<DateTime> reviewedAt,
+});
+
+final class $$ReviewLogsTableReferences
+    extends BaseReferences<_$AppDatabase, $ReviewLogsTable, ReviewLog> {
+  $$ReviewLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CardsTable _cardIdTable(_$AppDatabase db) =>
+      db.cards.createAlias('review_logs__card_id__cards__id');
+
+  $$CardsTableProcessedTableManager get cardId {
+    final $_column = $_itemColumn<int>('card_id')!;
+
+    final manager = $$CardsTableTableManager(
+      $_db,
+      $_db.cards,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReviewLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReviewLogsTable> {
+  $$ReviewLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastElapsedDays => $composableBuilder(
+    column: $table.lastElapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CardsTableFilterComposer get cardId {
+    final $$CardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.cards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardsTableFilterComposer(
+            $db: $db,
+            $table: $db.cards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReviewLogsTable> {
+  $$ReviewLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rating => $composableBuilder(
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get due => $composableBuilder(
+    column: $table.due,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get stability => $composableBuilder(
+    column: $table.stability,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastElapsedDays => $composableBuilder(
+    column: $table.lastElapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CardsTableOrderingComposer get cardId {
+    final $$CardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.cards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.cards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReviewLogsTable> {
+  $$ReviewLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get rating =>
+      $composableBuilder(column: $table.rating, builder: (column) => column);
+
+  GeneratedColumn<int> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get due =>
+      $composableBuilder(column: $table.due, builder: (column) => column);
+
+  GeneratedColumn<double> get stability =>
+      $composableBuilder(column: $table.stability, builder: (column) => column);
+
+  GeneratedColumn<double> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get elapsedDays => $composableBuilder(
+    column: $table.elapsedDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastElapsedDays => $composableBuilder(
+    column: $table.lastElapsedDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scheduledDays => $composableBuilder(
+    column: $table.scheduledDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reviewedAt => $composableBuilder(
+    column: $table.reviewedAt,
+    builder: (column) => column,
+  );
+
+  $$CardsTableAnnotationComposer get cardId {
+    final $$CardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.cards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReviewLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReviewLogsTable,
+          ReviewLog,
+          $$ReviewLogsTableFilterComposer,
+          $$ReviewLogsTableOrderingComposer,
+          $$ReviewLogsTableAnnotationComposer,
+          $$ReviewLogsTableCreateCompanionBuilder,
+          $$ReviewLogsTableUpdateCompanionBuilder,
+          (ReviewLog, $$ReviewLogsTableReferences),
+          ReviewLog,
+          PrefetchHooks Function({bool cardId})
+        > {
+  $$ReviewLogsTableTableManager(_$AppDatabase db, $ReviewLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReviewLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReviewLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReviewLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> cardId = const Value.absent(),
+                Value<int> rating = const Value.absent(),
+                Value<int> state = const Value.absent(),
+                Value<DateTime> due = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> lastElapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<DateTime> reviewedAt = const Value.absent(),
+              }) => ReviewLogsCompanion(
+                id: id,
+                cardId: cardId,
+                rating: rating,
+                state: state,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                lastElapsedDays: lastElapsedDays,
+                scheduledDays: scheduledDays,
+                reviewedAt: reviewedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int cardId,
+                required int rating,
+                required int state,
+                required DateTime due,
+                required double stability,
+                required double difficulty,
+                required int elapsedDays,
+                required int lastElapsedDays,
+                required int scheduledDays,
+                required DateTime reviewedAt,
+              }) => ReviewLogsCompanion.insert(
+                id: id,
+                cardId: cardId,
+                rating: rating,
+                state: state,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                lastElapsedDays: lastElapsedDays,
+                scheduledDays: scheduledDays,
+                reviewedAt: reviewedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReviewLogsTable, ReviewLog>(table),
+                  $$ReviewLogsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cardId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.cardId,
+                        referencedTable: $$ReviewLogsTableReferences
+                            ._cardIdTable(db),
+                        referencedColumn: $$ReviewLogsTableReferences
+                            ._cardIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReviewLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReviewLogsTable,
+      ReviewLog,
+      $$ReviewLogsTableFilterComposer,
+      $$ReviewLogsTableOrderingComposer,
+      $$ReviewLogsTableAnnotationComposer,
+      $$ReviewLogsTableCreateCompanionBuilder,
+      $$ReviewLogsTableUpdateCompanionBuilder,
+      (ReviewLog, $$ReviewLogsTableReferences),
+      ReviewLog,
+      PrefetchHooks Function({bool cardId})
+    >;
+
+class $AppDatabaseManager {
+  final _$AppDatabase _db;
+  $AppDatabaseManager(this._db);
+  $$DecksTableTableManager get decks =>
+      $$DecksTableTableManager(_db, _db.decks);
+  $$CardsTableTableManager get cards =>
+      $$CardsTableTableManager(_db, _db.cards);
+  $$ReviewLogsTableTableManager get reviewLogs =>
+      $$ReviewLogsTableTableManager(_db, _db.reviewLogs);
+}

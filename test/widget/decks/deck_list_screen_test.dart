@@ -1,0 +1,204 @@
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:repetita/src/core/database/app_database.dart';
+import 'package:repetita/src/core/database/database_provider.dart';
+import 'package:repetita/src/features/backup_transfer/presentation/backup_screen.dart';
+import 'package:repetita/src/features/decks/presentation/deck_list_screen.dart';
+import 'package:repetita/src/features/stats/presentation/stats_screen.dart';
+
+void main() {
+  late AppDatabase db;
+
+  setUp(() {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  Widget buildSubject() {
+    return ProviderScope(
+      overrides: [databaseProvider.overrideWithValue(db)],
+      child: const MaterialApp(home: DeckListScreen()),
+    );
+  }
+
+  group('DeckListScreen Widget Tests', () {
+    testWidgets('renders empty state message when no decks exist', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('No decks yet. Tap + to create one.'), findsOneWidget);
+      expect(find.byKey(const Key('create_deck_fab')), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets('renders list of decks with Due and Total badges', (
+      tester,
+    ) async {
+      final deckId = await db.decksDao.createDeck(
+        name: 'Spanish',
+        description: 'Spanish vocab',
+      );
+
+      // Add a card that is due
+      await db
+          .into(db.cards)
+          .insert(
+            CardsCompanion.insert(
+              deckId: deckId,
+              front: 'Hola',
+              back: 'Hello',
+              due: DateTime.now().toUtc(),
+            ),
+          );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Spanish'), findsOneWidget);
+      expect(find.text('Spanish vocab'), findsOneWidget);
+      expect(find.text('Due: 1'), findsOneWidget);
+      expect(find.text('Total: 1'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets(
+      'validates empty deck name and creates a deck when input is valid',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // Tap FAB to open creation dialog
+        await tester.tap(find.byKey(const Key('create_deck_fab')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Create Deck'), findsOneWidget);
+
+        // Submit with empty name -> triggers validation error
+        await tester.tap(find.byKey(const Key('deck_form_submit_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Deck name is required'), findsOneWidget);
+
+        // Enter valid name
+        await tester.enterText(
+          find.byKey(const Key('deck_name_field')),
+          'Computer Science',
+        );
+        await tester.enterText(
+          find.byKey(const Key('deck_description_field')),
+          'Algorithms & DS',
+        );
+        await tester.pumpAndSettle();
+
+        // Submit valid form
+        await tester.tap(find.byKey(const Key('deck_form_submit_button')));
+        await tester.pumpAndSettle();
+
+        // Verify dialog closed and new deck rendered
+        expect(find.text('Create Deck'), findsNothing);
+        expect(find.text('Computer Science'), findsOneWidget);
+        expect(find.text('Algorithms & DS'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets('delete confirmation dialog cancels or deletes deck', (
+      tester,
+    ) async {
+      await db.decksDao.createDeck(name: 'Disposable Deck');
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Disposable Deck'), findsOneWidget);
+
+      // Open context menu
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+
+      // Tap Delete
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete Deck?'), findsOneWidget);
+
+      // Tap Cancel
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Deck should still exist
+      expect(find.text('Disposable Deck'), findsOneWidget);
+
+      // Open menu and Delete again
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      // Confirm Delete
+      final deleteConfirmButton = find.widgetWithText(FilledButton, 'Delete');
+      await tester.tap(deleteConfirmButton);
+      await tester.pumpAndSettle();
+
+      // Verify deck deleted and empty state restored
+      expect(find.text('Disposable Deck'), findsNothing);
+      expect(find.text('No decks yet. Tap + to create one.'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets('tapping stats icon button navigates to StatsScreen', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final statsButton = find.byKey(const Key('open_stats_button'));
+      expect(statsButton, findsOneWidget);
+
+      await tester.tap(statsButton);
+      for (int i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.byType(StatsScreen), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets('tapping backup icon button navigates to BackupScreen', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final backupButton = find.byKey(const Key('open_backup_button'));
+      expect(backupButton, findsOneWidget);
+
+      await tester.tap(backupButton);
+      for (int i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.byType(BackupScreen), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+  });
+}

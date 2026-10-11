@@ -1,0 +1,118 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/algorithms/fsrs/models/rating.dart';
+
+class RatingBar extends StatelessWidget {
+  const RatingBar({
+    super.key,
+    required this.intervals,
+    required this.onRatingSelected,
+  });
+
+  final Map<Rating, String> intervals;
+  final ValueChanged<Rating> onRatingSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final configs = [
+      _RatingConfig(
+        rating: Rating.again,
+        label: 'Again',
+        key: const Key('rating_button_again'),
+        backgroundColor: colorScheme.errorContainer,
+        foregroundColor: colorScheme.onErrorContainer,
+      ),
+      _RatingConfig(
+        rating: Rating.hard,
+        label: 'Hard',
+        key: const Key('rating_button_hard'),
+        backgroundColor: colorScheme.tertiaryContainer,
+        foregroundColor: colorScheme.onTertiaryContainer,
+      ),
+      _RatingConfig(
+        rating: Rating.good,
+        label: 'Good',
+        key: const Key('rating_button_good'),
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+      ),
+      _RatingConfig(
+        rating: Rating.easy,
+        label: 'Easy',
+        key: const Key('rating_button_easy'),
+        backgroundColor: colorScheme.secondaryContainer,
+        foregroundColor: colorScheme.onSecondaryContainer,
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: configs.map((cfg) {
+          final interval = intervals[cfg.rating] ?? '';
+
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Semantics(
+                button: true,
+                label: 'Rate ${cfg.label}, next review in $interval',
+                child: FilledButton.tonal(
+                  key: cfg.key,
+                  onPressed: () => onRatingSelected(cfg.rating),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cfg.backgroundColor,
+                    foregroundColor: cfg.foregroundColor,
+                    minimumSize: const Size(48, 56),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        cfg.label,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: cfg.foregroundColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        interval,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: cfg.foregroundColor.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _RatingConfig {
+  const _RatingConfig({
+    required this.rating,
+    required this.label,
+    required this.key,
+    required this.backgroundColor,
+    required this.foregroundColor,
+  });
+
+  final Rating rating;
+  final String label;
+  final Key key;
+  final Color backgroundColor;
+  final Color foregroundColor;
+}

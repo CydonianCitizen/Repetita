@@ -1,0 +1,162 @@
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:repetita/src/core/database/app_database.dart';
+import 'package:repetita/src/core/database/database_provider.dart';
+import 'package:repetita/src/features/study_session/presentation/study_screen.dart';
+
+void main() {
+  late AppDatabase db;
+  late int testDeckId;
+
+  setUp(() async {
+    db = AppDatabase.forTesting(NativeDatabase.memory());
+    testDeckId = await db.decksDao.createDeck(name: 'Study Test Deck');
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  Widget buildSubject() {
+    return ProviderScope(
+      overrides: [databaseProvider.overrideWithValue(db)],
+      child: MaterialApp(home: StudyScreen(deckId: testDeckId)),
+    );
+  }
+
+  group('StudyScreen Widget Tests', () {
+    testWidgets('displays completion message when deck has no due cards', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      for (int i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.text('All cards reviewed for today!'), findsOneWidget);
+      expect(find.byKey(const Key('back_to_deck_button')), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets(
+      'displays front only initially, reveals back on Show Answer, and shows rating buttons with intervals',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'What is photosynthesis?',
+          back: 'Process by which plants convert light into chemical energy',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Verify initial state
+        expect(find.text('Card 1 of 1'), findsOneWidget);
+        expect(find.text('What is photosynthesis?'), findsOneWidget);
+        expect(
+          find.text(
+            'Process by which plants convert light into chemical energy',
+          ),
+          findsNothing,
+        );
+        expect(find.byKey(const Key('show_answer_button')), findsOneWidget);
+        expect(find.byKey(const Key('rating_button_good')), findsNothing);
+
+        // Tap Show Answer
+        await tester.tap(find.byKey(const Key('show_answer_button')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Verify answer revealed and rating buttons present
+        expect(
+          find.text(
+            'Process by which plants convert light into chemical energy',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('show_answer_button')), findsNothing);
+        expect(find.byKey(const Key('rating_button_again')), findsOneWidget);
+        expect(find.byKey(const Key('rating_button_hard')), findsOneWidget);
+        expect(find.byKey(const Key('rating_button_good')), findsOneWidget);
+        expect(find.byKey(const Key('rating_button_easy')), findsOneWidget);
+
+        // Verify interval preview texts
+        expect(find.text('10m'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'submitting ratings advances through multiple cards until session completion',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question 1',
+          back: 'Answer 1',
+        );
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question 2',
+          back: 'Answer 2',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Card 1
+        expect(find.text('Card 1 of 2'), findsOneWidget);
+        expect(find.text('Question 1'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('show_answer_button')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Rate Good on Card 1
+        await tester.tap(find.byKey(const Key('rating_button_good')));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Now on Card 2
+        expect(find.text('Card 2 of 2'), findsOneWidget);
+        expect(find.text('Question 2'), findsOneWidget);
+        expect(find.text('Answer 2'), findsNothing);
+        expect(find.byKey(const Key('show_answer_button')), findsOneWidget);
+
+        // Reveal Card 2 and Rate Easy
+        await tester.tap(find.byKey(const Key('show_answer_button')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        await tester.tap(find.byKey(const Key('rating_button_easy')));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // All cards finished
+        expect(find.text('All cards reviewed for today!'), findsOneWidget);
+        expect(find.byKey(const Key('back_to_deck_button')), findsOneWidget);
+
+        // Verify ReviewLogs recorded 2 reviews
+        final logs = await db.select(db.reviewLogs).get();
+        expect(logs, hasLength(2));
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+  });
+}
