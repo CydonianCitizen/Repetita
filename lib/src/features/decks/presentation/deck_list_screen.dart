@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../backup_transfer/presentation/backup_screen.dart';
 import '../../cards/presentation/deck_detail_screen.dart';
+import '../../settings/presentation/settings_screen.dart';
 import '../../stats/presentation/stats_screen.dart';
 import 'controllers/deck_list_controller.dart';
 import 'widgets/deck_form_dialog.dart';
@@ -36,6 +37,16 @@ class DeckListScreen extends ConsumerWidget {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const BackupScreen()),
+              );
+            },
+          ),
+          IconButton(
+            key: const Key('open_settings_button'),
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
               );
             },
           ),
