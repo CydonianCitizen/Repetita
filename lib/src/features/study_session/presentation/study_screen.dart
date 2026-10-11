@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'controllers/study_session_controller.dart';
@@ -34,20 +35,49 @@ class StudyScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 80,
-                      color: colorScheme.primary,
-                    ),
-                    const SizedBox(height: 24),
+                    Container(
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorScheme.primaryContainer.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.emoji_events_rounded,
+                            size: 56,
+                            color: colorScheme.primary,
+                          ),
+                        )
+                        .animate()
+                        .scale(
+                          duration: 450.ms,
+                          curve: Curves.elasticOut,
+                          begin: const Offset(0.35, 0.35),
+                        )
+                        .fadeIn(duration: 250.ms)
+                        .then()
+                        .shimmer(
+                          duration: 1200.ms,
+                          color: colorScheme.primary.withValues(alpha: 0.35),
+                        ),
+                    const SizedBox(height: 28),
                     Text(
-                      'All cards reviewed for today!',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                          'All cards reviewed for today!',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                        .animate()
+                        .fadeIn(delay: 150.ms, duration: 300.ms)
+                        .slideY(
+                          begin: 0.15,
+                          end: 0,
+                          curve: Curves.easeOutCubic,
+                        ),
                     const SizedBox(height: 12),
                     Text(
                       'Great job! Check back later for upcoming reviews.',
@@ -55,14 +85,20 @@ class StudyScreen extends ConsumerWidget {
                         color: colorScheme.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
+                    ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
+                    const SizedBox(height: 36),
                     FilledButton.icon(
-                      key: const Key('back_to_deck_button'),
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Back to Deck'),
-                    ),
+                          key: const Key('back_to_deck_button'),
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back),
+                          label: const Text('Back to Deck'),
+                        )
+                        .animate()
+                        .fadeIn(delay: 350.ms, duration: 300.ms)
+                        .scale(
+                          begin: const Offset(0.9, 0.9),
+                          curve: Curves.easeOutBack,
+                        ),
                   ],
                 ),
               ),
@@ -108,14 +144,22 @@ class StudyScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          key: const Key('study_progress_bar'),
-                          value: progress,
-                          minHeight: 6,
-                          backgroundColor: colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colorScheme.primary,
-                          ),
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: progress),
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          builder: (context, animatedProgress, _) {
+                            return LinearProgressIndicator(
+                              key: const Key('study_progress_bar'),
+                              value: animatedProgress,
+                              minHeight: 6,
+                              backgroundColor:
+                                  colorScheme.surfaceContainerHighest,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colorScheme.primary,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -127,6 +171,9 @@ class StudyScreen extends ConsumerWidget {
                     child: FlipCardView(
                       card: currentCard,
                       isAnswerRevealed: sessionState.isAnswerRevealed,
+                      onCardTap: !sessionState.isAnswerRevealed
+                          ? () => controller.revealAnswer()
+                          : null,
                     ),
                   ),
                 ),
@@ -139,10 +186,11 @@ class StudyScreen extends ConsumerWidget {
                     child: SizedBox(
                       width: double.infinity,
                       height: 52,
-                      child: FilledButton(
+                      child: FilledButton.icon(
                         key: const Key('show_answer_button'),
                         onPressed: () => controller.revealAnswer(),
-                        child: const Text(
+                        icon: const Icon(Icons.flip_rounded),
+                        label: const Text(
                           'Show Answer',
                           style: TextStyle(
                             fontSize: 16,
@@ -150,7 +198,7 @@ class StudyScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                    ),
+                    ).animate().fadeIn(duration: 150.ms),
                   )
                 else
                   RatingBar(

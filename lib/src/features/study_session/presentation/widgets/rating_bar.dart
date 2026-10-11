@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/algorithms/fsrs/models/rating.dart';
 
@@ -12,6 +14,24 @@ class RatingBar extends StatelessWidget {
   final Map<Rating, String> intervals;
   final ValueChanged<Rating> onRatingSelected;
 
+  void _handleTap(Rating rating) {
+    switch (rating) {
+      case Rating.again:
+        HapticFeedback.mediumImpact();
+        break;
+      case Rating.hard:
+        HapticFeedback.lightImpact();
+        break;
+      case Rating.good:
+        HapticFeedback.lightImpact();
+        break;
+      case Rating.easy:
+        HapticFeedback.selectionClick();
+        break;
+    }
+    onRatingSelected(rating);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -19,18 +39,11 @@ class RatingBar extends StatelessWidget {
 
     final configs = [
       _RatingConfig(
-        rating: Rating.again,
-        label: 'Again',
-        key: const Key('rating_button_again'),
-        backgroundColor: colorScheme.errorContainer,
-        foregroundColor: colorScheme.onErrorContainer,
-      ),
-      _RatingConfig(
-        rating: Rating.hard,
-        label: 'Hard',
-        key: const Key('rating_button_hard'),
-        backgroundColor: colorScheme.tertiaryContainer,
-        foregroundColor: colorScheme.onTertiaryContainer,
+        rating: Rating.easy,
+        label: 'Easy',
+        key: const Key('rating_button_easy'),
+        backgroundColor: colorScheme.secondaryContainer,
+        foregroundColor: colorScheme.onSecondaryContainer,
       ),
       _RatingConfig(
         rating: Rating.good,
@@ -40,64 +53,86 @@ class RatingBar extends StatelessWidget {
         foregroundColor: colorScheme.onPrimaryContainer,
       ),
       _RatingConfig(
-        rating: Rating.easy,
-        label: 'Easy',
-        key: const Key('rating_button_easy'),
-        backgroundColor: colorScheme.secondaryContainer,
-        foregroundColor: colorScheme.onSecondaryContainer,
+        rating: Rating.hard,
+        label: 'Hard',
+        key: const Key('rating_button_hard'),
+        backgroundColor: colorScheme.tertiaryContainer,
+        foregroundColor: colorScheme.onTertiaryContainer,
+      ),
+      _RatingConfig(
+        rating: Rating.again,
+        label: 'Again',
+        key: const Key('rating_button_again'),
+        backgroundColor: colorScheme.errorContainer,
+        foregroundColor: colorScheme.onErrorContainer,
       ),
     ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
-        children: configs.map((cfg) {
+        children: configs.asMap().entries.map((entry) {
+          final index = entry.key;
+          final cfg = entry.value;
           final interval = intervals[cfg.rating] ?? '';
 
           return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Semantics(
-                button: true,
-                label: 'Rate ${cfg.label}, next review in $interval',
-                child: FilledButton.tonal(
-                  key: cfg.key,
-                  onPressed: () => onRatingSelected(cfg.rating),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: cfg.backgroundColor,
-                    foregroundColor: cfg.foregroundColor,
-                    minimumSize: const Size(48, 56),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+            child:
+                Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Semantics(
+                        button: true,
+                        label: 'Rate ${cfg.label}, next review in $interval',
+                        child: FilledButton.tonal(
+                          key: cfg.key,
+                          onPressed: () => _handleTap(cfg.rating),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: cfg.backgroundColor,
+                            foregroundColor: cfg.foregroundColor,
+                            minimumSize: const Size(48, 56),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            elevation: 1,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                cfg.label,
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: cfg.foregroundColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                interval,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: cfg.foregroundColor.withValues(
+                                    alpha: 0.85,
+                                  ),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(duration: 180.ms, delay: (index * 35).ms)
+                    .scale(
+                      duration: 180.ms,
+                      delay: (index * 35).ms,
+                      begin: const Offset(0.92, 0.92),
+                      curve: Curves.easeOutBack,
                     ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        cfg.label,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: cfg.foregroundColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        interval,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: cfg.foregroundColor.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           );
         }).toList(),
       ),
-    );
+    ).animate().fadeIn(duration: 150.ms);
   }
 }
 
