@@ -422,6 +422,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get licenseSubtitle => 'MIT License • Open Source';
 
   @override
+  String get licenseDialogTitle => 'MIT License';
+
+  @override
+  String get licenseCopyright => 'Copyright (c) 2026 Thomasdg00';
+
+  @override
+  String get viewAllLicenses => 'View All Open Source Licenses';
+
+  @override
   String comingSoonNotice(String feature) {
     return '$feature feature coming in an upcoming release!';
   }

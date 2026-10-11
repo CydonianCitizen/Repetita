@@ -854,6 +854,24 @@ abstract class AppLocalizations {
   /// **'MIT License • Open Source'**
   String get licenseSubtitle;
 
+  /// No description provided for @licenseDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MIT License'**
+  String get licenseDialogTitle;
+
+  /// No description provided for @licenseCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'Copyright (c) 2026 Thomasdg00'**
+  String get licenseCopyright;
+
+  /// No description provided for @viewAllLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Open Source Licenses'**
+  String get viewAllLicenses;
+
   /// No description provided for @comingSoonNotice.
   ///
   /// In en, this message translates to:

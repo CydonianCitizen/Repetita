@@ -373,6 +373,37 @@ void main() {
         expect(find.byType(SnackBar), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'tapping License tile opens MIT License dialog with open source button',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 4000);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(buildSubject());
+
+        // Tap License tile
+        await tester.tap(find.byKey(const Key('setting_license_tile')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('MIT License'), findsWidgets);
+        expect(find.text('Copyright (c) 2026 Thomasdg00'), findsOneWidget);
+        expect(
+          find.byKey(const Key('view_all_licenses_button')),
+          findsOneWidget,
+        );
+
+        // Tap View on GitHub
+        await tester.tap(find.text('View on GitHub'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(SnackBar), findsOneWidget);
+      },
+    );
   });
 }
 

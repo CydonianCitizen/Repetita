@@ -137,5 +137,8 @@
   "offlinePrivacySubtitle": "Zero telemetria cloud, nessun tracciamento remoto",
   "licenseAndCredits": "Licenza e riconoscimenti",
   "licenseSubtitle": "Licenza MIT • Open Source",
+  "licenseDialogTitle": "Licenza MIT",
+  "licenseCopyright": "Copyright (c) 2026 Thomasdg00",
+  "viewAllLicenses": "Tutte le licenze open source",
   "comingSoonNotice": "Funzionalità {feature} disponibile in un prossimo aggiornamento!"
 }

@@ -175,6 +175,9 @@
   "offlinePrivacySubtitle": "Zero cloud telemetry, zero remote tracking",
   "licenseAndCredits": "License & Credits",
   "licenseSubtitle": "MIT License • Open Source",
+  "licenseDialogTitle": "MIT License",
+  "licenseCopyright": "Copyright (c) 2026 Thomasdg00",
+  "viewAllLicenses": "View All Open Source Licenses",
   "comingSoonNotice": "{feature} feature coming in an upcoming release!",
   "@comingSoonNotice": {
     "placeholders": {

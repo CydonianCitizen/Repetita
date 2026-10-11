@@ -65,8 +65,10 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "repetita-icon.png"
+  image_path: "repetita-circle-icon-1024.png"
   min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "repetita-adaptive-foreground-1024.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -79,7 +81,9 @@ flutter:
 
   assets:
     - repetita-icon.svg
-    - repetita-icon.png
+    - repetita-circle-icon.svg
+    - repetita-circle-icon-1024.png
+    - repetita-adaptive-foreground-1024.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
