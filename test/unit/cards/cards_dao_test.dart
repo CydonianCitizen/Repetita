@@ -164,5 +164,64 @@ void main() {
       final emptyCards = await cardsDao.getCardsByDeck(deck1Id);
       expect(emptyCards, isEmpty);
     });
+
+    test(
+      'setCardSuspended updates isSuspended and filters out from due cards',
+      () async {
+        final now = DateTime.now().toUtc();
+        final cardId = await cardsDao.createCard(
+          deckId: deck1Id,
+          front: 'Card to suspend',
+          back: 'Answer',
+        );
+
+        var due = await cardsDao.getDueCards(deck1Id, now);
+        expect(due, hasLength(1));
+
+        await cardsDao.setCardSuspended(cardId, true);
+        final cards = await cardsDao.getCardsByDeck(deck1Id);
+        expect(cards.first.isSuspended, isTrue);
+
+        due = await cardsDao.getDueCards(deck1Id, now);
+        expect(due, isEmpty);
+
+        await cardsDao.setCardSuspended(cardId, false);
+        due = await cardsDao.getDueCards(deck1Id, now);
+        expect(due, hasLength(1));
+      },
+    );
+
+    test(
+      'buryCard sets buriedUntil and filters out from due cards until unburied',
+      () async {
+        final now = DateTime.now().toUtc();
+        final cardId = await cardsDao.createCard(
+          deckId: deck1Id,
+          front: 'Card to bury',
+          back: 'Answer',
+        );
+
+        final tomorrow = now.add(const Duration(days: 1));
+        await cardsDao.buryCard(cardId, tomorrow);
+
+        final cards = await cardsDao.getCardsByDeck(deck1Id);
+        expect(cards.first.buriedUntil, isNotNull);
+
+        var due = await cardsDao.getDueCards(deck1Id, now);
+        expect(due, isEmpty);
+
+        // After tomorrow, it should be due again
+        due = await cardsDao.getDueCards(
+          deck1Id,
+          tomorrow.add(const Duration(hours: 1)),
+        );
+        expect(due, hasLength(1));
+
+        // Explicit unbury
+        await cardsDao.unburyCard(cardId);
+        due = await cardsDao.getDueCards(deck1Id, now);
+        expect(due, hasLength(1));
+      },
+    );
   });
 }

@@ -167,7 +167,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get retentionRate => 'Tasso di ritenzione';
 
   @override
-  String get totalReviews => 'Ripassi totali';
+  String get totalReviews => 'Revisioni totali';
 
   @override
   String get cardsLearned => 'Carte apprese';
@@ -462,4 +462,155 @@ class AppLocalizationsIt extends AppLocalizations {
   String comingSoonNotice(String feature) {
     return 'Funzionalità $feature disponibile in un prossimo aggiornamento!';
   }
+
+  @override
+  String get retry => 'Riprova';
+
+  @override
+  String get startStudySession => 'Inizia sessione di studio';
+
+  @override
+  String get newCard => 'Nuova carta';
+
+  @override
+  String get frontPromptCannotBeEmpty => 'La domanda non può essere vuota';
+
+  @override
+  String get backAnswerCannotBeEmpty => 'La risposta non può essere vuota';
+
+  @override
+  String get promptHint => 'Inserisci domanda o prompt...';
+
+  @override
+  String get answerHint => 'Inserisci risposta...';
+
+  @override
+  String get reviewForecastTitle => 'Previsione ripassi a 7 giorni';
+
+  @override
+  String get noUpcomingReviews => 'Nessun ripasso programmato.';
+
+  @override
+  String get cardStateBreakdown => 'Distribuzione stati carte';
+
+  @override
+  String get recallAccuracy => 'Precisione di rievocazione';
+
+  @override
+  String get reviewsCompleted => 'Totale completate';
+
+  @override
+  String get fullDatabaseBackup => 'Backup completo database (JSON)';
+
+  @override
+  String get flashcardsInterchange => 'Interscambio flashcard (CSV)';
+
+  @override
+  String get exportJson => 'Esporta JSON';
+
+  @override
+  String get restoreJson => 'Ripristina JSON';
+
+  @override
+  String get exportCsv => 'Esporta CSV';
+
+  @override
+  String get importCsv => 'Importa CSV';
+
+  @override
+  String get copyToClipboard => 'Copia negli appunti';
+
+  @override
+  String get retention => 'Ritenzione';
+
+  @override
+  String get reviews => 'Ripassi';
+
+  @override
+  String get undo => 'Annulla';
+
+  @override
+  String get undoReview => 'Annulla ripasso';
+
+  @override
+  String get cardUndone => 'Ripasso annullato';
+
+  @override
+  String get suspendCard => 'Sospendi carta';
+
+  @override
+  String get unsuspendCard => 'Riattiva carta';
+
+  @override
+  String get buryCard => 'Rinvia carta';
+
+  @override
+  String get unburyCard => 'Annulla rinvio';
+
+  @override
+  String get cardSuspended => 'Carta sospesa';
+
+  @override
+  String get cardUnsuspended => 'Carta riattivata';
+
+  @override
+  String get cardBuried => 'Carta rinviata a domani';
+
+  @override
+  String get suspendedBadge => 'Sospesa';
+
+  @override
+  String get buriedBadge => 'Rinviata';
+
+  @override
+  String get reviewHeatmap => 'Mappa delle revisioni';
+
+  @override
+  String get streak => 'Serie';
+
+  @override
+  String get currentStreak => 'Serie attuale';
+
+  @override
+  String daysStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count giorni',
+      one: '1 giorno',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noReviewsYet => 'Nessuna revisione registrata';
+
+  @override
+  String get deleteDeckConfirmTitle => 'Eliminare il mazzo?';
+
+  @override
+  String deleteDeckConfirmMessage(String name) {
+    return 'Sei sicuro di voler eliminare \"$name\"? Tutte le carte in questo mazzo verranno eliminate.';
+  }
+
+  @override
+  String get dueBadge => 'Da ripassare';
+
+  @override
+  String get totalBadge => 'Totale';
+
+  @override
+  String get promptBadge => 'DOMANDA';
+
+  @override
+  String get answerBadge => 'RISPOSTA';
+
+  @override
+  String get tapToFlipHint => 'Tocca o premi Mostra risposta per girare';
+
+  @override
+  String get saveAndAddAnother => 'Salva e aggiungi un\'altra';
+
+  @override
+  String get cardSaved => 'Carta salvata';
 }

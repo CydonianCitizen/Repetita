@@ -931,6 +931,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{feature} feature coming in an upcoming release!'**
   String comingSoonNotice(String feature);
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @startStudySession.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Study Session'**
+  String get startStudySession;
+
+  /// No description provided for @newCard.
+  ///
+  /// In en, this message translates to:
+  /// **'New Card'**
+  String get newCard;
+
+  /// No description provided for @frontPromptCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Front prompt cannot be empty'**
+  String get frontPromptCannotBeEmpty;
+
+  /// No description provided for @backAnswerCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Back answer cannot be empty'**
+  String get backAnswerCannotBeEmpty;
+
+  /// No description provided for @promptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter question or prompt...'**
+  String get promptHint;
+
+  /// No description provided for @answerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter answer...'**
+  String get answerHint;
+
+  /// No description provided for @reviewForecastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'7-Day Review Forecast'**
+  String get reviewForecastTitle;
+
+  /// No description provided for @noUpcomingReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming reviews scheduled.'**
+  String get noUpcomingReviews;
+
+  /// No description provided for @cardStateBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Card State Breakdown'**
+  String get cardStateBreakdown;
+
+  /// No description provided for @recallAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Recall accuracy'**
+  String get recallAccuracy;
+
+  /// No description provided for @reviewsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Total completed'**
+  String get reviewsCompleted;
+
+  /// No description provided for @fullDatabaseBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Database Backup (JSON)'**
+  String get fullDatabaseBackup;
+
+  /// No description provided for @flashcardsInterchange.
+  ///
+  /// In en, this message translates to:
+  /// **'Flashcards Interchange (CSV)'**
+  String get flashcardsInterchange;
+
+  /// No description provided for @exportJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Export JSON'**
+  String get exportJson;
+
+  /// No description provided for @restoreJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore JSON'**
+  String get restoreJson;
+
+  /// No description provided for @exportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportCsv;
+
+  /// No description provided for @importCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Import CSV'**
+  String get importCsv;
+
+  /// No description provided for @copyToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to Clipboard'**
+  String get copyToClipboard;
+
+  /// No description provided for @retention.
+  ///
+  /// In en, this message translates to:
+  /// **'Retention'**
+  String get retention;
+
+  /// No description provided for @reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviews;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @undoReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo Review'**
+  String get undoReview;
+
+  /// No description provided for @cardUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Review undone'**
+  String get cardUndone;
+
+  /// No description provided for @suspendCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend Card'**
+  String get suspendCard;
+
+  /// No description provided for @unsuspendCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsuspend Card'**
+  String get unsuspendCard;
+
+  /// No description provided for @buryCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Bury Card'**
+  String get buryCard;
+
+  /// No description provided for @unburyCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbury Card'**
+  String get unburyCard;
+
+  /// No description provided for @cardSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Card suspended'**
+  String get cardSuspended;
+
+  /// No description provided for @cardUnsuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Card unsuspended'**
+  String get cardUnsuspended;
+
+  /// No description provided for @cardBuried.
+  ///
+  /// In en, this message translates to:
+  /// **'Card buried until tomorrow'**
+  String get cardBuried;
+
+  /// No description provided for @suspendedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get suspendedBadge;
+
+  /// No description provided for @buriedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Buried'**
+  String get buriedBadge;
+
+  /// No description provided for @reviewHeatmap.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Heatmap'**
+  String get reviewHeatmap;
+
+  /// No description provided for @streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get streak;
+
+  /// No description provided for @currentStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Streak'**
+  String get currentStreak;
+
+  /// No description provided for @daysStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String daysStreak(int count);
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews recorded yet'**
+  String get noReviewsYet;
+
+  /// No description provided for @deleteDeckConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Deck?'**
+  String get deleteDeckConfirmTitle;
+
+  /// No description provided for @deleteDeckConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{name}\"? All cards in this deck will be deleted.'**
+  String deleteDeckConfirmMessage(String name);
+
+  /// No description provided for @dueBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get dueBadge;
+
+  /// No description provided for @totalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalBadge;
+
+  /// No description provided for @promptBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'PROMPT'**
+  String get promptBadge;
+
+  /// No description provided for @answerBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'ANSWER'**
+  String get answerBadge;
+
+  /// No description provided for @tapToFlipHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap or press Show Answer to flip'**
+  String get tapToFlipHint;
+
+  /// No description provided for @saveAndAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Add Another'**
+  String get saveAndAddAnother;
+
+  /// No description provided for @cardSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Card saved'**
+  String get cardSaved;
 }
 
 class _AppLocalizationsDelegate

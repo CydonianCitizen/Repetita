@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:repetita/src/core/theme/app_theme.dart';
 import 'package:repetita/src/core/theme/font_theme.dart';
 import 'package:repetita/src/core/theme/material_theme.dart';
@@ -9,7 +8,6 @@ import 'package:repetita/src/features/settings/presentation/controllers/theme_mo
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  GoogleFonts.config.allowRuntimeFetching = false;
 
   group('AppTheme & MaterialTheme Unit Tests', () {
     test('createAppTextTheme combines Lora display and Ubuntu body fonts', () {

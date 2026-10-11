@@ -239,5 +239,85 @@ void main() {
       )..where((t) => t.cardId.equals(cardId))).get();
       expect(logs, isEmpty);
     });
+
+    test('undoReview restores card state and deletes the corresponding reviewLog record', () async {
+      final now = DateTime.now().toUtc();
+      final cardId = await db.cardsDao.createCard(
+        deckId: testDeckId,
+        front: 'Undo Front',
+        back: 'Undo Back',
+      );
+
+      final initialCard = FsrsCard(
+        state: CardState.newCard,
+        stability: 0.0,
+        difficulty: 0.0,
+        due: now,
+        lastReview: null,
+        reps: 0,
+        lapses: 0,
+      );
+
+      final updatedCard = FsrsCard(
+        state: CardState.learning,
+        stability: 2.1,
+        difficulty: 4.5,
+        due: now.add(const Duration(days: 1)),
+        lastReview: now,
+        reps: 1,
+        lapses: 0,
+      );
+
+      // Record review
+      final logId = await studySessionDao.recordReview(
+        cardId: cardId,
+        updatedCard: updatedCard,
+        logSnapshot: ReviewLogSnapshot(
+          rating: Rating.good,
+          state: CardState.newCard,
+          due: now.add(const Duration(days: 1)),
+          stability: 2.1,
+          difficulty: 4.5,
+          elapsedDays: 0,
+          lastElapsedDays: 0,
+          scheduledDays: 1,
+          reviewedAt: now,
+        ),
+      );
+
+      // Verify card was updated and review log exists
+      var cardInDb = await (db.select(
+        db.cards,
+      )..where((t) => t.id.equals(cardId))).getSingle();
+      expect(cardInDb.state, equals(CardState.learning.value));
+      expect(cardInDb.reps, equals(1));
+
+      var logs = await (db.select(
+        db.reviewLogs,
+      )..where((t) => t.id.equals(logId))).get();
+      expect(logs, hasLength(1));
+
+      // Now undo review
+      await studySessionDao.undoReview(
+        cardId: cardId,
+        previousCard: initialCard,
+        reviewLogId: logId,
+      );
+
+      // Assert Cards table was restored
+      cardInDb = await (db.select(
+        db.cards,
+      )..where((t) => t.id.equals(cardId))).getSingle();
+      expect(cardInDb.state, equals(CardState.newCard.value));
+      expect(cardInDb.stability, equals(0.0));
+      expect(cardInDb.reps, equals(0));
+      expect(cardInDb.lastReview, isNull);
+
+      // Assert review log was deleted
+      logs = await (db.select(
+        db.reviewLogs,
+      )..where((t) => t.id.equals(logId))).get();
+      expect(logs, isEmpty);
+    });
   });
 }

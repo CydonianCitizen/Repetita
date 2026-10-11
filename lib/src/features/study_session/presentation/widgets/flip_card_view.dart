@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../cards/domain/card_entity.dart';
 
 class FlipCardView extends StatefulWidget {
@@ -24,17 +24,10 @@ class FlipCardView extends StatefulWidget {
 
 class _FlipCardViewState extends State<FlipCardView> {
   @override
-  void didUpdateWidget(covariant FlipCardView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isAnswerRevealed != widget.isAnswerRevealed) {
-      HapticFeedback.selectionClick();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Center(
           child: ConstrainedBox(
@@ -60,9 +53,14 @@ class _FlipCardViewState extends State<FlipCardView> {
                       ? Transform(
                           alignment: Alignment.center,
                           transform: Matrix4.identity()..rotateY(math.pi),
-                          child: _buildBackCard(context, colorScheme, theme),
+                          child: _buildBackCard(
+                            context,
+                            colorScheme,
+                            theme,
+                            l10n,
+                          ),
                         )
-                      : _buildFrontCard(context, colorScheme, theme),
+                      : _buildFrontCard(context, colorScheme, theme, l10n),
                 );
               },
             ),
@@ -77,6 +75,7 @@ class _FlipCardViewState extends State<FlipCardView> {
     BuildContext context,
     ColorScheme colorScheme,
     ThemeData theme,
+    AppLocalizations? l10n,
   ) {
     return Card(
       elevation: 2,
@@ -92,7 +91,7 @@ class _FlipCardViewState extends State<FlipCardView> {
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
         onTap: widget.onCardTap,
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -122,7 +121,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'PROMPT',
+                          l10n?.promptBadge ?? 'PROMPT',
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -164,7 +163,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Tap or press Show Answer to flip',
+                    l10n?.tapToFlipHint ?? 'Tap or press Show Answer to flip',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.outline,
                     ),
@@ -182,6 +181,7 @@ class _FlipCardViewState extends State<FlipCardView> {
     BuildContext context,
     ColorScheme colorScheme,
     ThemeData theme,
+    AppLocalizations? l10n,
   ) {
     return Card(
       elevation: 3,
@@ -194,7 +194,7 @@ class _FlipCardViewState extends State<FlipCardView> {
           width: 1.5,
         ),
       ),
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -224,7 +224,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'ANSWER',
+                        l10n?.answerBadge ?? 'ANSWER',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: colorScheme.secondary,
                           fontWeight: FontWeight.bold,

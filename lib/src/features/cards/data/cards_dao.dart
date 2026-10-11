@@ -20,6 +20,8 @@ extension CardToEntity on Card {
     reps: reps,
     lapses: lapses,
     createdAt: createdAt,
+    isSuspended: isSuspended,
+    buriedUntil: buriedUntil,
   );
 }
 
@@ -53,6 +55,9 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
           ..where(
             (t) =>
                 t.deckId.equals(deckId) &
+                t.isSuspended.equals(false) &
+                (t.buriedUntil.isNull() |
+                    t.buriedUntil.isSmallerOrEqualValue(cutoffUtc)) &
                 (t.due.isSmallerOrEqualValue(cutoffUtc) | t.state.equals(0)),
           )
           ..orderBy([(t) => OrderingTerm.asc(t.due)]))
@@ -77,6 +82,7 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
         reps: const Value(0),
         lapses: const Value(0),
         createdAt: Value(now),
+        isSuspended: const Value(false),
       ),
     );
   }
@@ -90,6 +96,24 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
         .write(
           CardsCompanion(front: Value(front.trim()), back: Value(back.trim())),
         )
+        .then((rows) => rows > 0);
+  }
+
+  Future<bool> setCardSuspended(int id, bool isSuspended) {
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(CardsCompanion(isSuspended: Value(isSuspended)))
+        .then((rows) => rows > 0);
+  }
+
+  Future<bool> buryCard(int id, DateTime until) {
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(CardsCompanion(buriedUntil: Value(until.toUtc())))
+        .then((rows) => rows > 0);
+  }
+
+  Future<bool> unburyCard(int id) {
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(const CardsCompanion(buriedUntil: Value(null)))
         .then((rows) => rows > 0);
   }
 

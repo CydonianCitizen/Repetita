@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/algorithms/fsrs/models/rating.dart';
+import '../../../../core/l10n/generated/app_localizations.dart';
 
 class RatingBar extends StatelessWidget {
   const RatingBar({
@@ -15,20 +15,6 @@ class RatingBar extends StatelessWidget {
   final ValueChanged<Rating> onRatingSelected;
 
   void _handleTap(Rating rating) {
-    switch (rating) {
-      case Rating.again:
-        HapticFeedback.mediumImpact();
-        break;
-      case Rating.hard:
-        HapticFeedback.lightImpact();
-        break;
-      case Rating.good:
-        HapticFeedback.lightImpact();
-        break;
-      case Rating.easy:
-        HapticFeedback.selectionClick();
-        break;
-    }
     onRatingSelected(rating);
   }
 
@@ -36,35 +22,36 @@ class RatingBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     final configs = [
       _RatingConfig(
-        rating: Rating.easy,
-        label: 'Easy',
-        key: const Key('rating_button_easy'),
-        backgroundColor: colorScheme.secondaryContainer,
-        foregroundColor: colorScheme.onSecondaryContainer,
-      ),
-      _RatingConfig(
-        rating: Rating.good,
-        label: 'Good',
-        key: const Key('rating_button_good'),
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        rating: Rating.again,
+        label: l10n?.ratingAgain ?? 'Again',
+        key: const Key('rating_button_again'),
+        backgroundColor: colorScheme.errorContainer,
+        foregroundColor: colorScheme.onErrorContainer,
       ),
       _RatingConfig(
         rating: Rating.hard,
-        label: 'Hard',
+        label: l10n?.ratingHard ?? 'Hard',
         key: const Key('rating_button_hard'),
         backgroundColor: colorScheme.tertiaryContainer,
         foregroundColor: colorScheme.onTertiaryContainer,
       ),
       _RatingConfig(
-        rating: Rating.again,
-        label: 'Again',
-        key: const Key('rating_button_again'),
-        backgroundColor: colorScheme.errorContainer,
-        foregroundColor: colorScheme.onErrorContainer,
+        rating: Rating.good,
+        label: l10n?.ratingGood ?? 'Good',
+        key: const Key('rating_button_good'),
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
+      ),
+      _RatingConfig(
+        rating: Rating.easy,
+        label: l10n?.ratingEasy ?? 'Easy',
+        key: const Key('rating_button_easy'),
+        backgroundColor: colorScheme.secondaryContainer,
+        foregroundColor: colorScheme.onSecondaryContainer,
       ),
     ];
 

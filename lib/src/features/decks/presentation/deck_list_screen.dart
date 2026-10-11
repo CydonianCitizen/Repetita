@@ -20,20 +20,98 @@ class DeckListScreen extends ConsumerWidget {
       body: decksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
-          child: Text(
-            'Failed to load decks: $error',
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Failed to load decks',
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$error',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.tonalIcon(
+                  onPressed: () => ref.invalidate(deckListControllerProvider),
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
         data: (decks) {
           if (decks.isEmpty) {
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
+
             return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  l10n?.noDecksYet ?? 'No decks yet. Tap + to create one.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(
+                          alpha: 0.5,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.style_outlined,
+                        size: 44,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n?.noDecksYet ?? 'No decks yet. Tap + to create one.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n?.createFirstDeckPrompt ?? 'Create your first deck to begin spaced repetition studying.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () async {
+                        final result = await DeckFormDialog.show(context);
+                        if (result != null) {
+                          await ref
+                              .read(deckListControllerProvider.notifier)
+                              .createDeck(
+                                name: result.name,
+                                description: result.description,
+                              );
+                        }
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n?.newDeck ?? 'New Deck'),
+                    ),
+                  ],
                 ),
               ),
             );

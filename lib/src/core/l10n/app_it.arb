@@ -151,5 +151,73 @@
   "licenseDialogTitle": "Licenza MIT",
   "licenseCopyright": "Copyright (c) 2026 repetita",
   "viewAllLicenses": "Tutte le licenze open source",
-  "comingSoonNotice": "Funzionalità {feature} disponibile in un prossimo aggiornamento!"
+  "comingSoonNotice": "Funzionalità {feature} disponibile in un prossimo aggiornamento!",
+  "retry": "Riprova",
+  "startStudySession": "Inizia sessione di studio",
+  "newCard": "Nuova carta",
+  "frontPromptCannotBeEmpty": "La domanda non può essere vuota",
+  "backAnswerCannotBeEmpty": "La risposta non può essere vuota",
+  "promptHint": "Inserisci domanda o prompt...",
+  "answerHint": "Inserisci risposta...",
+  "reviewForecastTitle": "Previsione ripassi a 7 giorni",
+  "noUpcomingReviews": "Nessun ripasso programmato.",
+  "cardStateBreakdown": "Distribuzione stati carte",
+  "recallAccuracy": "Precisione di rievocazione",
+  "reviewsCompleted": "Totale completate",
+  "fullDatabaseBackup": "Backup completo database (JSON)",
+  "flashcardsInterchange": "Interscambio flashcard (CSV)",
+  "exportJson": "Esporta JSON",
+  "restoreJson": "Ripristina JSON",
+  "exportCsv": "Esporta CSV",
+  "importCsv": "Importa CSV",
+  "copyToClipboard": "Copia negli appunti",
+  "retention": "Ritenzione",
+  "reviews": "Ripassi",
+  "undo": "Annulla",
+  "undoReview": "Annulla ripasso",
+  "cardUndone": "Ripasso annullato",
+  "suspendCard": "Sospendi carta",
+  "unsuspendCard": "Riattiva carta",
+  "buryCard": "Rinvia carta",
+  "unburyCard": "Annulla rinvio",
+  "cardSuspended": "Carta sospesa",
+  "cardUnsuspended": "Carta riattivata",
+  "cardBuried": "Carta rinviata a domani",
+  "suspendedBadge": "Sospesa",
+  "buriedBadge": "Rinviata",
+  "reviewHeatmap": "Mappa delle revisioni",
+  "streak": "Serie",
+  "currentStreak": "Serie attuale",
+  "daysStreak": "{count, plural, =1{1 giorno} other{{count} giorni}}",
+  "@daysStreak": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "totalReviews": "Revisioni totali",
+  "noReviewsYet": "Nessuna revisione registrata",
+  "deleteDeckConfirmTitle": "Eliminare il mazzo?",
+  "deleteDeckConfirmMessage": "Sei sicuro di voler eliminare \"{name}\"? Tutte le carte in questo mazzo verranno eliminate.",
+  "@deleteDeckConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dueBadge": "Da ripassare",
+  "totalBadge": "Totale",
+  "promptBadge": "DOMANDA",
+  "answerBadge": "RISPOSTA",
+  "tapToFlipHint": "Tocca o premi Mostra risposta per girare",
+  "ratingAgain": "Ripeti",
+  "ratingHard": "Difficile",
+  "ratingGood": "Buono",
+  "ratingEasy": "Facile",
+  "saveAndAddAnother": "Salva e aggiungi un'altra",
+  "cardSaved": "Carta salvata"
 }
+
+

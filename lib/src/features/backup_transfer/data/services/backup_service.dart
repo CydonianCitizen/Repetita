@@ -45,6 +45,8 @@ class BackupService {
               reps: c.reps,
               lapses: c.lapses,
               createdAt: c.createdAt,
+              isSuspended: c.isSuspended,
+              buriedUntil: c.buriedUntil,
             ),
           )
           .toList(),
@@ -123,6 +125,8 @@ class BackupService {
                 reps: Value(card.reps),
                 lapses: Value(card.lapses),
                 createdAt: Value(card.createdAt),
+                isSuspended: Value(card.isSuspended),
+                buriedUntil: Value(card.buriedUntil),
               ),
             );
         cardIdMap[card.id] = newCardId;

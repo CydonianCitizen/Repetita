@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../data/decks_dao.dart';
 import 'deck_form_dialog.dart';
 
@@ -18,17 +19,19 @@ class DeckListTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   void _showDeleteConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Deck?'),
+        title: Text(l10n?.deleteDeckConfirmTitle ?? 'Delete Deck?'),
         content: Text(
-          'Are you sure you want to delete "${deckWithCounts.deck.name}"? All cards in this deck will be deleted.',
+          l10n?.deleteDeckConfirmMessage(deckWithCounts.deck.name) ??
+              'Are you sure you want to delete "${deckWithCounts.deck.name}"? All cards in this deck will be deleted.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n?.cancel ?? 'Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -36,7 +39,7 @@ class DeckListTile extends StatelessWidget {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -63,6 +66,7 @@ class DeckListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final deck = deckWithCounts.deck;
 
     return Card(
@@ -123,35 +127,38 @@ class DeckListTile extends StatelessWidget {
                         _showDeleteConfirmation(context);
                       }
                     },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit_outlined, size: 20),
-                            SizedBox(width: 8),
-                            Text('Edit'),
-                          ],
+                    itemBuilder: (context) {
+                      final itemL10n = AppLocalizations.of(context);
+                      return [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Text(itemL10n?.edit ?? 'Edit'),
+                            ],
+                          ),
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              size: 20,
-                              color: colorScheme.error,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Delete',
-                              style: TextStyle(color: colorScheme.error),
-                            ),
-                          ],
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline,
+                                size: 20,
+                                color: colorScheme.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                itemL10n?.delete ?? 'Delete',
+                                style: TextStyle(color: colorScheme.error),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ];
+                    },
                   ),
                 ],
               ),
@@ -159,7 +166,7 @@ class DeckListTile extends StatelessWidget {
               Row(
                 children: [
                   _Badge(
-                    label: 'Due',
+                    label: l10n?.dueBadge ?? 'Due',
                     count: deckWithCounts.dueCards,
                     backgroundColor: deckWithCounts.dueCards > 0
                         ? colorScheme.primaryContainer
@@ -170,7 +177,7 @@ class DeckListTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   _Badge(
-                    label: 'Total',
+                    label: l10n?.totalBadge ?? 'Total',
                     count: deckWithCounts.totalCards,
                     backgroundColor: colorScheme.surfaceContainerHighest,
                     textColor: colorScheme.onSurfaceVariant,

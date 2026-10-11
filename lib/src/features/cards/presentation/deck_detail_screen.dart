@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart' show Deck;
+import '../../../core/l10n/generated/app_localizations.dart';
 import '../../study_session/presentation/study_screen.dart';
 import '../domain/card_entity.dart';
 import 'card_editor_screen.dart';
@@ -16,6 +17,7 @@ class DeckDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final cardsAsync = ref.watch(cardListControllerProvider(deck.id));
 
     return Scaffold(
@@ -23,14 +25,46 @@ class DeckDetailScreen extends ConsumerWidget {
       body: cardsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text(
-            'Error loading cards: $error',
-            style: TextStyle(color: colorScheme.error),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: colorScheme.error,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Error loading cards',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$error',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.tonalIcon(
+                  onPressed: () =>
+                      ref.invalidate(cardListControllerProvider(deck.id)),
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: Text(l10n?.retry ?? 'Retry'),
+                ),
+              ],
+            ),
           ),
         ),
         data: (cards) {
           final now = DateTime.now().toUtc();
           final dueCount = cards.where((c) {
+            if (c.isSuspended || c.isBuried(now)) return false;
             return c.state == 0 ||
                 c.due.isBefore(now) ||
                 c.due.isAtSameMomentAs(now);
@@ -78,7 +112,9 @@ class DeckDetailScreen extends ConsumerWidget {
                             }
                           : null,
                       icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start Study Session'),
+                      label: Text(
+                        l10n?.startStudySession ?? 'Start Study Session',
+                      ),
                     ),
                   ],
                 ),
@@ -103,11 +139,46 @@ class DeckDetailScreen extends ConsumerWidget {
               Expanded(
                 child: cards.isEmpty
                     ? Center(
-                        child: Text(
-                          'No cards in this deck yet.\nTap + to add one.',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 72,
+                                height: 72,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surfaceContainerHighest,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.post_add_rounded,
+                                  size: 36,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No cards in this deck yet.\nTap + to add one.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.tonalIcon(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          CardEditorScreen(deckId: deck.id),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.add, size: 18),
+                                label: Text(l10n?.addCard ?? 'Add Card'),
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -139,6 +210,25 @@ class DeckDetailScreen extends ConsumerWidget {
                                   )
                                   .deleteCard(card.id);
                             },
+                            onToggleSuspend: () {
+                              ref
+                                  .read(
+                                    cardListControllerProvider(deck.id)
+                                        .notifier,
+                                  )
+                                  .toggleSuspendCard(card.id, card.isSuspended);
+                            },
+                            onToggleBury: () {
+                              final now = DateTime.now().toUtc();
+                              final notifier = ref.read(
+                                cardListControllerProvider(deck.id).notifier,
+                              );
+                              if (card.isBuried(now)) {
+                                notifier.unburyCard(card.id);
+                              } else {
+                                notifier.buryCard(card.id);
+                              }
+                            },
                           );
                         },
                       ),
@@ -149,6 +239,7 @@ class DeckDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('add_card_fab'),
+        tooltip: l10n?.addCard ?? 'Add Card',
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -168,22 +259,26 @@ class _CardTile extends StatelessWidget {
     required this.card,
     required this.onEdit,
     required this.onDelete,
+    required this.onToggleSuspend,
+    required this.onToggleBury,
   });
 
   final CardEntity card;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onToggleSuspend;
+  final VoidCallback onToggleBury;
 
-  String _stateName(int state) {
+  String _stateName(int state, AppLocalizations? l10n) {
     switch (state) {
       case 0:
-        return 'New';
+        return l10n?.stateNew ?? 'New';
       case 1:
-        return 'Learning';
+        return l10n?.stateLearning ?? 'Learning';
       case 2:
-        return 'Review';
+        return l10n?.stateReview ?? 'Review';
       case 3:
-        return 'Relearning';
+        return l10n?.stateRelearning ?? 'Relearning';
       default:
         return 'Unknown';
     }
@@ -208,6 +303,7 @@ class _CardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Dismissible(
       key: ValueKey('dismiss_${card.id}'),
@@ -248,25 +344,69 @@ class _CardTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _stateColor(
-                          card.state,
-                          scheme,
-                        ).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        _stateName(card.state),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: _stateColor(card.state, scheme),
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(width: 8),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (card.isSuspended)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.errorContainer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              l10n?.suspendedBadge ?? 'Suspended',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onErrorContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        if (card.isBuried(DateTime.now().toUtc()))
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              l10n?.buriedBadge ?? 'Buried',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onTertiaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _stateColor(
+                              card.state,
+                              scheme,
+                            ).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _stateName(card.state, l10n),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: _stateColor(card.state, scheme),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                     PopupMenuButton<String>(
                       icon: Icon(
@@ -276,18 +416,44 @@ class _CardTile extends StatelessWidget {
                       ),
                       onSelected: (value) {
                         if (value == 'edit') onEdit();
+                        if (value == 'suspend') onToggleSuspend();
+                        if (value == 'bury') onToggleBury();
                         if (value == 'delete') onDelete();
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Text(
-                            'Delete',
-                            style: TextStyle(color: scheme.error),
+                      itemBuilder: (context) {
+                        final itemL10n = AppLocalizations.of(context);
+                        final isBuried = card.isBuried(DateTime.now().toUtc());
+                        return [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Text(itemL10n?.edit ?? 'Edit'),
                           ),
-                        ),
-                      ],
+                          PopupMenuItem(
+                            value: 'suspend',
+                            child: Text(
+                              card.isSuspended
+                                  ? (itemL10n?.unsuspendCard ??
+                                        'Unsuspend Card')
+                                  : (itemL10n?.suspendCard ?? 'Suspend Card'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'bury',
+                            child: Text(
+                              isBuried
+                                  ? (itemL10n?.unburyCard ?? 'Unbury Card')
+                                  : (itemL10n?.buryCard ?? 'Bury Card'),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(
+                              itemL10n?.delete ?? 'Delete',
+                              style: TextStyle(color: scheme.error),
+                            ),
+                          ),
+                        ];
+                      },
                     ),
                   ],
                 ),

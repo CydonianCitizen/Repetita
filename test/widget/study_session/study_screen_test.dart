@@ -158,5 +158,148 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
       },
     );
+
+    testWidgets(
+      'tapping undo button rolls back previous rating and restores card',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question 1',
+          back: 'Answer 1',
+        );
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question 2',
+          back: 'Answer 2',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Initially no undo button
+        expect(find.byKey(const Key('undo_review_button')), findsNothing);
+
+        // Rate Question 1 Good
+        await tester.tap(find.byKey(const Key('show_answer_button')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+        await tester.tap(find.byKey(const Key('rating_button_good')));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Now on Question 2, undo button is present
+        expect(find.text('Question 2'), findsOneWidget);
+        expect(find.byKey(const Key('undo_review_button')), findsOneWidget);
+
+        // Tap Undo
+        await tester.tap(find.byKey(const Key('undo_review_button')));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // We are back on Question 1!
+        expect(find.text('Card 1 of 2'), findsOneWidget);
+        expect(find.text('Question 1'), findsOneWidget);
+        expect(find.byKey(const Key('show_answer_button')), findsOneWidget);
+
+        // And undo button is gone (only 1 step undo)
+        expect(find.byKey(const Key('undo_review_button')), findsNothing);
+
+        // Verify reviewLogs has 0 records (was deleted by undo)
+        final logs = await db.select(db.reviewLogs).get();
+        expect(logs, isEmpty);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'suspending current card removes it from queue and updates database',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question to Suspend',
+          back: 'Answer',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.text('Question to Suspend'), findsOneWidget);
+        expect(
+          find.byKey(const Key('study_card_actions_menu')),
+          findsOneWidget,
+        );
+
+        // Open options menu
+        await tester.tap(find.byKey(const Key('study_card_actions_menu')));
+        await tester.pumpAndSettle();
+
+        // Tap Suspend
+        await tester.tap(find.text('Suspend Card'));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Queue now empty -> session completed
+        expect(find.text('All cards reviewed for today!'), findsOneWidget);
+
+        // Check card is suspended in DB
+        final cards = await db.cardsDao.getCardsByDeck(testDeckId);
+        expect(cards.first.isSuspended, isTrue);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'burying current card removes it from queue and sets buriedUntil',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Question to Bury',
+          back: 'Answer',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.text('Question to Bury'), findsOneWidget);
+        expect(
+          find.byKey(const Key('study_card_actions_menu')),
+          findsOneWidget,
+        );
+
+        // Open options menu
+        await tester.tap(find.byKey(const Key('study_card_actions_menu')));
+        await tester.pumpAndSettle();
+
+        // Tap Bury
+        await tester.tap(find.text('Bury Card'));
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        // Queue now empty -> session completed
+        expect(find.text('All cards reviewed for today!'), findsOneWidget);
+
+        // Check card is buried in DB
+        final cards = await db.cardsDao.getCardsByDeck(testDeckId);
+        expect(cards.first.buriedUntil, isNotNull);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

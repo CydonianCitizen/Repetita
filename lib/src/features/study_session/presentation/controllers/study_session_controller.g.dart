@@ -52,7 +52,7 @@ final class StudySessionControllerProvider
 }
 
 String _$studySessionControllerHash() =>
-    r'ff908091d884155ca6e56c6ce3e9c849e5eab5c1';
+    r'707056ad1f1f8380ac95db6c8d3b7994faafe1c2';
 
 final class StudySessionControllerFamily extends $Family
     with

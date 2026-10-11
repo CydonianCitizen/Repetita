@@ -58,6 +58,8 @@ class CardPayload {
     required this.reps,
     required this.lapses,
     required this.createdAt,
+    this.isSuspended = false,
+    this.buriedUntil,
   });
 
   final int id;
@@ -72,6 +74,8 @@ class CardPayload {
   final int reps;
   final int lapses;
   final DateTime createdAt;
+  final bool isSuspended;
+  final DateTime? buriedUntil;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -86,6 +90,8 @@ class CardPayload {
     'reps': reps,
     'lapses': lapses,
     'createdAt': createdAt.toUtc().toIso8601String(),
+    'isSuspended': isSuspended,
+    'buriedUntil': buriedUntil?.toUtc().toIso8601String(),
   };
 
   factory CardPayload.fromJson(Map<String, dynamic> json) => CardPayload(
@@ -103,6 +109,10 @@ class CardPayload {
     reps: json['reps'] as int,
     lapses: json['lapses'] as int,
     createdAt: DateTime.parse(json['createdAt'] as String).toUtc(),
+    isSuspended: (json['isSuspended'] as bool?) ?? false,
+    buriedUntil: json['buriedUntil'] != null
+        ? DateTime.parse(json['buriedUntil'] as String).toUtc()
+        : null,
   );
 
   @override
@@ -121,7 +131,9 @@ class CardPayload {
           lastReview == other.lastReview &&
           reps == other.reps &&
           lapses == other.lapses &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          isSuspended == other.isSuspended &&
+          buriedUntil == other.buriedUntil;
 
   @override
   int get hashCode => Object.hash(
@@ -137,6 +149,8 @@ class CardPayload {
     reps,
     lapses,
     createdAt,
+    isSuspended,
+    buriedUntil,
   );
 }
 

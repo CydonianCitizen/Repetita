@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/generated/app_localizations.dart';
 import 'controllers/card_list_controller.dart';
 
 class CardEditorScreen extends ConsumerStatefulWidget {
@@ -43,7 +44,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _save({bool addAnother = false}) async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isSaving = true);
@@ -62,7 +63,20 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
       }
 
       if (mounted) {
-        Navigator.of(context).pop();
+        if (addAnother) {
+          _frontController.clear();
+          _backController.clear();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(context)?.cardSaved ?? 'Card saved',
+              ),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        } else {
+          Navigator.of(context).pop();
+        }
       }
     } finally {
       if (mounted) {
@@ -73,22 +87,33 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final title = widget.isEditing
+        ? (l10n?.editCard ?? 'Edit Card')
+        : (l10n?.newCard ?? 'New Card');
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Card' : 'New Card'),
+        title: Text(title),
         actions: [
+          if (!widget.isEditing)
+            TextButton(
+              key: const Key('save_and_add_another_button'),
+              onPressed: _isSaving ? null : () => _save(addAnother: true),
+              child: Text(l10n?.saveAndAddAnother ?? 'Save & Add Another'),
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilledButton(
               key: const Key('save_card_button'),
-              onPressed: _isSaving ? null : _save,
+              onPressed: _isSaving ? null : () => _save(addAnother: false),
               child: _isSaving
                   ? const SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Save'),
+                  : Text(l10n?.save ?? 'Save'),
             ),
           ),
         ],
@@ -104,15 +129,16 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               autofocus: !widget.isEditing,
               maxLines: 5,
               minLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Front (Prompt)',
-                hintText: 'Enter question or prompt...',
+              decoration: InputDecoration(
+                labelText: l10n?.cardFront ?? 'Front (Prompt)',
+                hintText: l10n?.promptHint ?? 'Enter question or prompt...',
                 alignLabelWithHint: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Front prompt cannot be empty';
+                  return l10n?.frontPromptCannotBeEmpty ??
+                      'Front prompt cannot be empty';
                 }
                 return null;
               },
@@ -123,15 +149,16 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
               controller: _backController,
               maxLines: 5,
               minLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Back (Answer)',
-                hintText: 'Enter answer...',
+              decoration: InputDecoration(
+                labelText: l10n?.cardBack ?? 'Back (Answer)',
+                hintText: l10n?.answerHint ?? 'Enter answer...',
                 alignLabelWithHint: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Back answer cannot be empty';
+                  return l10n?.backAnswerCannotBeEmpty ??
+                      'Back answer cannot be empty';
                 }
                 return null;
               },

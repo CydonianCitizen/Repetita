@@ -159,5 +159,74 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 50));
     });
+
+    testWidgets(
+      'suspending and unsuspending card shows badge and updates due count',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeck.id,
+          front: 'Card to Suspend',
+          back: 'Back to Suspend',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('1 cards due for review'), findsOneWidget);
+        expect(find.text('Suspended'), findsNothing);
+
+        // Open popup menu and tap Suspend
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Suspend Card'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Suspended'), findsOneWidget);
+        expect(find.text('0 cards due for review'), findsOneWidget);
+
+        // Unsuspend
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Unsuspend Card'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Suspended'), findsNothing);
+        expect(find.text('1 cards due for review'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets('burying card shows badge and updates due count', (
+      tester,
+    ) async {
+      await db.cardsDao.createCard(
+        deckId: testDeck.id,
+        front: 'Card to Bury',
+        back: 'Back to Bury',
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 cards due for review'), findsOneWidget);
+      expect(find.text('Buried'), findsNothing);
+
+      // Open popup menu and tap Bury Card
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Bury Card'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Buried'), findsOneWidget);
+      expect(find.text('0 cards due for review'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
   });
 }

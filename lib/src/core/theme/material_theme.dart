@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'font_theme.dart';
-
-class MaterialTheme {
-  final TextTheme textTheme;
-
-  const MaterialTheme([this.textTheme = const TextTheme()]);
-
+abstract final class MaterialTheme {
   static ColorScheme lightScheme() {
     return const ColorScheme(
       brightness: Brightness.light,
@@ -56,10 +50,6 @@ class MaterialTheme {
       surfaceContainerHigh: Color(0xffe8e7ef),
       surfaceContainerHighest: Color(0xffe3e2e9),
     );
-  }
-
-  ThemeData light() {
-    return theme(lightScheme());
   }
 
   static ColorScheme lightMediumContrastScheme() {
@@ -113,10 +103,6 @@ class MaterialTheme {
     );
   }
 
-  ThemeData lightMediumContrast() {
-    return theme(lightMediumContrastScheme());
-  }
-
   static ColorScheme lightHighContrastScheme() {
     return const ColorScheme(
       brightness: Brightness.light,
@@ -166,10 +152,6 @@ class MaterialTheme {
       surfaceContainerHigh: Color(0xffd4d4db),
       surfaceContainerHighest: Color(0xffc6c6cd),
     );
-  }
-
-  ThemeData lightHighContrast() {
-    return theme(lightHighContrastScheme());
   }
 
   static ColorScheme darkScheme() {
@@ -223,10 +205,6 @@ class MaterialTheme {
     );
   }
 
-  ThemeData dark() {
-    return theme(darkScheme());
-  }
-
   static ColorScheme darkMediumContrastScheme() {
     return const ColorScheme(
       brightness: Brightness.dark,
@@ -276,10 +254,6 @@ class MaterialTheme {
       surfaceContainerHigh: Color(0xff313238),
       surfaceContainerHighest: Color(0xff3c3d43),
     );
-  }
-
-  ThemeData darkMediumContrast() {
-    return theme(darkMediumContrastScheme());
   }
 
   static ColorScheme darkHighContrastScheme() {
@@ -332,63 +306,4 @@ class MaterialTheme {
       surfaceContainerHighest: Color(0xff46464c),
     );
   }
-
-  ThemeData darkHighContrast() {
-    return theme(darkHighContrastScheme());
-  }
-
-  ThemeData theme(ColorScheme colorScheme) {
-    final effectiveTextTheme = textTheme == const TextTheme()
-        ? createAppTextTheme(brightness: colorScheme.brightness)
-        : textTheme;
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: colorScheme.brightness,
-      colorScheme: colorScheme,
-      textTheme: effectiveTextTheme.apply(
-        bodyColor: colorScheme.onSurface,
-        displayColor: colorScheme.onSurface,
-      ),
-      scaffoldBackgroundColor: colorScheme.surface,
-      canvasColor: colorScheme.surface,
-    );
-  }
-
-  List<ExtendedColor> get extendedColors => const [];
-}
-
-class ExtendedColor {
-  final Color seed, value;
-  final ColorFamily light;
-  final ColorFamily lightHighContrast;
-  final ColorFamily lightMediumContrast;
-  final ColorFamily dark;
-  final ColorFamily darkHighContrast;
-  final ColorFamily darkMediumContrast;
-
-  const ExtendedColor({
-    required this.seed,
-    required this.value,
-    required this.light,
-    required this.lightHighContrast,
-    required this.lightMediumContrast,
-    required this.dark,
-    required this.darkHighContrast,
-    required this.darkMediumContrast,
-  });
-}
-
-class ColorFamily {
-  const ColorFamily({
-    required this.color,
-    required this.onColor,
-    required this.colorContainer,
-    required this.onColorContainer,
-  });
-
-  final Color color;
-  final Color onColor;
-  final Color colorContainer;
-  final Color onColorContainer;
 }

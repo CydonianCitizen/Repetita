@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/generated/app_localizations.dart';
 import 'controllers/study_session_controller.dart';
 import '../../settings/data/haptic_service.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
@@ -17,10 +18,86 @@ class StudyScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final stateAsync = ref.watch(studySessionControllerProvider(deckId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Study Session')),
+      appBar: AppBar(
+        title: Text(l10n?.studySessionTitle ?? 'Study Session'),
+        actions: [
+          if (stateAsync.value?.canUndo == true)
+            IconButton(
+              key: const Key('undo_review_button'),
+              icon: const Icon(Icons.undo_rounded),
+              tooltip: l10n?.undoReview ?? 'Undo Review',
+              onPressed: () async {
+                await ref
+                    .read(studySessionControllerProvider(deckId).notifier)
+                    .undoReview();
+              },
+            ),
+          if (stateAsync.value?.currentCard != null)
+            PopupMenuButton<String>(
+              key: const Key('study_card_actions_menu'),
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'Card options',
+              onSelected: (value) async {
+                final controller = ref.read(
+                  studySessionControllerProvider(deckId).notifier,
+                );
+                if (value == 'suspend') {
+                  await controller.suspendCurrentCard();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(l10n?.cardSuspended ?? 'Card suspended'),
+                      ),
+                    );
+                  }
+                } else if (value == 'bury') {
+                  await controller.buryCurrentCard();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          l10n?.cardBuried ?? 'Card buried until tomorrow',
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              itemBuilder: (context) {
+                final itemL10n = AppLocalizations.of(context);
+                return [
+                  PopupMenuItem(
+                    value: 'bury',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.alarm_off_rounded, size: 20),
+                        const SizedBox(width: 8),
+                        Text(itemL10n?.buryCard ?? 'Bury Card'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'suspend',
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.pause_circle_outline_rounded,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(itemL10n?.suspendCard ?? 'Suspend Card'),
+                      ],
+                    ),
+                  ),
+                ];
+              },
+            ),
+        ],
+      ),
       body: stateAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -174,7 +251,15 @@ class StudyScreen extends ConsumerWidget {
                       card: currentCard,
                       isAnswerRevealed: sessionState.isAnswerRevealed,
                       onCardTap: !sessionState.isAnswerRevealed
-                          ? () => controller.revealAnswer()
+                          ? () {
+                              final intensity = ref.read(
+                                hapticFeedbackControllerProvider,
+                              );
+                              ref
+                                  .read(hapticServiceProvider)
+                                  .triggerSelection(intensity);
+                              controller.revealAnswer();
+                            }
                           : null,
                     ),
                   ),
@@ -190,7 +275,15 @@ class StudyScreen extends ConsumerWidget {
                       height: 52,
                       child: FilledButton.icon(
                         key: const Key('show_answer_button'),
-                        onPressed: () => controller.revealAnswer(),
+                        onPressed: () {
+                          final intensity = ref.read(
+                            hapticFeedbackControllerProvider,
+                          );
+                          ref
+                              .read(hapticServiceProvider)
+                              .triggerSelection(intensity);
+                          controller.revealAnswer();
+                        },
                         icon: const Icon(Icons.flip_rounded),
                         label: const Text(
                           'Show Answer',

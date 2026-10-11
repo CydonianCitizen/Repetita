@@ -16,4 +16,6 @@ class Cards extends Table {
   IntColumn get reps => integer().withDefault(const Constant(0))();
   IntColumn get lapses => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isSuspended => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get buriedUntil => dateTime().nullable()();
 }

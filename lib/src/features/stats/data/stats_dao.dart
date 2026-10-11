@@ -125,4 +125,75 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
 
     return result;
   }
+
+  Future<Map<DateTime, int>> getDailyReviewCounts({
+    int? deckId,
+    int days = 105,
+    required DateTime toDate,
+  }) async {
+    final toUtc = toDate.toUtc();
+    final endOfDay = DateTime.utc(
+      toUtc.year,
+      toUtc.month,
+      toUtc.day,
+      23,
+      59,
+      59,
+      999,
+    );
+    final startDay = DateTime.utc(
+      toUtc.year,
+      toUtc.month,
+      toUtc.day,
+    ).subtract(Duration(days: days - 1));
+
+    final query = selectOnly(reviewLogs);
+    if (deckId != null) {
+      query.join([innerJoin(cards, cards.id.equalsExp(reviewLogs.cardId))]);
+      query.where(
+        cards.deckId.equals(deckId) &
+            reviewLogs.reviewedAt.isBiggerOrEqualValue(startDay) &
+            reviewLogs.reviewedAt.isSmallerOrEqualValue(endOfDay),
+      );
+    } else {
+      query.where(
+        reviewLogs.reviewedAt.isBiggerOrEqualValue(startDay) &
+            reviewLogs.reviewedAt.isSmallerOrEqualValue(endOfDay),
+      );
+    }
+    query.addColumns([reviewLogs.reviewedAt]);
+
+    final rows = await query.get();
+    final map = <DateTime, int>{};
+    for (final row in rows) {
+      final dt = row.read(reviewLogs.reviewedAt);
+      if (dt != null) {
+        final utc = dt.toUtc();
+        final dayKey = DateTime.utc(utc.year, utc.month, utc.day);
+        map[dayKey] = (map[dayKey] ?? 0) + 1;
+      }
+    }
+    return map;
+  }
+
+  Future<int> getCurrentStreak({int? deckId, required DateTime today}) async {
+    final query = selectOnly(reviewLogs);
+    if (deckId != null) {
+      query.join([innerJoin(cards, cards.id.equalsExp(reviewLogs.cardId))]);
+      query.where(cards.deckId.equals(deckId));
+    }
+    query.addColumns([reviewLogs.reviewedAt]);
+
+    final rows = await query.get();
+    final uniqueDays = <DateTime>{};
+    for (final row in rows) {
+      final dt = row.read(reviewLogs.reviewedAt);
+      if (dt != null) {
+        final utc = dt.toUtc();
+        uniqueDays.add(DateTime.utc(utc.year, utc.month, utc.day));
+      }
+    }
+
+    return calculateStreak(uniqueDays, today);
+  }
 }

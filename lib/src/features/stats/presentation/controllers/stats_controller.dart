@@ -20,12 +20,23 @@ class StatsController extends _$StatsController {
       days: 7,
       fromDate: now,
     );
+    final dailyReviewCounts = await dao.getDailyReviewCounts(
+      deckId: deckId,
+      days: 105,
+      toDate: now,
+    );
+    final currentStreak = await dao.getCurrentStreak(
+      deckId: deckId,
+      today: now,
+    );
 
     return StatsData(
       stateCounts: stateCounts,
       retentionRate: retentionRate,
       totalReviews: totalReviews,
       forecast: forecast,
+      dailyReviewCounts: dailyReviewCounts,
+      currentStreak: currentStreak,
     );
   }
 }

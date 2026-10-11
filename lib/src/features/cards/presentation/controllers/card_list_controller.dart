@@ -34,4 +34,25 @@ class CardListController extends _$CardListController {
     final dao = ref.read(cardsDaoProvider);
     await dao.deleteCard(id);
   }
+
+  Future<void> toggleSuspendCard(int id, bool currentSuspended) async {
+    final dao = ref.read(cardsDaoProvider);
+    await dao.setCardSuspended(id, !currentSuspended);
+  }
+
+  Future<void> buryCard(int id) async {
+    final dao = ref.read(cardsDaoProvider);
+    final tomorrow = DateTime.now().toUtc().add(const Duration(days: 1));
+    final tomorrowMidnight = DateTime.utc(
+      tomorrow.year,
+      tomorrow.month,
+      tomorrow.day,
+    );
+    await dao.buryCard(id, tomorrowMidnight);
+  }
+
+  Future<void> unburyCard(int id) async {
+    final dao = ref.read(cardsDaoProvider);
+    await dao.unburyCard(id);
+  }
 }

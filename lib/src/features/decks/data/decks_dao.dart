@@ -38,6 +38,9 @@ class DecksDao extends DatabaseAccessor<AppDatabase> with _$DecksDaoMixin {
     final totalCards = cards.id.count();
     final isDue =
         cards.id.isNotNull() &
+        cards.isSuspended.equals(false) &
+        (cards.buriedUntil.isNull() |
+            cards.buriedUntil.isSmallerOrEqual(currentDateAndTime)) &
         (cards.due.isSmallerOrEqual(currentDateAndTime) |
             cards.state.equals(0));
     final dueCards = isDue

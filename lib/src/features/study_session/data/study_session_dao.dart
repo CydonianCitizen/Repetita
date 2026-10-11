@@ -19,6 +19,9 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           ..where(
             (t) =>
                 t.deckId.equals(deckId) &
+                t.isSuspended.equals(false) &
+                (t.buriedUntil.isNull() |
+                    t.buriedUntil.isSmallerOrEqualValue(cutoffUtc)) &
                 (t.due.isSmallerOrEqualValue(cutoffUtc) | t.state.equals(0)),
           )
           ..orderBy([
@@ -28,7 +31,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  Future<void> recordReview({
+  Future<int> recordReview({
     required int cardId,
     required FsrsCard updatedCard,
     required ReviewLogSnapshot logSnapshot,
@@ -46,7 +49,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
         ),
       );
 
-      await into(reviewLogs).insert(
+      final logId = await into(reviewLogs).insert(
         ReviewLogsCompanion.insert(
           cardId: cardId,
           rating: logSnapshot.rating.value,
@@ -60,6 +63,30 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           reviewedAt: logSnapshot.reviewedAt,
         ),
       );
+
+      return logId;
+    });
+  }
+
+  Future<void> undoReview({
+    required int cardId,
+    required FsrsCard previousCard,
+    required int reviewLogId,
+  }) {
+    return transaction(() async {
+      await (update(cards)..where((t) => t.id.equals(cardId))).write(
+        CardsCompanion(
+          state: Value(previousCard.state.value),
+          stability: Value(previousCard.stability),
+          difficulty: Value(previousCard.difficulty),
+          due: Value(previousCard.due),
+          lastReview: Value(previousCard.lastReview),
+          reps: Value(previousCard.reps),
+          lapses: Value(previousCard.lapses),
+        ),
+      );
+
+      await (delete(reviewLogs)..where((t) => t.id.equals(reviewLogId))).go();
     });
   }
 }

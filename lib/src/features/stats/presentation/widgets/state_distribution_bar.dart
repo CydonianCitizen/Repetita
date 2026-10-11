@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../domain/stats_models.dart';
 
 class StateDistributionBar extends StatelessWidget {
@@ -11,22 +12,27 @@ class StateDistributionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
     final total = counts.total;
 
     final segments = [
-      _Segment(name: 'New', count: counts.newCount, color: colorScheme.primary),
       _Segment(
-        name: 'Learning',
+        name: l10n?.stateNew ?? 'New',
+        count: counts.newCount,
+        color: colorScheme.primary,
+      ),
+      _Segment(
+        name: l10n?.stateLearning ?? 'Learning',
         count: counts.learningCount,
         color: colorScheme.tertiary,
       ),
       _Segment(
-        name: 'Review',
+        name: l10n?.stateReview ?? 'Review',
         count: counts.reviewCount,
         color: colorScheme.secondary,
       ),
       _Segment(
-        name: 'Relearning',
+        name: l10n?.stateRelearning ?? 'Relearning',
         count: counts.relearningCount,
         color: colorScheme.error,
       ),
@@ -50,7 +56,7 @@ class StateDistributionBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Card State Breakdown',
+                  l10n?.cardStateBreakdown ?? 'Card State Breakdown',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

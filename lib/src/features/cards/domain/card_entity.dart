@@ -15,6 +15,8 @@ class CardEntity {
     required this.reps,
     required this.lapses,
     required this.createdAt,
+    this.isSuspended = false,
+    this.buriedUntil,
   });
 
   final int id;
@@ -29,6 +31,47 @@ class CardEntity {
   final int reps;
   final int lapses;
   final DateTime createdAt;
+  final bool isSuspended;
+  final DateTime? buriedUntil;
+
+  bool isBuried(DateTime now) {
+    if (buriedUntil == null) return false;
+    return buriedUntil!.isAfter(now.toUtc());
+  }
+
+  CardEntity copyWith({
+    int? id,
+    int? deckId,
+    String? front,
+    String? back,
+    int? state,
+    double? stability,
+    double? difficulty,
+    DateTime? due,
+    DateTime? lastReview,
+    int? reps,
+    int? lapses,
+    DateTime? createdAt,
+    bool? isSuspended,
+    DateTime? buriedUntil,
+  }) {
+    return CardEntity(
+      id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
+      front: front ?? this.front,
+      back: back ?? this.back,
+      state: state ?? this.state,
+      stability: stability ?? this.stability,
+      difficulty: difficulty ?? this.difficulty,
+      due: due ?? this.due,
+      lastReview: lastReview ?? this.lastReview,
+      reps: reps ?? this.reps,
+      lapses: lapses ?? this.lapses,
+      createdAt: createdAt ?? this.createdAt,
+      isSuspended: isSuspended ?? this.isSuspended,
+      buriedUntil: buriedUntil ?? this.buriedUntil,
+    );
+  }
 
   FsrsCard toFsrsCard() => FsrsCard(
     state: CardState.values.firstWhere(
@@ -59,7 +102,9 @@ class CardEntity {
           lastReview == other.lastReview &&
           reps == other.reps &&
           lapses == other.lapses &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          isSuspended == other.isSuspended &&
+          buriedUntil == other.buriedUntil;
 
   @override
   int get hashCode => Object.hash(
@@ -75,5 +120,7 @@ class CardEntity {
     reps,
     lapses,
     createdAt,
+    isSuspended,
+    buriedUntil,
   );
 }

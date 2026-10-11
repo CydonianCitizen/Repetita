@@ -462,4 +462,155 @@ class AppLocalizationsEn extends AppLocalizations {
   String comingSoonNotice(String feature) {
     return '$feature feature coming in an upcoming release!';
   }
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get startStudySession => 'Start Study Session';
+
+  @override
+  String get newCard => 'New Card';
+
+  @override
+  String get frontPromptCannotBeEmpty => 'Front prompt cannot be empty';
+
+  @override
+  String get backAnswerCannotBeEmpty => 'Back answer cannot be empty';
+
+  @override
+  String get promptHint => 'Enter question or prompt...';
+
+  @override
+  String get answerHint => 'Enter answer...';
+
+  @override
+  String get reviewForecastTitle => '7-Day Review Forecast';
+
+  @override
+  String get noUpcomingReviews => 'No upcoming reviews scheduled.';
+
+  @override
+  String get cardStateBreakdown => 'Card State Breakdown';
+
+  @override
+  String get recallAccuracy => 'Recall accuracy';
+
+  @override
+  String get reviewsCompleted => 'Total completed';
+
+  @override
+  String get fullDatabaseBackup => 'Full Database Backup (JSON)';
+
+  @override
+  String get flashcardsInterchange => 'Flashcards Interchange (CSV)';
+
+  @override
+  String get exportJson => 'Export JSON';
+
+  @override
+  String get restoreJson => 'Restore JSON';
+
+  @override
+  String get exportCsv => 'Export CSV';
+
+  @override
+  String get importCsv => 'Import CSV';
+
+  @override
+  String get copyToClipboard => 'Copy to Clipboard';
+
+  @override
+  String get retention => 'Retention';
+
+  @override
+  String get reviews => 'Reviews';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get undoReview => 'Undo Review';
+
+  @override
+  String get cardUndone => 'Review undone';
+
+  @override
+  String get suspendCard => 'Suspend Card';
+
+  @override
+  String get unsuspendCard => 'Unsuspend Card';
+
+  @override
+  String get buryCard => 'Bury Card';
+
+  @override
+  String get unburyCard => 'Unbury Card';
+
+  @override
+  String get cardSuspended => 'Card suspended';
+
+  @override
+  String get cardUnsuspended => 'Card unsuspended';
+
+  @override
+  String get cardBuried => 'Card buried until tomorrow';
+
+  @override
+  String get suspendedBadge => 'Suspended';
+
+  @override
+  String get buriedBadge => 'Buried';
+
+  @override
+  String get reviewHeatmap => 'Review Heatmap';
+
+  @override
+  String get streak => 'Streak';
+
+  @override
+  String get currentStreak => 'Current Streak';
+
+  @override
+  String daysStreak(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noReviewsYet => 'No reviews recorded yet';
+
+  @override
+  String get deleteDeckConfirmTitle => 'Delete Deck?';
+
+  @override
+  String deleteDeckConfirmMessage(String name) {
+    return 'Are you sure you want to delete \"$name\"? All cards in this deck will be deleted.';
+  }
+
+  @override
+  String get dueBadge => 'Due';
+
+  @override
+  String get totalBadge => 'Total';
+
+  @override
+  String get promptBadge => 'PROMPT';
+
+  @override
+  String get answerBadge => 'ANSWER';
+
+  @override
+  String get tapToFlipHint => 'Tap or press Show Answer to flip';
+
+  @override
+  String get saveAndAddAnother => 'Save & Add Another';
+
+  @override
+  String get cardSaved => 'Card saved';
 }

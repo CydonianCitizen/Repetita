@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/stats/presentation/stats_screen.dart';
+import 'package:repetita/src/features/stats/presentation/widgets/review_heatmap_widget.dart';
 
 void main() {
   late AppDatabase db;
@@ -31,6 +32,13 @@ void main() {
 
   group('StatsScreen Widget Tests', () {
     testWidgets('renders empty metrics gracefully', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       await tester.pumpWidget(buildSubject());
       for (int i = 0; i < 10; i++) {
         await tester.pump(const Duration(milliseconds: 50));
@@ -42,6 +50,8 @@ void main() {
       expect(find.text('0'), findsWidgets);
       expect(find.text('Reviews'), findsOneWidget);
       expect(find.text('0 total'), findsOneWidget);
+      expect(find.byType(ReviewHeatmapWidget), findsOneWidget);
+      expect(find.text('Review Heatmap'), findsOneWidget);
       expect(find.text('Card State Breakdown'), findsOneWidget);
       expect(find.text('7-Day Review Forecast'), findsOneWidget);
 
@@ -50,6 +60,13 @@ void main() {
     });
 
     testWidgets('renders populated metrics accurately', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final now = DateTime.now().toUtc();
 
       // Create cards in different states
@@ -130,6 +147,9 @@ void main() {
       expect(find.text('3'), findsWidgets); // 3 reviews
       expect(find.text('Reviews'), findsOneWidget);
       expect(find.text('2 total'), findsOneWidget); // 2 cards
+      expect(find.byType(ReviewHeatmapWidget), findsOneWidget);
+      expect(find.text('Review Heatmap'), findsOneWidget);
+      expect(find.text('1 day'), findsOneWidget);
       expect(find.text('7-Day Review Forecast'), findsOneWidget);
       expect(find.text('Today'), findsOneWidget);
       expect(find.text('Tomorrow'), findsOneWidget);

@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/features/stats/data/stats_dao.dart';
+import 'package:repetita/src/features/stats/domain/stats_models.dart';
 
 void main() {
   late AppDatabase db;
@@ -261,5 +262,115 @@ void main() {
       expect(forecast[5].count, equals(0)); // Day 5
       expect(forecast[6].count, equals(0)); // Day 6
     });
+
+    test('calculateStreak computes consecutive streak correctly', () {
+      final today = DateTime.utc(2026, 10, 11);
+
+      // Empty review dates
+      expect(calculateStreak({}, today), equals(0));
+
+      // Reviewed today only -> 1 day streak
+      expect(calculateStreak({today}, today), equals(1));
+
+      // Reviewed yesterday only -> 1 day streak (active habit)
+      expect(
+        calculateStreak({today.subtract(const Duration(days: 1))}, today),
+        equals(1),
+      );
+
+      // Reviewed 2 days ago but not yesterday -> 0 streak
+      expect(
+        calculateStreak({today.subtract(const Duration(days: 2))}, today),
+        equals(0),
+      );
+
+      // 4 consecutive days including today -> 4 days streak
+      final fourDays = {
+        today,
+        today.subtract(const Duration(days: 1)),
+        today.subtract(const Duration(days: 2)),
+        today.subtract(const Duration(days: 3)),
+      };
+      expect(calculateStreak(fourDays, today), equals(4));
+
+      // 3 consecutive days ending yesterday (has not studied today yet) -> 3 days streak
+      final threeDaysEndingYesterday = {
+        today.subtract(const Duration(days: 1)),
+        today.subtract(const Duration(days: 2)),
+        today.subtract(const Duration(days: 3)),
+      };
+      expect(calculateStreak(threeDaysEndingYesterday, today), equals(3));
+    });
+
+    test(
+      'getDailyReviewCounts and getCurrentStreak query database correctly',
+      () async {
+        final today = DateTime.utc(2026, 10, 11, 14, 0);
+        final cardId = await db.cardsDao.createCard(
+          deckId: deck1Id,
+          front: 'Streak Card',
+          back: 'A',
+        );
+
+        // Add 2 reviews today
+        for (int i = 0; i < 2; i++) {
+          await db
+              .into(db.reviewLogs)
+              .insert(
+                ReviewLogsCompanion.insert(
+                  cardId: cardId,
+                  rating: 3,
+                  state: 1,
+                  due: today,
+                  stability: 2.0,
+                  difficulty: 5.0,
+                  elapsedDays: 0,
+                  lastElapsedDays: 0,
+                  scheduledDays: 1,
+                  reviewedAt: today.add(Duration(minutes: i * 30)),
+                ),
+              );
+        }
+
+        // Add 1 review yesterday
+        final yesterday = today.subtract(const Duration(days: 1));
+        await db
+            .into(db.reviewLogs)
+            .insert(
+              ReviewLogsCompanion.insert(
+                cardId: cardId,
+                rating: 3,
+                state: 1,
+                due: yesterday,
+                stability: 2.0,
+                difficulty: 5.0,
+                elapsedDays: 0,
+                lastElapsedDays: 0,
+                scheduledDays: 1,
+                reviewedAt: yesterday,
+              ),
+            );
+
+        // Daily review counts
+        final counts = await statsDao.getDailyReviewCounts(
+          deckId: deck1Id,
+          days: 7,
+          toDate: today,
+        );
+
+        final todayKey = DateTime.utc(2026, 10, 11);
+        final yesterdayKey = DateTime.utc(2026, 10, 10);
+
+        expect(counts[todayKey], equals(2));
+        expect(counts[yesterdayKey], equals(1));
+
+        // Current streak
+        final streak = await statsDao.getCurrentStreak(
+          deckId: deck1Id,
+          today: today,
+        );
+        expect(streak, equals(2));
+      },
+    );
   });
 }

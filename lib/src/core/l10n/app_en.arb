@@ -196,5 +196,73 @@
         "type": "String"
       }
     }
-  }
+  },
+  "retry": "Retry",
+  "startStudySession": "Start Study Session",
+  "newCard": "New Card",
+  "frontPromptCannotBeEmpty": "Front prompt cannot be empty",
+  "backAnswerCannotBeEmpty": "Back answer cannot be empty",
+  "promptHint": "Enter question or prompt...",
+  "answerHint": "Enter answer...",
+  "reviewForecastTitle": "7-Day Review Forecast",
+  "noUpcomingReviews": "No upcoming reviews scheduled.",
+  "cardStateBreakdown": "Card State Breakdown",
+  "recallAccuracy": "Recall accuracy",
+  "reviewsCompleted": "Total completed",
+  "fullDatabaseBackup": "Full Database Backup (JSON)",
+  "flashcardsInterchange": "Flashcards Interchange (CSV)",
+  "exportJson": "Export JSON",
+  "restoreJson": "Restore JSON",
+  "exportCsv": "Export CSV",
+  "importCsv": "Import CSV",
+  "copyToClipboard": "Copy to Clipboard",
+  "retention": "Retention",
+  "reviews": "Reviews",
+  "undo": "Undo",
+  "undoReview": "Undo Review",
+  "cardUndone": "Review undone",
+  "suspendCard": "Suspend Card",
+  "unsuspendCard": "Unsuspend Card",
+  "buryCard": "Bury Card",
+  "unburyCard": "Unbury Card",
+  "cardSuspended": "Card suspended",
+  "cardUnsuspended": "Card unsuspended",
+  "cardBuried": "Card buried until tomorrow",
+  "suspendedBadge": "Suspended",
+  "buriedBadge": "Buried",
+  "reviewHeatmap": "Review Heatmap",
+  "streak": "Streak",
+  "currentStreak": "Current Streak",
+  "daysStreak": "{count, plural, =1{1 day} other{{count} days}}",
+  "@daysStreak": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "totalReviews": "Total Reviews",
+  "noReviewsYet": "No reviews recorded yet",
+  "deleteDeckConfirmTitle": "Delete Deck?",
+  "deleteDeckConfirmMessage": "Are you sure you want to delete \"{name}\"? All cards in this deck will be deleted.",
+  "@deleteDeckConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dueBadge": "Due",
+  "totalBadge": "Total",
+  "promptBadge": "PROMPT",
+  "answerBadge": "ANSWER",
+  "tapToFlipHint": "Tap or press Show Answer to flip",
+  "ratingAgain": "Again",
+  "ratingHard": "Hard",
+  "ratingGood": "Good",
+  "ratingEasy": "Easy",
+  "saveAndAddAnother": "Save & Add Another",
+  "cardSaved": "Card saved"
 }
+
+

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/generated/app_localizations.dart';
 import '../../decks/data/decks_dao.dart';
 import '../../decks/presentation/controllers/deck_list_controller.dart';
 import 'controllers/backup_controller.dart';
@@ -144,8 +145,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup & Transfer')),
+      appBar: AppBar(title: Text(l10n?.backupTitle ?? 'Backup & Transfer')),
       body: Stack(
         children: [
           ListView(
@@ -153,42 +156,45 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             children: [
               _SectionCard(
                 icon: Icons.storage,
-                title: 'Full Database Backup (JSON)',
-                description: 'Export entire study database including all decks, cards, scheduling states, and historical review logs.',
+                title:
+                    l10n?.fullDatabaseBackup ?? 'Full Database Backup (JSON)',
+                description: l10n?.exportDescription ?? 'Export entire study database including all decks, cards, scheduling states, and historical review logs.',
                 actions: [
                   FilledButton.icon(
                     key: const Key('export_json_button'),
                     onPressed: _isLoading ? null : _handleExportJson,
                     icon: const Icon(Icons.file_upload_outlined),
-                    label: const Text('Export Full Backup'),
+                    label: Text(l10n?.exportBackup ?? 'Export Full Backup'),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     key: const Key('restore_json_button'),
                     onPressed: _isLoading ? null : _handleRestoreJson,
                     icon: const Icon(Icons.file_download_outlined),
-                    label: const Text('Restore Backup'),
+                    label: Text(l10n?.restoreJson ?? 'Restore Backup'),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
               _SectionCard(
                 icon: Icons.table_chart_outlined,
-                title: 'Flashcards Interchange (CSV)',
+                title:
+                    l10n?.flashcardsInterchange ??
+                    'Flashcards Interchange (CSV)',
                 description: 'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.',
                 actions: [
                   FilledButton.icon(
                     key: const Key('export_csv_button'),
                     onPressed: _isLoading ? null : _handleExportCsv,
                     icon: const Icon(Icons.upload_file),
-                    label: const Text('Export Cards to CSV'),
+                    label: Text(l10n?.exportCsv ?? 'Export Cards to CSV'),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     key: const Key('import_csv_button'),
                     onPressed: _isLoading ? null : _handleImportCsv,
                     icon: const Icon(Icons.download_for_offline_outlined),
-                    label: const Text('Import Cards from CSV'),
+                    label: Text(l10n?.importCsv ?? 'Import Cards from CSV'),
                   ),
                 ],
               ),
@@ -269,7 +275,7 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const Key('confirm_restore_button'),
@@ -351,7 +357,7 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
         ),
         FilledButton(
           key: const Key('confirm_import_csv_button'),
@@ -373,6 +379,8 @@ class _DisplayResultDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
       title: Text(title),
       content: SizedBox(
@@ -382,7 +390,7 @@ class _DisplayResultDialog extends StatelessWidget {
       actions: [
         TextButton.icon(
           icon: const Icon(Icons.copy),
-          label: const Text('Copy to Clipboard'),
+          label: Text(l10n?.copyToClipboard ?? 'Copy to Clipboard'),
           onPressed: () {
             Clipboard.setData(ClipboardData(text: content));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -392,7 +400,7 @@ class _DisplayResultDialog extends StatelessWidget {
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n?.close ?? 'Close'),
         ),
       ],
     );

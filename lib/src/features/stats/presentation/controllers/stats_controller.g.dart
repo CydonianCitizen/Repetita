@@ -50,7 +50,7 @@ final class StatsControllerProvider
   }
 }
 
-String _$statsControllerHash() => r'40d738af4dc90390e0f5bb279c079c9fa964ae39';
+String _$statsControllerHash() => r'68b93678729eff6b5df49b952a709b0597a98998';
 
 final class StatsControllerFamily extends $Family
     with

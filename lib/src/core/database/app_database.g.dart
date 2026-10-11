@@ -492,6 +492,32 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isSuspendedMeta = const VerificationMeta(
+    'isSuspended',
+  );
+  @override
+  late final GeneratedColumn<bool> isSuspended = GeneratedColumn<bool>(
+    'is_suspended',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_suspended" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _buriedUntilMeta = const VerificationMeta(
+    'buriedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> buriedUntil = GeneratedColumn<DateTime>(
+    'buried_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -506,6 +532,8 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     reps,
     lapses,
     createdAt,
+    isSuspended,
+    buriedUntil,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -596,6 +624,24 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('is_suspended')) {
+      context.handle(
+        _isSuspendedMeta,
+        isSuspended.isAcceptableOrUnknown(
+          data['is_suspended']!,
+          _isSuspendedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('buried_until')) {
+      context.handle(
+        _buriedUntilMeta,
+        buriedUntil.isAcceptableOrUnknown(
+          data['buried_until']!,
+          _buriedUntilMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -653,6 +699,14 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      isSuspended: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_suspended'],
+      )!,
+      buriedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}buried_until'],
+      ),
     );
   }
 
@@ -675,6 +729,8 @@ class Card extends DataClass implements Insertable<Card> {
   final int reps;
   final int lapses;
   final DateTime createdAt;
+  final bool isSuspended;
+  final DateTime? buriedUntil;
   const Card({
     required this.id,
     required this.deckId,
@@ -688,6 +744,8 @@ class Card extends DataClass implements Insertable<Card> {
     required this.reps,
     required this.lapses,
     required this.createdAt,
+    required this.isSuspended,
+    this.buriedUntil,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -706,6 +764,10 @@ class Card extends DataClass implements Insertable<Card> {
     map['reps'] = Variable<int>(reps);
     map['lapses'] = Variable<int>(lapses);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_suspended'] = Variable<bool>(isSuspended);
+    if (!nullToAbsent || buriedUntil != null) {
+      map['buried_until'] = Variable<DateTime>(buriedUntil);
+    }
     return map;
   }
 
@@ -725,6 +787,10 @@ class Card extends DataClass implements Insertable<Card> {
       reps: Value(reps),
       lapses: Value(lapses),
       createdAt: Value(createdAt),
+      isSuspended: Value(isSuspended),
+      buriedUntil: buriedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(buriedUntil),
     );
   }
 
@@ -746,6 +812,8 @@ class Card extends DataClass implements Insertable<Card> {
       reps: serializer.fromJson<int>(json['reps']),
       lapses: serializer.fromJson<int>(json['lapses']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isSuspended: serializer.fromJson<bool>(json['isSuspended']),
+      buriedUntil: serializer.fromJson<DateTime?>(json['buriedUntil']),
     );
   }
   @override
@@ -764,6 +832,8 @@ class Card extends DataClass implements Insertable<Card> {
       'reps': serializer.toJson<int>(reps),
       'lapses': serializer.toJson<int>(lapses),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isSuspended': serializer.toJson<bool>(isSuspended),
+      'buriedUntil': serializer.toJson<DateTime?>(buriedUntil),
     };
   }
 
@@ -780,6 +850,8 @@ class Card extends DataClass implements Insertable<Card> {
     int? reps,
     int? lapses,
     DateTime? createdAt,
+    bool? isSuspended,
+    Value<DateTime?> buriedUntil = const Value.absent(),
   }) => Card(
     id: id ?? this.id,
     deckId: deckId ?? this.deckId,
@@ -793,6 +865,8 @@ class Card extends DataClass implements Insertable<Card> {
     reps: reps ?? this.reps,
     lapses: lapses ?? this.lapses,
     createdAt: createdAt ?? this.createdAt,
+    isSuspended: isSuspended ?? this.isSuspended,
+    buriedUntil: buriedUntil.present ? buriedUntil.value : this.buriedUntil,
   );
   Card copyWithCompanion(CardsCompanion data) {
     return Card(
@@ -812,6 +886,12 @@ class Card extends DataClass implements Insertable<Card> {
       reps: data.reps.present ? data.reps.value : this.reps,
       lapses: data.lapses.present ? data.lapses.value : this.lapses,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isSuspended: data.isSuspended.present
+          ? data.isSuspended.value
+          : this.isSuspended,
+      buriedUntil: data.buriedUntil.present
+          ? data.buriedUntil.value
+          : this.buriedUntil,
     );
   }
 
@@ -829,7 +909,9 @@ class Card extends DataClass implements Insertable<Card> {
           ..write('lastReview: $lastReview, ')
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isSuspended: $isSuspended, ')
+          ..write('buriedUntil: $buriedUntil')
           ..write(')'))
         .toString();
   }
@@ -848,6 +930,8 @@ class Card extends DataClass implements Insertable<Card> {
     reps,
     lapses,
     createdAt,
+    isSuspended,
+    buriedUntil,
   );
   @override
   bool operator ==(Object other) =>
@@ -864,7 +948,9 @@ class Card extends DataClass implements Insertable<Card> {
           other.lastReview == this.lastReview &&
           other.reps == this.reps &&
           other.lapses == this.lapses &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.isSuspended == this.isSuspended &&
+          other.buriedUntil == this.buriedUntil);
 }
 
 class CardsCompanion extends UpdateCompanion<Card> {
@@ -880,6 +966,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
   final Value<int> reps;
   final Value<int> lapses;
   final Value<DateTime> createdAt;
+  final Value<bool> isSuspended;
+  final Value<DateTime?> buriedUntil;
   const CardsCompanion({
     this.id = const Value.absent(),
     this.deckId = const Value.absent(),
@@ -893,6 +981,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isSuspended = const Value.absent(),
+    this.buriedUntil = const Value.absent(),
   });
   CardsCompanion.insert({
     this.id = const Value.absent(),
@@ -907,6 +997,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isSuspended = const Value.absent(),
+    this.buriedUntil = const Value.absent(),
   }) : deckId = Value(deckId),
        front = Value(front),
        back = Value(back),
@@ -924,6 +1016,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Expression<int>? reps,
     Expression<int>? lapses,
     Expression<DateTime>? createdAt,
+    Expression<bool>? isSuspended,
+    Expression<DateTime>? buriedUntil,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -938,6 +1032,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
       if (reps != null) 'reps': reps,
       if (lapses != null) 'lapses': lapses,
       if (createdAt != null) 'created_at': createdAt,
+      if (isSuspended != null) 'is_suspended': isSuspended,
+      if (buriedUntil != null) 'buried_until': buriedUntil,
     });
   }
 
@@ -954,6 +1050,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Value<int>? reps,
     Value<int>? lapses,
     Value<DateTime>? createdAt,
+    Value<bool>? isSuspended,
+    Value<DateTime?>? buriedUntil,
   }) {
     return CardsCompanion(
       id: id ?? this.id,
@@ -968,6 +1066,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
       reps: reps ?? this.reps,
       lapses: lapses ?? this.lapses,
       createdAt: createdAt ?? this.createdAt,
+      isSuspended: isSuspended ?? this.isSuspended,
+      buriedUntil: buriedUntil ?? this.buriedUntil,
     );
   }
 
@@ -1010,6 +1110,12 @@ class CardsCompanion extends UpdateCompanion<Card> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (isSuspended.present) {
+      map['is_suspended'] = Variable<bool>(isSuspended.value);
+    }
+    if (buriedUntil.present) {
+      map['buried_until'] = Variable<DateTime>(buriedUntil.value);
+    }
     return map;
   }
 
@@ -1027,7 +1133,9 @@ class CardsCompanion extends UpdateCompanion<Card> {
           ..write('lastReview: $lastReview, ')
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isSuspended: $isSuspended, ')
+          ..write('buriedUntil: $buriedUntil')
           ..write(')'))
         .toString();
   }
@@ -2034,6 +2142,8 @@ typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<DateTime> createdAt,
+  Value<bool> isSuspended,
+  Value<DateTime?> buriedUntil,
 });
 typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<int> id,
@@ -2048,6 +2158,8 @@ typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<DateTime> createdAt,
+  Value<bool> isSuspended,
+  Value<DateTime?> buriedUntil,
 });
 
 final class $$CardsTableReferences
@@ -2150,6 +2262,16 @@ class $$CardsTableFilterComposer extends Composer<_$AppDatabase, $CardsTable> {
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSuspended => $composableBuilder(
+    column: $table.isSuspended,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get buriedUntil => $composableBuilder(
+    column: $table.buriedUntil,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2266,6 +2388,16 @@ class $$CardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isSuspended => $composableBuilder(
+    column: $table.isSuspended,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get buriedUntil => $composableBuilder(
+    column: $table.buriedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DecksTableOrderingComposer get deckId {
     final $$DecksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2335,6 +2467,16 @@ class $$CardsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSuspended => $composableBuilder(
+    column: $table.isSuspended,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get buriedUntil => $composableBuilder(
+    column: $table.buriedUntil,
+    builder: (column) => column,
+  );
 
   $$DecksTableAnnotationComposer get deckId {
     final $$DecksTableAnnotationComposer composer = $composerBuilder(
@@ -2425,6 +2567,8 @@ class $$CardsTableTableManager
                 Value<int> reps = const Value.absent(),
                 Value<int> lapses = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isSuspended = const Value.absent(),
+                Value<DateTime?> buriedUntil = const Value.absent(),
               }) => CardsCompanion(
                 id: id,
                 deckId: deckId,
@@ -2438,6 +2582,8 @@ class $$CardsTableTableManager
                 reps: reps,
                 lapses: lapses,
                 createdAt: createdAt,
+                isSuspended: isSuspended,
+                buriedUntil: buriedUntil,
               ),
           createCompanionCallback:
               ({
@@ -2453,6 +2599,8 @@ class $$CardsTableTableManager
                 Value<int> reps = const Value.absent(),
                 Value<int> lapses = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isSuspended = const Value.absent(),
+                Value<DateTime?> buriedUntil = const Value.absent(),
               }) => CardsCompanion.insert(
                 id: id,
                 deckId: deckId,
@@ -2466,6 +2614,8 @@ class $$CardsTableTableManager
                 reps: reps,
                 lapses: lapses,
                 createdAt: createdAt,
+                isSuspended: isSuspended,
+                buriedUntil: buriedUntil,
               ),
           withReferenceMapper: (p0) => p0
               .map(
