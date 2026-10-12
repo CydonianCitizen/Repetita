@@ -7,6 +7,7 @@ import '../data/haptic_service.dart';
 import '../domain/animation_level.dart';
 import '../domain/haptic_intensity.dart';
 import 'controllers/animation_level_controller.dart';
+import 'controllers/app_version_controller.dart';
 import 'controllers/fsrs_parameters_controller.dart';
 import 'controllers/haptic_controller.dart';
 import 'controllers/locale_controller.dart';
@@ -23,8 +24,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key, this.isEmbedded = false});
 
   final bool isEmbedded;
-
-  static const String appVersion = 'v0.3.0';
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -103,6 +102,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final appVersion = ref.watch(appVersionProvider).value ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -130,8 +130,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        l10n?.appSubtitle(SettingsScreen.appVersion) ??
-                            'Offline Spaced Repetition Engine • ${SettingsScreen.appVersion}',
+                        l10n?.appSubtitle(appVersion) ??
+                            'Offline Spaced Repetition Engine • $appVersion',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.outline,
                         ),
@@ -149,7 +149,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    SettingsScreen.appVersion,
+                    appVersion,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.primary,
@@ -857,7 +857,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                 subtitle:
                     l10n?.checkForUpdatesSubtitle ??
                     'Verify installed version against GitHub releases',
-                trailingText: SettingsScreen.appVersion,
+                trailingText: appVersion,
                 onTap: () => UpdateCheckDialog.show(context, ref),
               ),
             ],

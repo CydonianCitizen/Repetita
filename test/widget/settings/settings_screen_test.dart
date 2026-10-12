@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:repetita/src/core/l10n/generated/app_localizations.dart';
 import 'package:repetita/src/features/settings/data/update_service.dart';
 import 'package:repetita/src/features/settings/domain/animation_level.dart';
@@ -14,6 +15,16 @@ import 'package:repetita/src/features/settings/presentation/controllers/update_c
 import 'package:repetita/src/features/settings/presentation/settings_screen.dart';
 
 void main() {
+  setUpAll(() {
+    PackageInfo.setMockInitialValues(
+      appName: 'repetita',
+      packageName: 'dev.repetita.app',
+      version: '0.3.0',
+      buildNumber: '0',
+      buildSignature: '',
+    );
+  });
+
   Widget buildSubject({ProviderContainer? container}) {
     if (container != null) {
       return UncontrolledProviderScope(
@@ -36,10 +47,11 @@ void main() {
         });
 
         await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
         expect(find.text('Settings'), findsOneWidget);
         expect(find.text('repetita'), findsOneWidget);
-        expect(find.textContaining(SettingsScreen.appVersion), findsWidgets);
+        expect(find.textContaining('v0.3.0'), findsWidgets);
 
         // Section headers
         expect(find.text('APPEARANCE'), findsOneWidget);

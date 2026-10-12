@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.20.2
   pub_semver: ^2.2.1
   csv: ^8.0.0
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

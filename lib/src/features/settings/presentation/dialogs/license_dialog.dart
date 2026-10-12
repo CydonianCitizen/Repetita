@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
-import '../settings_screen.dart';
+import '../controllers/app_version_controller.dart';
 
-class LicenseDialog extends StatelessWidget {
+class LicenseDialog extends ConsumerWidget {
   const LicenseDialog({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -14,7 +15,7 @@ class LicenseDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
@@ -73,24 +74,26 @@ class LicenseDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
-            OutlinedButton.icon(
-              key: const Key('view_all_licenses_button'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 44),
+            Consumer(
+              builder: (context, ref, _) => OutlinedButton.icon(
+                key: const Key('view_all_licenses_button'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 44),
+                ),
+                icon: const Icon(Icons.policy_outlined, size: 18),
+                label: Text(
+                  l10n?.viewAllLicenses ?? 'View All Open Source Licenses',
+                ),
+                onPressed: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: l10n?.appTitle ?? 'repetita',
+                    applicationVersion: ref.read(appVersionProvider).value,
+                    applicationLegalese:
+                        'Copyright (c) 2026 repetita\nMIT License',
+                  );
+                },
               ),
-              icon: const Icon(Icons.policy_outlined, size: 18),
-              label: Text(
-                l10n?.viewAllLicenses ?? 'View All Open Source Licenses',
-              ),
-              onPressed: () {
-                showLicensePage(
-                  context: context,
-                  applicationName: l10n?.appTitle ?? 'repetita',
-                  applicationVersion: SettingsScreen.appVersion,
-                  applicationLegalese:
-                      'Copyright (c) 2026 repetita\nMIT License',
-                );
-              },
             ),
           ],
         ),

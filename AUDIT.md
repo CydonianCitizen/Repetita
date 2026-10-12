@@ -8,9 +8,8 @@ Verdetto generale: codice disciplinato (l10n quasi ovunque, `select()` nei watch
 
 ## 1. Critico / Alta priorità
 
-### 1.1 Versione hardcoded e disallineata — `settings_screen.dart:27`
-`appVersion = 'v0.3.0'` mentre `pubspec.yaml` è `0.5.0+0`. La stessa costante alimenta `UpdateCheckController.checkForUpdates` (`update_check_dialog.dart:15`): il confronto di versione usa un valore stantio e può segnalare falsi "aggiornamento disponibile".
-**Fix:** leggere la versione da `package_info_plus` (unica fonte di verità).
+### 1.1 ~~Versione hardcoded e disallineata — `settings_screen.dart:27`~~ ✅ RISOLTO (2026-10-12)
+Rimossa la costante `SettingsScreen.appVersion = 'v0.3.0'`. Ora la versione arriva da `package_info_plus` tramite `appVersionProvider` (`controllers/app_version_controller.dart`), unica fonte di verità = `pubspec.yaml`. Aggiornati tutti i call site: settings header, badge, tile update check, `UpdateCheckDialog.show` (legge `appVersionProvider.future`) e `license_dialog.dart`. Test aggiornati con `PackageInfo.setMockInitialValues`.
 
 ### 1.2 Nessun indice secondario nel DB — `tables.dart`
 `Cards.deckId`, `Cards.due`, `ReviewLogs.cardId`, `ReviewLogs.reviewedAt`, `CardTags.tagId` sono tutti non indicizzati. `watchCardsByDeck`, `fetchDueCards`, join delle statistiche fanno full table scan che peggiorano con la crescita dei dati.
@@ -117,7 +116,7 @@ Concurrency sicura: nessun file `.g.dart` duplicato; generati drift coerenti.
 
 ## 6. Quick wins ordinati per impatto/sforzo
 
-1. Versione da `package_info_plus` (bug visibile, 5 min).
+1. ~~Versione da `package_info_plus`~~ ✅ fatto.
 2. Persistenza tema/lingua/aptica/animazioni via `AppSettings` (bug funzionale percepito, piccolo).
 3. Default `replaceExisting=false` + conferma restore (rischio dati, piccolo).
 4. Indici DB in migration (fondamenta, piccolo).

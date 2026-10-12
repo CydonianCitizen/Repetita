@@ -3,16 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../data/update_service.dart';
+import '../controllers/app_version_controller.dart';
 import '../controllers/update_controller.dart';
-import '../settings_screen.dart';
 
 class UpdateCheckDialog extends ConsumerWidget {
   const UpdateCheckDialog({super.key});
 
   static Future<void> show(BuildContext context, WidgetRef ref) {
-    ref
-        .read(updateCheckControllerProvider.notifier)
-        .checkForUpdates(currentVersion: SettingsScreen.appVersion);
+    ref.read(appVersionProvider.future).then(
+      (version) => ref
+          .read(updateCheckControllerProvider.notifier)
+          .checkForUpdates(currentVersion: version),
+    );
 
     return showDialog<void>(
       context: context,
