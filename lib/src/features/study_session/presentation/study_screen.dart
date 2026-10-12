@@ -264,6 +264,39 @@ class StudyScreen extends ConsumerWidget {
                           ),
                           textAlign: TextAlign.center,
                         ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
+                        if (sessionState.reviewedCount > 0) ...[
+                          const SizedBox(height: 20),
+                          Container(
+                            key: const Key('session_completion_stats'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 20,
+                                  color: colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${l10n?.totalReviews ?? 'Total Reviews'}: ${sessionState.reviewedCount}',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ).animate().fadeIn(delay: 300.ms, duration: 300.ms),
+                        ],
                         const SizedBox(height: 36),
                         FilledButton.icon(
                               key: const Key('back_to_deck_button'),

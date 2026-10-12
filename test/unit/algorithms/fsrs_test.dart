@@ -349,4 +349,76 @@ void main() {
       expect(Rating.easy.value, equals(4));
     });
   });
+
+  group('FsrsEngine - Study-Ahead and Clamping Tests', () {
+    test('retrievability clamps zero and negative elapsed days to 1.0', () {
+      expect(engine.retrievability(0.0, 5.0), equals(1.0));
+      expect(engine.retrievability(-1.0, 5.0), equals(1.0));
+      expect(engine.retrievability(-100.0, 5.0), equals(1.0));
+      expect(engine.retrievability(0.0, -1.0), equals(0.0));
+    });
+
+    test(
+      'schedule clamps negative review times to zero elapsed days and 1.0 retrievability',
+      () {
+        final card = FsrsCard(
+          state: CardState.review,
+          stability: 10.0,
+          difficulty: 5.0,
+          due: baseTime.add(const Duration(days: 10)),
+          lastReview: baseTime,
+          reps: 2,
+          lapses: 0,
+        );
+
+        final sameTimeRecord = engine.schedule(card, Rating.good, baseTime);
+        expect(sameTimeRecord.log.elapsedDays, equals(0));
+
+        final pastTime = baseTime.subtract(const Duration(days: 2));
+        final pastRecord = engine.schedule(card, Rating.good, pastTime);
+        expect(pastRecord.log.elapsedDays, equals(0));
+        expect(pastRecord.card.stability, greaterThan(0.0));
+        expect(pastRecord.card.due.isAfter(pastTime), isTrue);
+      },
+    );
+
+    test(
+      'Study-ahead review calculates adjusted retrievability and schedules correctly',
+      () {
+        final reviewCard = FsrsCard(
+          state: CardState.review,
+          stability: 10.0,
+          difficulty: 5.0,
+          due: baseTime.add(const Duration(days: 10)),
+          lastReview: baseTime,
+          reps: 2,
+          lapses: 0,
+        );
+
+        final earlyReviewTime = baseTime.add(const Duration(days: 2));
+        final repeats = engine.repeat(reviewCard, earlyReviewTime);
+
+        expect(
+          repeats.keys,
+          containsAll([Rating.again, Rating.hard, Rating.good, Rating.easy]),
+        );
+
+        final againRecord = repeats[Rating.again]!;
+        expect(againRecord.card.state, equals(CardState.relearning));
+        expect(againRecord.log.elapsedDays, equals(2));
+        expect(againRecord.card.lapses, equals(1));
+
+        final goodRecord = repeats[Rating.good]!;
+        expect(goodRecord.card.state, equals(CardState.review));
+        expect(goodRecord.log.elapsedDays, equals(2));
+        expect(goodRecord.card.reps, equals(3));
+        expect(goodRecord.card.stability, greaterThan(0.0));
+        expect(goodRecord.card.due.isAfter(earlyReviewTime), isTrue);
+
+        final rEarly = engine.retrievability(2.0, 10.0);
+        expect(rEarly, greaterThan(0.90));
+        expect(rEarly, closeTo(0.977, 0.01));
+      },
+    );
+  });
 }

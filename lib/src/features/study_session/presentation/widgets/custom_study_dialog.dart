@@ -215,6 +215,7 @@ class _CustomStudyDialogState extends ConsumerState<CustomStudyDialog> {
                         : null,
                     daysAhead: _daysAhead,
                     isCram: _isCram,
+                    recordReviews: !_isCram,
                   );
                   Navigator.of(context).pop(config);
                 },

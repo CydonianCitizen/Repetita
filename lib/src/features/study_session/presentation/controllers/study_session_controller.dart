@@ -18,12 +18,14 @@ class StudySessionHistoryEntry {
   const StudySessionHistoryEntry({
     required this.card,
     required this.index,
+    this.rating,
     this.reviewLogId,
     this.requeued = false,
   });
 
   final CardEntity card;
   final int index;
+  final Rating? rating;
   final int? reviewLogId;
   final bool requeued;
 }
@@ -37,6 +39,7 @@ class StudySessionState {
     this.isCompleted = false,
     this.undoStack = const [],
     this.isCram = false,
+    this.recordReviews = true,
     this.customStudyConfig,
     this.intervalPreviews = const {},
   });
@@ -48,10 +51,12 @@ class StudySessionState {
   final bool isCompleted;
   final List<StudySessionHistoryEntry> undoStack;
   final bool isCram;
+  final bool recordReviews;
   final CustomStudyConfig? customStudyConfig;
   final Map<Rating, String> intervalPreviews;
 
   bool get canUndo => undoStack.isNotEmpty;
+  int get reviewedCount => undoStack.length;
 
   CardEntity? get currentCard {
     if (isCompleted || currentIndex >= queue.length) return null;
@@ -69,6 +74,7 @@ class StudySessionState {
     bool? isCompleted,
     List<StudySessionHistoryEntry>? undoStack,
     bool? isCram,
+    bool? recordReviews,
     CustomStudyConfig? customStudyConfig,
     Map<Rating, String>? intervalPreviews,
   }) {
@@ -80,6 +86,7 @@ class StudySessionState {
       isCompleted: isCompleted ?? this.isCompleted,
       undoStack: undoStack ?? this.undoStack,
       isCram: isCram ?? this.isCram,
+      recordReviews: recordReviews ?? this.recordReviews,
       customStudyConfig: customStudyConfig ?? this.customStudyConfig,
       intervalPreviews: intervalPreviews ?? this.intervalPreviews,
     );
@@ -112,6 +119,7 @@ class StudySessionController extends _$StudySessionController {
 
     final cardEntities = cards.map((c) => c.toEntity()).toList();
     final isCram = customStudyConfig?.isCram ?? false;
+    final recordReviews = customStudyConfig?.recordReviews ?? true;
     final firstCard = cardEntities.isNotEmpty ? cardEntities.first : null;
 
     return StudySessionState(
@@ -121,8 +129,9 @@ class StudySessionController extends _$StudySessionController {
       isAnswerRevealed: false,
       isCompleted: cardEntities.isEmpty,
       isCram: isCram,
+      recordReviews: recordReviews,
       customStudyConfig: customStudyConfig,
-      intervalPreviews: _calculateIntervalPreviews(firstCard, isCram),
+      intervalPreviews: _calculateIntervalPreviews(firstCard, !recordReviews),
     );
   }
 
@@ -144,7 +153,7 @@ class StudySessionController extends _$StudySessionController {
     final now = ref.read(clockProvider)();
 
     try {
-      if (current.isCram) {
+      if (!current.recordReviews) {
         final updatedQueue = List<CardEntity>.from(current.queue);
         final isRequeued = rating == Rating.again;
         if (isRequeued) {
@@ -159,6 +168,7 @@ class StudySessionController extends _$StudySessionController {
         final undoEntry = StudySessionHistoryEntry(
           card: currentCard,
           index: current.currentIndex,
+          rating: rating,
           requeued: isRequeued,
         );
 
@@ -196,6 +206,7 @@ class StudySessionController extends _$StudySessionController {
       final undoEntry = StudySessionHistoryEntry(
         card: currentCard,
         index: current.currentIndex,
+        rating: rating,
         reviewLogId: reviewLogId,
       );
 
@@ -227,7 +238,7 @@ class StudySessionController extends _$StudySessionController {
         current.undoStack,
       )..removeLast();
 
-      if (!current.isCram && lastEntry.reviewLogId != null) {
+      if (current.recordReviews && lastEntry.reviewLogId != null) {
         final dao = ref.read(studySessionDaoProvider);
         await dao.undoReview(
           cardId: lastEntry.card.id,
@@ -254,11 +265,13 @@ class StudySessionController extends _$StudySessionController {
           undoStack: newUndoStack,
           intervalPreviews: _calculateIntervalPreviews(
             prevCard,
-            current.isCram,
+            !current.recordReviews,
           ),
         ),
       );
-      ref.invalidate(statsControllerProvider);
+      if (current.recordReviews) {
+        ref.invalidate(statsControllerProvider);
+      }
     } catch (e) {
       state = AsyncData(current);
       rethrow;
@@ -291,7 +304,7 @@ class StudySessionController extends _$StudySessionController {
           undoStack: const [],
           intervalPreviews: _calculateIntervalPreviews(
             nextCard,
-            current.isCram,
+            !current.recordReviews,
           ),
         ),
       );
@@ -327,7 +340,7 @@ class StudySessionController extends _$StudySessionController {
           undoStack: const [],
           intervalPreviews: _calculateIntervalPreviews(
             nextCard,
-            current.isCram,
+            !current.recordReviews,
           ),
         ),
       );
@@ -339,11 +352,11 @@ class StudySessionController extends _$StudySessionController {
 
   Map<Rating, String> _calculateIntervalPreviews(
     CardEntity? card,
-    bool isCram,
+    bool isNonRecording,
   ) {
     if (card == null) return const {};
 
-    if (isCram) {
+    if (isNonRecording) {
       return const {
         Rating.again: 'Re-queue',
         Rating.hard: 'Pass',
