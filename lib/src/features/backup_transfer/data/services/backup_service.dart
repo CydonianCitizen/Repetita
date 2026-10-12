@@ -11,7 +11,7 @@ class BackupService {
 
   final AppDatabase db;
 
-  Future<String> exportJsonPayload() async {
+  Future<String> exportJsonPayload({DateTime? now}) async {
     final results = await Future.wait([
       db.select(db.decks).get(),
       db.select(db.cards).get(),
@@ -28,7 +28,7 @@ class BackupService {
 
     final payload = BackupPayload(
       version: 1,
-      exportedAt: DateTime.now().toUtc(),
+      exportedAt: (now ?? DateTime.now()).toUtc(),
       decks: decksList
           .map(
             (d) => DeckPayload(
@@ -242,6 +242,7 @@ class BackupService {
   Future<CsvImportResult> importCardsFromCsv(
     String csvString, {
     required int targetDeckId,
+    DateTime? now,
   }) async {
     final parsedRows = csv.decode(csvString);
 
@@ -259,7 +260,7 @@ class BackupService {
       startIndex = 1;
     }
 
-    final now = DateTime.now().toUtc();
+    final effectiveNow = (now ?? DateTime.now()).toUtc();
 
     final companions = <CardsCompanion>[];
     for (int i = startIndex; i < parsedRows.length; i++) {
@@ -285,10 +286,10 @@ class BackupService {
           state: const Value(0),
           stability: const Value(0.0),
           difficulty: const Value(0.0),
-          due: now,
+          due: effectiveNow,
           reps: const Value(0),
           lapses: const Value(0),
-          createdAt: Value(now),
+          createdAt: Value(effectiveNow),
         ),
       );
       importedCount++;

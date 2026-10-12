@@ -74,8 +74,9 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     required String front,
     required String back,
     int? clozeIndex,
+    DateTime? now,
   }) {
-    final now = DateTime.now().toUtc();
+    final effectiveNow = (now ?? DateTime.now()).toUtc();
     return into(cards).insert(
       CardsCompanion.insert(
         deckId: deckId,
@@ -84,10 +85,10 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
         state: const Value(0),
         stability: const Value(0.0),
         difficulty: const Value(0.0),
-        due: now,
+        due: effectiveNow,
         reps: const Value(0),
         lapses: const Value(0),
-        createdAt: Value(now),
+        createdAt: Value(effectiveNow),
         isSuspended: const Value(false),
         clozeIndex: Value(clozeIndex),
       ),

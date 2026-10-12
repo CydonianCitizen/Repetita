@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/utils/clock_provider.dart';
 
 import '../../../../core/algorithms/fsrs/fsrs_engine.dart';
 import '../../../../core/algorithms/fsrs/models/fsrs_models.dart';
@@ -91,7 +92,7 @@ class StudySessionController extends _$StudySessionController {
     CustomStudyConfig? customStudyConfig,
   ]) async {
     final dao = ref.watch(studySessionDaoProvider);
-    final now = DateTime.now().toUtc();
+    final now = ref.read(clockProvider)();
     final List<Card> cards;
 
     if (customStudyConfig != null) {
@@ -133,7 +134,7 @@ class StudySessionController extends _$StudySessionController {
     if (current == null || current.currentCard == null) return;
 
     final currentCard = current.currentCard!;
-    final now = DateTime.now().toUtc();
+    final now = ref.read(clockProvider)();
 
     try {
       if (current.isCram) {
@@ -340,7 +341,7 @@ class StudySessionController extends _$StudySessionController {
       };
     }
 
-    final now = DateTime.now().toUtc();
+    final now = ref.read(clockProvider)();
     final fsrsCard = card.toFsrsCard();
     final fsrsParams = ref.read(fsrsParametersControllerProvider);
     final engine = FsrsEngine(fsrsParams);

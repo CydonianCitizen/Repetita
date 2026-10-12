@@ -11,31 +11,32 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   StatsDao(super.db);
 
   Future<CardStateCounts> getCardStateCounts({int? deckId}) async {
-    final query = select(cards);
+    final countCol = cards.id.count();
+    final query = selectOnly(cards)
+      ..addColumns([cards.state, countCol])
+      ..groupBy([cards.state]);
     if (deckId != null) {
-      query.where((t) => t.deckId.equals(deckId));
+      query.where(cards.deckId.equals(deckId));
     }
-    final cardList = await query.get();
 
+    final rows = await query.get();
     int newCount = 0;
     int learningCount = 0;
     int reviewCount = 0;
     int relearningCount = 0;
 
-    for (final c in cardList) {
-      switch (c.state) {
+    for (final row in rows) {
+      final state = row.read(cards.state);
+      final count = row.read(countCol) ?? 0;
+      switch (state) {
         case 0:
-          newCount++;
-          break;
+          newCount = count;
         case 1:
-          learningCount++;
-          break;
+          learningCount = count;
         case 2:
-          reviewCount++;
-          break;
+          reviewCount = count;
         case 3:
-          relearningCount++;
-          break;
+          relearningCount = count;
       }
     }
 
@@ -176,10 +177,21 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   }
 
   Future<int> getCurrentStreak({int? deckId, required DateTime today}) async {
+    final todayUtc = DateTime.utc(today.year, today.month, today.day);
+    // Streak cannot exceed 366 days; limit lookback to avoid full-table scan.
+    final lookbackStart = todayUtc.subtract(const Duration(days: 366));
+
     final query = selectOnly(reviewLogs);
     if (deckId != null) {
       query.join([innerJoin(cards, cards.id.equalsExp(reviewLogs.cardId))]);
-      query.where(cards.deckId.equals(deckId));
+      query.where(
+        cards.deckId.equals(deckId) &
+            reviewLogs.reviewedAt.isBiggerOrEqualValue(lookbackStart),
+      );
+    } else {
+      query.where(
+        reviewLogs.reviewedAt.isBiggerOrEqualValue(lookbackStart),
+      );
     }
     query.addColumns([reviewLogs.reviewedAt]);
 

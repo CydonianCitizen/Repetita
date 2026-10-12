@@ -67,14 +67,18 @@ class DecksDao extends DatabaseAccessor<AppDatabase> with _$DecksDaoMixin {
     });
   }
 
-  Future<int> createDeck({required String name, String? description}) {
-    final now = DateTime.now().toUtc();
+  Future<int> createDeck({
+    required String name,
+    String? description,
+    DateTime? now,
+  }) {
+    final effectiveNow = (now ?? DateTime.now()).toUtc();
     return into(decks).insert(
       DecksCompanion.insert(
         name: name.trim(),
         description: Value(description?.trim()),
-        createdAt: Value(now),
-        updatedAt: Value(now),
+        createdAt: Value(effectiveNow),
+        updatedAt: Value(effectiveNow),
       ),
     );
   }
@@ -83,14 +87,15 @@ class DecksDao extends DatabaseAccessor<AppDatabase> with _$DecksDaoMixin {
     required int id,
     required String name,
     String? description,
+    DateTime? now,
   }) {
-    final now = DateTime.now().toUtc();
+    final effectiveNow = (now ?? DateTime.now()).toUtc();
     return (update(decks)..where((t) => t.id.equals(id)))
         .write(
           DecksCompanion(
             name: Value(name.trim()),
             description: Value(description?.trim()),
-            updatedAt: Value(now),
+            updatedAt: Value(effectiveNow),
           ),
         )
         .then((rows) => rows > 0);

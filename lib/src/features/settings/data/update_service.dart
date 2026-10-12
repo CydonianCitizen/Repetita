@@ -13,6 +13,12 @@ class UpdateCheckException implements Exception {
 
 typedef ReleaseDataFetcher = Future<String> Function(Uri uri);
 
+/// Checks GitHub releases API for available app updates.
+///
+/// Intentional exception to the offline-first architecture: update checking
+/// is user-initiated, non-blocking, and does not affect core functionality.
+/// The app operates fully offline; this service provides optional version
+/// awareness only.
 class UpdateService {
   UpdateService({
     this.repoOwner = 'CydonianCitizen',
