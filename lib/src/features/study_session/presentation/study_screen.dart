@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../settings/data/haptic_service.dart';
+import '../../settings/presentation/controllers/animation_level_controller.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
 import '../domain/models/custom_study_config.dart';
 import 'controllers/study_session_controller.dart';
@@ -75,7 +78,14 @@ class StudyScreen extends ConsumerWidget {
                 icon: const Icon(Icons.undo_rounded),
                 tooltip: l10n?.undoReview ?? 'Undo Review',
                 onPressed: () async {
-                  await ref.read(provider.notifier).undoReview();
+                  try {
+                    await ref.read(provider.notifier).undoReview();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  }
                 },
               );
             },
@@ -92,27 +102,34 @@ class StudyScreen extends ConsumerWidget {
                 tooltip: l10n?.cardOptions ?? 'Card options',
                 onSelected: (value) async {
                   final controller = ref.read(provider.notifier);
-                  if (value == 'suspend') {
-                    await controller.suspendCurrentCard();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.cardSuspended ?? 'Card suspended',
+                  try {
+                    if (value == 'suspend') {
+                      await controller.suspendCurrentCard();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n?.cardSuspended ?? 'Card suspended',
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
+                    } else if (value == 'bury') {
+                      await controller.buryCurrentCard();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n?.cardBuried ?? 'Card buried until tomorrow',
+                            ),
+                          ),
+                        );
+                      }
                     }
-                  } else if (value == 'bury') {
-                    await controller.buryCurrentCard();
+                  } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n?.cardBuried ?? 'Card buried until tomorrow',
-                          ),
-                        ),
-                      );
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString())));
                     }
                   }
                 },
@@ -169,7 +186,12 @@ class StudyScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
+                        Builder(
+                          builder: (context) {
+                            final animLevel = ref.watch(
+                              animationLevelControllerProvider,
+                            );
+                            Widget trophy = Container(
                               width: 96,
                               height: 96,
                               decoration: BoxDecoration(
@@ -183,21 +205,30 @@ class StudyScreen extends ConsumerWidget {
                                 size: 56,
                                 color: colorScheme.primary,
                               ),
-                            )
-                            .animate()
-                            .scale(
-                              duration: 450.ms,
-                              curve: Curves.elasticOut,
-                              begin: const Offset(0.35, 0.35),
-                            )
-                            .fadeIn(duration: 250.ms)
-                            .then()
-                            .shimmer(
-                              duration: 1200.ms,
-                              color: colorScheme.primary.withValues(
-                                alpha: 0.35,
-                              ),
-                            ),
+                            );
+
+                            if (!animLevel.isReduced) {
+                              var animatedTrophy = trophy
+                                  .animate()
+                                  .scale(
+                                    duration: 450.ms,
+                                    curve: Curves.elasticOut,
+                                    begin: const Offset(0.35, 0.35),
+                                  )
+                                  .fadeIn(duration: 250.ms);
+                              if (animLevel.isExpressive) {
+                                animatedTrophy = animatedTrophy.then().shimmer(
+                                  duration: 1200.ms,
+                                  color: colorScheme.primary.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                );
+                              }
+                              trophy = animatedTrophy;
+                            }
+                            return RepaintBoundary(child: trophy);
+                          },
+                        ),
                         const SizedBox(height: 28),
                         Text(
                               sessionState.isCram
@@ -282,7 +313,7 @@ class StudyScreen extends ConsumerWidget {
                                     ) ??
                                     '${sessionState.remainingCards} remaining',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.outline,
+                                  color: colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -369,16 +400,24 @@ class StudyScreen extends ConsumerWidget {
                       )
                     else
                       RatingBar(
-                        intervals: sessionState.intervalPreviews.isNotEmpty
-                            ? sessionState.intervalPreviews
-                            : controller.getIntervalPreviews(),
-                        onRatingSelected: (rating) {
+                        intervals: sessionState.intervalPreviews,
+                        onRatingSelected: (rating) async {
                           final haptic = ref.read(hapticServiceProvider);
                           final intensity = ref.read(
                             hapticFeedbackControllerProvider,
                           );
-                          haptic.triggerRatingFeedback(rating, intensity);
-                          controller.submitRating(rating);
+                          unawaited(
+                            haptic.triggerRatingFeedback(rating, intensity),
+                          );
+                          try {
+                            await controller.submitRating(rating);
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
+                          }
                         },
                       ),
                   ],

@@ -49,23 +49,25 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   }
 
   Future<double> getRetentionRate({int? deckId}) async {
-    if (deckId == null) {
-      final allLogs = await select(reviewLogs).get();
-      if (allLogs.isEmpty) return 0.0;
-      final successful = allLogs.where((l) => l.rating >= 2).length;
-      return successful / allLogs.length;
-    } else {
-      final query = select(reviewLogs).join([
+    final total = await getTotalReviewsCount(deckId: deckId);
+    if (total == 0) return 0.0;
+
+    final countExp = reviewLogs.id.count();
+    final successfulQuery = selectOnly(reviewLogs);
+    if (deckId != null) {
+      successfulQuery.join([
         innerJoin(cards, cards.id.equalsExp(reviewLogs.cardId)),
-      ])..where(cards.deckId.equals(deckId));
-      final rows = await query.get();
-      if (rows.isEmpty) return 0.0;
-      final successful = rows.where((row) {
-        final log = row.readTable(reviewLogs);
-        return log.rating >= 2;
-      }).length;
-      return successful / rows.length;
+      ]);
+      successfulQuery.where(
+        cards.deckId.equals(deckId) & reviewLogs.rating.isBiggerOrEqualValue(2),
+      );
+    } else {
+      successfulQuery.where(reviewLogs.rating.isBiggerOrEqualValue(2));
     }
+    successfulQuery.addColumns([countExp]);
+    final successful =
+        await successfulQuery.map((r) => r.read(countExp)).getSingle() ?? 0;
+    return successful / total;
   }
 
   Future<int> getTotalReviewsCount({int? deckId}) async {
@@ -91,14 +93,18 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
     int days = 7,
     required DateTime fromDate,
   }) async {
+    final fromUtc = fromDate.toUtc();
+    final todayStart = DateTime.utc(fromUtc.year, fromUtc.month, fromUtc.day);
+    final forecastEnd = todayStart.add(Duration(days: days));
+
     final query = select(cards);
     if (deckId != null) {
       query.where((t) => t.deckId.equals(deckId));
     }
+    query.where(
+      (t) => t.state.equals(0) | t.due.isSmallerThanValue(forecastEnd),
+    );
     final cardList = await query.get();
-
-    final fromUtc = fromDate.toUtc();
-    final todayStart = DateTime.utc(fromUtc.year, fromUtc.month, fromUtc.day);
 
     final result = <ForecastDay>[];
     for (int i = 0; i < days; i++) {
@@ -189,9 +195,7 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
             reviewLogs.reviewedAt.isBiggerOrEqualValue(lookbackStart),
       );
     } else {
-      query.where(
-        reviewLogs.reviewedAt.isBiggerOrEqualValue(lookbackStart),
-      );
+      query.where(reviewLogs.reviewedAt.isBiggerOrEqualValue(lookbackStart));
     }
     query.addColumns([reviewLogs.reviewedAt]);
 

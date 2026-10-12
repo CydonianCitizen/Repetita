@@ -1,14 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/database/database_provider.dart';
+
 part 'theme_mode_controller.g.dart';
 
 @Riverpod(keepAlive: true)
 class ThemeModeController extends _$ThemeModeController {
-  @override
-  ThemeMode build() => ThemeMode.system;
+  static const _key = 'app_theme_mode';
 
-  void setThemeMode(ThemeMode mode) {
+  @override
+  ThemeMode build() {
+    _loadFromDb();
+    return ThemeMode.system;
+  }
+
+  Future<void> _loadFromDb() async {
+    try {
+      final db = ref.read(databaseProvider);
+      final saved = await db.getSetting(_key);
+      if (saved != null) {
+        final mode = ThemeMode.values.cast<ThemeMode?>().firstWhere(
+          (m) => m?.name == saved,
+          orElse: () => null,
+        );
+        if (mode != null && ref.mounted) {
+          state = mode;
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to load theme mode: $e');
+    }
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
     state = mode;
+    try {
+      await ref.read(databaseProvider).setSetting(_key, mode.name);
+    } catch (e) {
+      debugPrint('Failed to save theme mode: $e');
+    }
   }
 }

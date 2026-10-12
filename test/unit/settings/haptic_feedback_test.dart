@@ -1,7 +1,10 @@
+import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
+import 'package:repetita/src/core/database/app_database.dart';
+import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/settings/data/haptic_service.dart';
 import 'package:repetita/src/features/settings/domain/haptic_intensity.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/haptic_controller.dart';
@@ -27,31 +30,40 @@ void main() {
   });
 
   group('HapticFeedbackController', () {
-    test('initializes with medium intensity', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    late AppDatabase db;
+    late ProviderContainer container;
 
+    setUp(() {
+      db = AppDatabase.forTesting(NativeDatabase.memory());
+      container = ProviderContainer(
+        overrides: [databaseProvider.overrideWithValue(db)],
+      );
+    });
+
+    tearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+
+    test('initializes with medium intensity', () {
       expect(
         container.read(hapticFeedbackControllerProvider),
         HapticIntensity.medium,
       );
     });
 
-    test('setIntensity updates state reactively', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
+    test('setIntensity updates state reactively', () async {
       final controller = container.read(
         hapticFeedbackControllerProvider.notifier,
       );
 
-      controller.setIntensity(HapticIntensity.off);
+      await controller.setIntensity(HapticIntensity.off);
       expect(
         container.read(hapticFeedbackControllerProvider),
         HapticIntensity.off,
       );
 
-      controller.setIntensity(HapticIntensity.strong);
+      await controller.setIntensity(HapticIntensity.strong);
       expect(
         container.read(hapticFeedbackControllerProvider),
         HapticIntensity.strong,

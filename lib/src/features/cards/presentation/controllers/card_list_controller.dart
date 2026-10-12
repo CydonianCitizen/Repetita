@@ -38,6 +38,32 @@ class CardListController extends _$CardListController {
     });
   }
 
+  Future<List<int>> createClozeCards({
+    required String front,
+    required String back,
+    required Iterable<int> clozeIndices,
+    List<int> tagIds = const [],
+  }) async {
+    final dao = ref.read(cardsDaoProvider);
+    final tagsDao = ref.read(tagsDaoProvider);
+    return dao.attachedDatabase.transaction(() async {
+      final cardIds = <int>[];
+      for (final idx in clozeIndices) {
+        final cardId = await dao.createCard(
+          deckId: deckId,
+          front: front,
+          back: back,
+          clozeIndex: idx,
+        );
+        if (tagIds.isNotEmpty) {
+          await tagsDao.setCardTags(cardId, tagIds);
+        }
+        cardIds.add(cardId);
+      }
+      return cardIds;
+    });
+  }
+
   Future<void> updateCard({
     required int id,
     required String front,

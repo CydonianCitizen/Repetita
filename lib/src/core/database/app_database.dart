@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -44,6 +44,23 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 4) {
           await m.createTable(appSettings);
+        }
+        if (from < 5) {
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_cards_deck_id ON cards (deck_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_cards_due ON cards (due)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_review_logs_card_id ON review_logs (card_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_review_logs_reviewed_at ON review_logs (reviewed_at)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_card_tags_tag_id ON card_tags (tag_id)',
+          );
         }
       },
     );

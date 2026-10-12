@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../../core/utils/clock_provider.dart';
 
 import '../../../../core/algorithms/fsrs/fsrs_engine.dart';
@@ -8,6 +9,7 @@ import '../../../../core/database/database_provider.dart';
 import '../../../cards/data/cards_dao.dart';
 import '../../../cards/domain/card_entity.dart';
 import '../../../settings/presentation/controllers/fsrs_parameters_controller.dart';
+import '../../../stats/presentation/controllers/stats_controller.dart';
 import '../../domain/models/custom_study_config.dart';
 
 part 'study_session_controller.g.dart';
@@ -91,6 +93,7 @@ class StudySessionController extends _$StudySessionController {
     int deckId, [
     CustomStudyConfig? customStudyConfig,
   ]) async {
+    await ref.read(fsrsParametersControllerProvider.notifier).ensureLoaded();
     final dao = ref.watch(studySessionDaoProvider);
     final now = ref.read(clockProvider)();
     final List<Card> cards;
@@ -129,9 +132,13 @@ class StudySessionController extends _$StudySessionController {
     state = AsyncData(current.copyWith(isAnswerRevealed: true));
   }
 
+  bool _isSubmitting = false;
+
   Future<void> submitRating(Rating rating) async {
+    if (_isSubmitting) return;
     final current = state.value;
     if (current == null || current.currentCard == null) return;
+    _isSubmitting = true;
 
     final currentCard = current.currentCard!;
     final now = ref.read(clockProvider)();
@@ -201,8 +208,12 @@ class StudySessionController extends _$StudySessionController {
           intervalPreviews: _calculateIntervalPreviews(nextCard, false),
         ),
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+      ref.invalidate(statsControllerProvider);
+    } catch (e) {
+      state = AsyncData(current);
+      rethrow;
+    } finally {
+      _isSubmitting = false;
     }
   }
 
@@ -247,8 +258,10 @@ class StudySessionController extends _$StudySessionController {
           ),
         ),
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+      ref.invalidate(statsControllerProvider);
+    } catch (e) {
+      state = AsyncData(current);
+      rethrow;
     }
   }
 
@@ -282,8 +295,9 @@ class StudySessionController extends _$StudySessionController {
           ),
         ),
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (e) {
+      state = AsyncData(current);
+      rethrow;
     }
   }
 
@@ -317,13 +331,10 @@ class StudySessionController extends _$StudySessionController {
           ),
         ),
       );
-    } catch (e, st) {
-      state = AsyncError(e, st);
+    } catch (e) {
+      state = AsyncData(current);
+      rethrow;
     }
-  }
-
-  Map<Rating, String> getIntervalPreviews() {
-    return state.value?.intervalPreviews ?? const {};
   }
 
   Map<Rating, String> _calculateIntervalPreviews(

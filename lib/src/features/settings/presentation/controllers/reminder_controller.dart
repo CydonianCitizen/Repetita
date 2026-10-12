@@ -51,12 +51,15 @@ class ReminderController extends _$ReminderController {
       if (!granted) {
         throw Exception('Notification permission denied');
       }
-      await service.scheduleDailyReminder(
+      final success = await service.scheduleDailyReminder(
         hour: state.hour,
         minute: state.minute,
         title: title,
         body: body,
       );
+      if (!success) {
+        throw Exception('Failed to schedule daily reminder');
+      }
     } else {
       await service.cancelReminder();
     }
@@ -71,6 +74,18 @@ class ReminderController extends _$ReminderController {
     required String title,
     required String body,
   }) async {
+    final service = ref.read(notificationServiceProvider);
+    if (state.enabled) {
+      final success = await service.scheduleDailyReminder(
+        hour: hour,
+        minute: minute,
+        title: title,
+        body: body,
+      );
+      if (!success) {
+        throw Exception('Failed to schedule daily reminder');
+      }
+    }
     state = state.copyWith(hour: hour, minute: minute);
     final db = ref.read(databaseProvider);
     await db.setSetting(_keyHour, hour.toString());

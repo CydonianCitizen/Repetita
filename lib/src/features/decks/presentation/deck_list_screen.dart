@@ -17,140 +17,169 @@ class DeckListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.appTitle ?? 'repetita')),
-      body: decksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n?.failedToLoadDecks ?? 'Failed to load decks',
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$error',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall
-                      ?.copyWith(color: Theme.of(context).colorScheme.error),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.tonalIcon(
-                  onPressed: () => ref.invalidate(deckListControllerProvider),
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(l10n?.retry ?? 'Retry'),
-                ),
-              ],
+      body: SafeArea(
+        child: decksAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n?.failedToLoadDecks ?? 'Failed to load decks',
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$error',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: Theme.of(context).colorScheme.error),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.tonalIcon(
+                    onPressed: () => ref.invalidate(deckListControllerProvider),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(l10n?.retry ?? 'Retry'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        data: (decks) {
-          if (decks.isEmpty) {
-            final theme = Theme.of(context);
-            final colorScheme = theme.colorScheme;
+          data: (decks) {
+            if (decks.isEmpty) {
+              final theme = Theme.of(context);
+              final colorScheme = theme.colorScheme;
 
-            return Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withValues(
-                          alpha: 0.5,
+              return Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 88,
+                        height: 88,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withValues(
+                            alpha: 0.5,
+                          ),
+                          shape: BoxShape.circle,
                         ),
-                        shape: BoxShape.circle,
+                        child: Icon(
+                          Icons.style_outlined,
+                          size: 44,
+                          color: colorScheme.primary,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.style_outlined,
-                        size: 44,
-                        color: colorScheme.primary,
+                      const SizedBox(height: 20),
+                      Text(
+                        l10n?.noDecksYet ??
+                            'No decks yet. Tap + to create one.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n?.noDecksYet ?? 'No decks yet. Tap + to create one.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n?.createFirstDeckPrompt ?? 'Create your first deck to begin spaced repetition studying.',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n?.createFirstDeckPrompt ?? 'Create your first deck to begin spaced repetition studying.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: () async {
+                          final result = await DeckFormDialog.show(context);
+                          if (result != null) {
+                            await ref
+                                .read(deckListControllerProvider.notifier)
+                                .createDeck(
+                                  name: result.name,
+                                  description: result.description,
+                                );
+                          }
+                        },
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n?.newDeck ?? 'New Deck'),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      onPressed: () async {
-                        final result = await DeckFormDialog.show(context);
-                        if (result != null) {
-                          await ref
-                              .read(deckListControllerProvider.notifier)
-                              .createDeck(
-                                name: result.name,
-                                description: result.description,
-                              );
-                        }
-                      },
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n?.newDeck ?? 'New Deck'),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: decks.length,
-            itemBuilder: (context, index) {
-              final deckWithCounts = decks[index];
-              return DeckListTile(
-                key: ValueKey(deckWithCounts.deck.id),
-                deckWithCounts: deckWithCounts,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          DeckDetailScreen(deck: deckWithCounts.deck),
-                    ),
-                  );
-                },
-                onEdit: (name, description) {
-                  ref
-                      .read(deckListControllerProvider.notifier)
-                      .updateDeck(
-                        id: deckWithCounts.deck.id,
-                        name: name,
-                        description: description,
-                      );
-                },
-                onDelete: () {
-                  ref
-                      .read(deckListControllerProvider.notifier)
-                      .deleteDeck(deckWithCounts.deck.id);
-                },
               );
-            },
-          );
-        },
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              itemCount: decks.length,
+              itemBuilder: (context, index) {
+                final deckWithCounts = decks[index];
+                return DeckListTile(
+                  key: ValueKey(deckWithCounts.deck.id),
+                  deckWithCounts: deckWithCounts,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            DeckDetailScreen(deck: deckWithCounts.deck),
+                      ),
+                    );
+                  },
+                  onEdit: (name, description) async {
+                    try {
+                      await ref
+                          .read(deckListControllerProvider.notifier)
+                          .updateDeck(
+                            id: deckWithCounts.deck.id,
+                            name: name,
+                            description: description,
+                          );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to update deck: $e'),
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .error,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  onDelete: () async {
+                    try {
+                      await ref
+                          .read(deckListControllerProvider.notifier)
+                          .deleteDeck(deckWithCounts.deck.id);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to delete deck: $e'),
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .error,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('create_deck_fab'),

@@ -54,14 +54,23 @@ class _FlipCardViewState extends State<FlipCardView> {
                       ? Transform(
                           alignment: Alignment.center,
                           transform: Matrix4.identity()..rotateY(math.pi),
-                          child: _buildBackCard(
+                          child: RepaintBoundary(
+                            child: _buildBackCard(
+                              context,
+                              colorScheme,
+                              theme,
+                              l10n,
+                            ),
+                          ),
+                        )
+                      : RepaintBoundary(
+                          child: _buildFrontCard(
                             context,
                             colorScheme,
                             theme,
                             l10n,
                           ),
-                        )
-                      : _buildFrontCard(context, colorScheme, theme, l10n),
+                        ),
                 );
               },
             ),

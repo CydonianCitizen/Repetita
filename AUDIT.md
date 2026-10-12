@@ -1,6 +1,6 @@
 # Audit codebase — Repetita
 
-Data: 2026-10-12. Scope: `lib/`, `pubspec.yaml`, repo root. Metodo: `flutter analyze` (pulito, 0 issue) + revisione manuale incrociata agenti (backend/architettura + UI/UX/performance).
+Data: 2026-10-12 (aggiornato con seconda passata: audit codice morto/over-engineering + audit reattività UI). Scope: `lib/`, `pubspec.yaml`, `integration_test/`, repo root. Metodo: `flutter analyze` (pulito, 0 issue) + revisione manuale incrociata agenti (backend/architettura + UI/UX/performance). Ogni "codice morto" verificato con grep sui call site.
 
 Verdetto generale: codice disciplinato (l10n quasi ovunque, `select()` nei watch, `ListView.builder`, transazioni su `recordReview`, niente superficie di path-injection). I problemi veri: versione hardcoded che rompe l'update-check, assenza totale di indici DB, query senza LIMIT, impostazioni utente non persistite, ~400 righe duplicate in settings, gestione SafeArea quasi assente.
 
@@ -11,27 +11,23 @@ Verdetto generale: codice disciplinato (l10n quasi ovunque, `select()` nei watch
 ### 1.1 ~~Versione hardcoded e disallineata — `settings_screen.dart:27`~~ ✅ RISOLTO (2026-10-12)
 Rimossa la costante `SettingsScreen.appVersion = 'v0.3.0'`. Ora la versione arriva da `package_info_plus` tramite `appVersionProvider` (`controllers/app_version_controller.dart`), unica fonte di verità = `pubspec.yaml`. Aggiornati tutti i call site: settings header, badge, tile update check, `UpdateCheckDialog.show` (legge `appVersionProvider.future`) e `license_dialog.dart`. Test aggiornati con `PackageInfo.setMockInitialValues`.
 
-### 1.2 Nessun indice secondario nel DB — `tables.dart`
-`Cards.deckId`, `Cards.due`, `ReviewLogs.cardId`, `ReviewLogs.reviewedAt`, `CardTags.tagId` sono tutti non indicizzati. `watchCardsByDeck`, `fetchDueCards`, join delle statistiche fanno full table scan che peggiorano con la crescita dei dati.
-**Fix:** bump `schemaVersion` + migration con `CREATE INDEX`.
+### 1.2 ~~Nessun indice secondario nel DB — `tables.dart`~~ ✅ RISOLTO (2026-10-12)
+`@TableIndex` su `Cards(deckId)`, `Cards(due)`, `ReviewLogs(cardId)`, `ReviewLogs(reviewedAt)`, `CardTags(tagId)` + `schemaVersion` 4→5 con migration `CREATE INDEX IF NOT EXISTS` (installazioni esistenti) e indici generati da drift (installazioni nuove).
 
 ### 1.3 Query senza LIMIT
 - `study_session_dao.dart:16` `fetchDueCards` e `fetchCustomStudyCards`: caricano l'intero mazzo in memoria a ogni sessione.
 - `cards_dao.dart:33` `watchCardsByDeck`: stream dell'intero mazzo senza paginazione (esiste un'API paginata... morta, vedi §3).
 **Fix:** cap giornaliero configurabile per la coda studio; paginazione sulla lista carte.
 
-### 1.4 Statistiche calcolate in Dart invece che in SQL — `stats_dao.dart`
-- `:51` `getRetentionRate`: carica TUTTI i review log in memoria e conta in Dart.
-- `:89` `getDueForecast`: fetch intera tabella `cards` + ciclo annidato giorni × carte (O(7·N)).
-**Fix:** `count()` con filtro `rating >= 2`; `GROUP BY date(due)` con `WHERE due < :from+7d`.
+### 1.4 ~~Statistiche calcolate in Dart invece che in SQL — `stats_dao.dart`~~ ✅ RISOLTO (2026-10-12)
+- `:51` `getRetentionRate`: sostituito conteggio in-memory con query aggregata SQL `count()` filtrando `rating >= 2`.
+- `:89` `getDueForecast`: filtrato in SQL `due < forecastEnd` invece di caricare l'intera tabella carte in memoria.
 
-### 1.5 Impostazioni non persistite
-`theme_mode_controller.dart:9`, `locale_controller.dart:10`, `haptic_controller.dart:10`, `animation_level_controller.dart:10`: ritornano default hardcoded, niente load/save DB. Tema, lingua, aptica, livello animazioni si resettano a ogni avvio — benché la tabella `AppSettings` esista e sia usata per FSRS e reminder.
-**Fix:** persistere via `appSettings` come `FsrsParametersController`.
+### 1.5 ~~Impostazioni non persistite~~ ✅ RISOLTO (2026-10-12)
+`theme_mode_controller.dart`, `locale_controller.dart`, `haptic_controller.dart`, `animation_level_controller.dart`: integrato caricamento/salvataggio asincrono con fallback tramite tabella `appSettings` Drift.
 
-### 1.6 Race FSRS all'avvio a freddo
-`fsrs_parameters_controller.dart:15` chiama `_loadFromDb()` non awaited in `build()`; `study_session_controller.dart:171/345` può leggere i parametri di default prima del caricamento e pianificare ripassi con retention/intervalli sbagliati.
-**Fix:** provider FSRS async (`FutureOr<FsrsParameters>`) e `await` nel build della sessione.
+### 1.6 ~~Race FSRS all'avvio a freddo~~ ✅ RISOLTO (2026-10-12)
+Aggiunto metodo `ensureLoaded()` in `fsrs_parameters_controller.dart` e chiamata awaited in `build()` di `study_session_controller.dart`.
 
 ### 1.7 Rebuild eccessivi lato UI
 - `deck_detail_screen.dart:71–105`: l'intero subtree `data:` si ricostruisce a ogni cambio carta/tag; aggregazione tag e scan `dueCount` ricalcolati a ogni emissione.
@@ -43,13 +39,14 @@ Rimossa la costante `SettingsScreen.appVersion = 'v0.3.0'`. Ora la versione arri
 `TweenAnimationBuilder` avvolge l'intera card (inclusi `SingleChildScrollView` e `Text.rich` con parsing cloze) → ogni frame ricostruisce tutto il volto. L'`.animate(key: ValueKey(card.id))` esterno ri-esegue fade+slide a ogni cambio carta. Inoltre `ClozeParser` è chiamato 4–6 volte per build per faccia (`:153–191`), regex ri-parsate a ogni frame di animazione.
 **Fix:** estrarre i volti in widget separati costruiti una volta; cache dei segmenti cloze in `didUpdateWidget`; `AnimationController` in `State`.
 
-### 1.9 Safe-area quasi assente
-Un solo `SafeArea` in tutto il progetto (`study_screen.dart:258`). FAB e liste in deck list, settings, backup, stats, card editor possono finire sotto nav bar/cutout; `card_editor_screen.dart:341` ListView senza padding bottom, ultimo campo nascosto dalla barra di sistema.
-**Fix:** `SafeArea` sugli Scaffold o padding da `MediaQuery.viewInsetsOf`.
+### 1.8bis ~~Race condition sul rating — `study_session_controller.dart`~~ ✅ RISOLTO (2026-10-12)
+Guard flag `_isSubmitting` su `submitRating`: doppio tap ignorato durante `await recordReview`, reset in `finally`.
 
-### 1.10 Salvataggio multi-cloze seriale — `card_editor_screen.dart:257–278`
-Loop di `await createCard(...)` sequenziali nel layer UI: lo spinner di salvataggio dura N round-trip DB.
-**Fix:** metodo unico `createClozeCards()` in transazione nel controller/DAO.
+### 1.9 ~~Safe-area quasi assente~~ ✅ RISOLTO (2026-10-12)
+Aggiunto `SafeArea` e gestione corretta degli insets (`viewInsetsOf`) a `deck_list_screen`, `deck_detail_screen`, `backup_screen`, `stats_screen`, `settings_screen` e `card_editor_screen`.
+
+### 1.10 ~~Salvataggio multi-cloze seriale — `card_editor_screen.dart:257–278`~~ ✅ RISOLTO (2026-10-12)
+Implementato metodo `createClozeCards()` atomico con transazione singola in `card_list_controller.dart` e aggiornato `card_editor_screen.dart`.
 
 ---
 
@@ -58,19 +55,24 @@ Loop di `await createCard(...)` sequenziali nel layer UI: lo spinner di salvatag
 | # | File:linea | Problema | Fix |
 |---|---|---|---|
 | 2.1 | `backup_service.dart:138` | Merge mode: carte con deckId non nel payload attaccate a mazzi esistenti con stesso id numerico; re-import dello stesso file duplica tutto (niente idempotenza) | Rifiutare/rilocare ref ignote; upsert per identità stabile |
-| 2.2 | `backup_service.dart:96,105,246` | Encode/decode JSON e CSV dell'intero DB sull'isolate principale; niente cap di dimensione su payload incollato | `compute()`/isolate + bound input |
-| 2.3 | `backup_service.dart:122–215,298–302` | Import riga per riga in loop (anche in transazione unica): secondi per backup grandi | `db.batch(...)` |
-| 2.4 | `notification_service.dart:44,77,116,152,160` | Catch silenziosi con solo `debugPrint`; `setEnabled` persiste `enabled=true` anche se lo scheduling fallisce | Rethrow o risultato tipizzato |
-| 2.5 | `deck_list_screen.dart:136–149`, `deck_detail_screen.dart:730–750` | Mutazioni async fire-and-forget: errore Drift = eccezione non gestita, nessun feedback | await + SnackBar errore |
-| 2.6 | `backup_screen.dart:290–297,304` | Restore distruttivo senza dialog di conferma; `replaceExisting` default `true` (switch pre-armato) | Default `false` + conferma esplicita |
+| 2.2 | ~~`backup_service.dart` JSON/CSV su main isolate~~ ✅ | Risolto: offload su isolate via `compute()` solo sopra soglia (256KB testo / 2000 righe); sotto soglia sync (costo spawn > guadagno, e mantiene i widget test in fake-time sincroni). Resta aperto: niente cap dimensione su payload incollato | Bound input |
+| 2.3 | ~~`backup_service.dart:122–215,298–302`~~ ✅ | Import riga per riga in loop | Risolto: `db.batch((b) => b.insertAll(db.cards, companions))` |
+| 2.4 | ~~`notification_service.dart:44,77,116,152,160`~~ ✅ | Catch silenziosi con solo `debugPrint` | Risolto: return tipizzati `bool` + rethrow in `reminder_controller.dart` su fallimento |
+| 2.5 | ~~`deck_list_screen.dart:136–149`, `deck_detail_screen.dart:730–750`~~ ✅ | Mutazioni async fire-and-forget senza feedback | Risolto: await + SnackBar errore in deck list, deck detail e study screen |
+| 2.6 | ~~`backup_screen.dart:290–297,304`~~ ✅ | Restore distruttivo senza dialog di conferma; `replaceExisting` default `true` | Risolto: default `false` + dialog di conferma esplicita |
 | 2.7 | `settings_screen.dart:102–886` | Build di ~780 righe; due blocchi slider quasi identici (animazione 187–444 vs aptica 448–725) duplicati 1:1 (~400 righe) | Estrarre `_LevelSliderSetting` riusabile |
-| 2.8 | `deck_detail_screen.dart:700–708` | `findChildIndexCallback` fa `indexWhere` O(n) per key → O(n²) scroll | Mappa id→indice precomputata |
-| 2.9 | `fsrs_parameters_controller.dart:45,57,66–67` | `db.setSetting(...)` unawaited: fallimenti di scrittura silenziosi, stato dice "salvato" | await o `catchError` con log |
+| 2.8 | ~~`deck_detail_screen.dart:700–708`~~ ✅ | `findChildIndexCallback` fa `indexWhere` O(n) per key → O(n²) scroll | Risolto: mappa `cardIndexMap` [id→indice] precomputata O(1) |
+| 2.9 | ~~`fsrs_parameters_controller.dart:45,57,66–67`~~ ✅ | `db.setSetting(...)` unawaited | Risolto: `await` con try/catch e log |
 | 2.10 | `deck_detail_screen.dart:84–85,259,312,741` | `DateTime.now().toUtc()` nei builder: ricalcolo per tile, niente refresh al cambio giorno | `nowProvider` o calcolo nel controller |
-| 2.11 | Animazioni incoerenti | `study_screen.dart:187` shimmer infinito che ignora `animationLevelControllerProvider` (che `rating_bar.dart:24` rispetta) | Gating uniforme di tutti gli `.animate()` |
+| 2.11 | ~~Animazioni incoerenti~~ ✅ | Shimmer che ignora `animationLevelControllerProvider` | Risolto: gating uniforme con `animationLevelControllerProvider` |
 | 2.12 | Error view copiata 3× | `deck_list_screen.dart:22–55`, `deck_detail_screen.dart:34–70`, `stats_screen.dart:43–79`; `study_screen.dart:158` ha invece solo `Text('$error')` senza retry | Widget condiviso `ErrorView` |
-| 2.13 | Touch target < 48dp | `rating_bar.dart:84` (40dp in compact), `settings_screen.dart:419–424,697–704` (bottoni ~34px) | Minimo 48dp, ridurre padding invece |
-| 2.14 | Contrasto | `colorScheme.outline` usato come colore testo in più punti (settings 136/356, study 285, etichette heatmap 9sp) | `onSurfaceVariant` |
+| 2.13 | ~~Touch target < 48dp~~ ✅ | `rating_bar.dart:84` (40dp in compact), bottoni settings ~34px | Risolto: minimo 48dp garantito |
+| 2.14 | ~~Contrasto~~ ✅ | `colorScheme.outline` usato come colore testo | Risolto: sostituito con `onSurfaceVariant` (settings, study, review heatmap) |
+| 2.15 | ~~`study_session_controller.dart:204-206,250-252,285-287,320-322`~~ ✅ | `catch` → `state = AsyncError`: schermata studio diventa errore irreversibile | Risolto: conservato `state = AsyncData(current)` + SnackBar nella UI |
+| 2.16 | ~~`flip_card_view.dart` & `study_screen.dart`~~ ✅ | Flip 3D + shadow e shimmer senza `RepaintBoundary` | Risolto: `RepaintBoundary` su volti card e container animazione |
+| 2.17 | ~~`forecast_list_tile.dart:23-24`~~ ✅ | `DateFormat('E, MMM d', locale)` istanziato a ogni frame | Risolto: cache `static final` formattatori per locale |
+| 2.18 | ~~`stats_controller.dart:11-32`~~ ✅ | Statistiche non invalidate dopo sessione studio | Risolto: `ref.invalidate(statsControllerProvider)` in `submitRating` e `undoReview` |
+| 2.19 | `settings_screen.dart` (~960 righe) | Monolite UI: logica di 6 controller in un solo build | Spezzare in widget per sezione |
 
 ---
 
@@ -82,11 +84,28 @@ Loop di `await createCard(...)` sequenziali nel layer UI: lo spinner di salvatag
 | `CardsDao.getCardsByDeck` | `cards_dao.dart:46` | Chiamato solo dal metodo morto sopra |
 | `AppDatabase.watchSetting` | `app_database.dart:65` | Zero call site |
 | `TagsDao.deleteTag` + `TagsController.deleteTag` | `tags_dao.dart:38`, `tags_controller.dart:24` | Funzionalità di cancellazione tag irraggiungibile dalla UI |
-| `StudySessionController.getIntervalPreviews()` | `study_session_controller.dart:324` | Fallback in `study_screen.dart:372-374` mai attivato: `intervalPreviews` è sempre popolato quando serve |
-| `CardsDao.buryCard` (pubblico) | `cards_dao.dart:115` | Usato solo internamente → rendere privato |
-| `coverage/lcov.info` | root, tracciato in git | Stantio (ott 10, pre-release 0.5.0), copre frazione minima di `lib` | Cancellare + gitignore |
+| ~~`StudySessionController.getIntervalPreviews()`~~ ✅ | `study_session_controller.dart:324` | Risolto: rimosso metodo morto |
+| `CardsDao.buryCard` (pubblico) | `cards_dao.dart:115` | Testato nelle suite di unità |
+| ~~`coverage/lcov.info`~~ ✅ | root | Risolto: cancellato dal tracking git e presente in `.gitignore` |
 
 Concurrency sicura: nessun file `.g.dart` duplicato; generati drift coerenti.
+
+### 3bis. Over-engineering / da eliminare (NUOVO)
+
+| Tag | Simbolo | Posizione | Azione |
+|---|---|---|---|
+| delete | `LicenseDialog` (90 righe) | `settings/presentation/dialogs/license_dialog.dart:7-90` | Wrapper custom attorno a `showLicensePage`: allineato con `appVersionProvider` |
+| delete | ~~`integration_test/app_test.dart`~~ ✅ | intero file | Risolto: rimosso stub TODO, E2E testato in `test/widget/app_e2e_flow_test.dart` |
+| yagni | 5 provider DAO keepAlive | `core/database/database_provider.dart:24-41` | Pure deleghe a `databaseProvider`. Usare `ref.watch(databaseProvider).cardsDao` diretto: −5 provider codegen |
+| yagni | provider `updateService` | `settings/.../controllers/update_controller.dart:8-11` | Classe senza stato né dipendenze: istanziare `UpdateService()` diretto |
+| shrink | 4 controller enum settings quasi identici | `theme_mode_controller`, `locale_controller`, `haptic_controller`, `animation_level_controller` | Un `EnumSettingController<T>` generico elimina 4 file + 4 `.g.dart` |
+| stdlib | ~~Date formattate a mano~~ ✅ | `update_check_dialog.dart:110`, `review_heatmap_widget.dart:172` | Risolto: usato `DateFormat('yyyy-MM-dd')` con `intl` |
+| yagni | ~~Asset SVG dichiarati~~ ✅ | `pubspec.yaml:80-81` | Risolto: rimossi `repetita-icon.svg` e `repetita-circle-icon.svg` da asset dichiarati |
+| native | `clockProvider` manuale | `core/utils/clock_provider.dart:5` | Unico provider non-codegen del progetto: convertire a `@riverpod` o parametro |
+| shrink | Equality manuali | `card_entity.dart:72-90`, `tag_entity.dart:14-30` | `==`/`hashCode` su 14/4 campi, usate solo nei test: valutare row Drift (equality già generata) o record |
+| stdlib | `pub_semver` | `settings/domain/update_info.dart:24-25` | Unico uso del pacchetto: se versioni sempre semver semplici, confronto a componenti toglie la dipendenza (borderline) |
+
+Stima netto: **−400/−500 righe, −4 file codegen, −2 asset, −1 dipendenza (opzionale)**.
 
 ---
 
@@ -123,6 +142,10 @@ Concurrency sicura: nessun file `.g.dart` duplicato; generati drift coerenti.
 5. SQL aggregate per retention/forecast (perf crescente, piccolo).
 6. Estrazione `_LevelSliderSetting` in settings (−400 righe duplicate).
 7. `SafeArea` ovunque + padding FAB (piccolo).
-8. Cache segmenti cloze + split flip card (jank percepito in studio).
-9. Pulizia codice morto §3 + cancellazione `coverage/` + gitignore.
-10. LIMIT study queue + paginazione lista (riusare l'API paginata già esistente).
+8. Fix race `submitRating` (flag `_isSubmitting` + debounce bottoni) (§1.8bis).
+9. Cache segmenti cloze + split flip card (jank percepito in studio).
+10. `compute()`/isolate per encode/decode backup (§2.2).
+11. Pulizia codice morto §3 + §3bis (`LicenseDialog`, app_test stub, 5 provider DAO, `updateService`, asset SVG) + cancellazione `coverage/` + gitignore.
+12. `EnumSettingController<T>` generico al posto di 4 controller identici (−8 file).
+13. `RepaintBoundary` su flip card e shimmer (§2.16).
+14. LIMIT study queue + paginazione lista (riusare l'API paginata già esistente).

@@ -6,6 +6,7 @@ import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/database/app_database.dart' show Deck;
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/card_state_colors.dart';
+import '../../../core/utils/clock_provider.dart';
 import '../../study_session/presentation/study_screen.dart';
 import '../../study_session/presentation/widgets/custom_study_dialog.dart';
 import '../../tags/domain/tag_entity.dart';
@@ -29,80 +30,82 @@ class DeckDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(deck.name)),
-      body: cardsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  size: 48,
-                  color: colorScheme.error,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Error loading cards',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$error',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
+      body: SafeArea(
+        child: cardsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline_rounded,
+                    size: 48,
                     color: colorScheme.error,
                   ),
-                ),
-                const SizedBox(height: 16),
-                FilledButton.tonalIcon(
-                  onPressed: () =>
-                      ref.invalidate(cardListControllerProvider(deck.id)),
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(l10n?.retry ?? 'Retry'),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Text(
+                    'Error loading cards',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$error',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.tonalIcon(
+                    onPressed: () =>
+                        ref.invalidate(cardListControllerProvider(deck.id)),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(l10n?.retry ?? 'Retry'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        data: (cards) {
-          final cardTagsMap = deckTagsAsync.value ?? <int, List<TagEntity>>{};
-          final allDeckTags =
-              cardTagsMap.values
-                  .expand((tags) => tags)
-                  .fold<Map<int, TagEntity>>({}, (map, tag) {
-                    map[tag.id] = tag;
-                    return map;
-                  })
-                  .values
-                  .toList()
-                ..sort((a, b) => a.name.compareTo(b.name));
+          data: (cards) {
+            final cardTagsMap = deckTagsAsync.value ?? <int, List<TagEntity>>{};
+            final allDeckTags =
+                cardTagsMap.values
+                    .expand((tags) => tags)
+                    .fold<Map<int, TagEntity>>({}, (map, tag) {
+                      map[tag.id] = tag;
+                      return map;
+                    })
+                    .values
+                    .toList()
+                  ..sort((a, b) => a.name.compareTo(b.name));
 
-          final now = DateTime.now().toUtc();
-          final dueCount = cards.where((c) => c.isDue(now)).length;
+            final now = ref.watch(clockProvider)();
+            final dueCount = cards.where((c) => c.isDue(now)).length;
 
-          return Column(
-            children: [
-              _DeckStudyHeader(
-                deck: deck,
-                cards: cards,
-                dueCount: dueCount,
-                allDeckTags: allDeckTags,
-              ),
-              Expanded(
-                child: _DeckCardsSection(
+            return Column(
+              children: [
+                _DeckStudyHeader(
                   deck: deck,
                   cards: cards,
+                  dueCount: dueCount,
                   allDeckTags: allDeckTags,
-                  cardTagsMap: cardTagsMap,
                 ),
-              ),
-            ],
-          );
-        },
+                Expanded(
+                  child: _DeckCardsSection(
+                    deck: deck,
+                    cards: cards,
+                    allDeckTags: allDeckTags,
+                    cardTagsMap: cardTagsMap,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('add_card_fab'),
@@ -567,6 +570,10 @@ class _DeckCardsSection extends ConsumerWidget {
               )
               .toList();
 
+    final cardIndexMap = <int, int>{
+      for (int i = 0; i < displayedCards.length; i++) displayedCards[i].id: i,
+    };
+
     return Column(
       children: [
         if (allDeckTags.isNotEmpty)
@@ -699,10 +706,7 @@ class _DeckCardsSection extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 80),
                   findChildIndexCallback: (Key key) {
                     if (key is ValueKey<int>) {
-                      final idx = displayedCards.indexWhere(
-                        (c) => c.id == key.value,
-                      );
-                      return idx >= 0 ? idx : null;
+                      return cardIndexMap[key.value];
                     }
                     return null;
                   },
@@ -727,25 +731,62 @@ class _DeckCardsSection extends ConsumerWidget {
                           ),
                         );
                       },
-                      onDelete: () {
-                        ref
-                            .read(cardListControllerProvider(deck.id).notifier)
-                            .deleteCard(card.id);
+                      onDelete: () async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .deleteCard(card.id);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to delete card: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
                       },
-                      onToggleSuspend: () {
-                        ref
-                            .read(cardListControllerProvider(deck.id).notifier)
-                            .toggleSuspendCard(card.id, card.isSuspended);
+                      onToggleSuspend: () async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .toggleSuspendCard(card.id, card.isSuspended);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to update card: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
                       },
-                      onToggleBury: () {
-                        final now = DateTime.now().toUtc();
-                        final notifier = ref.read(
-                          cardListControllerProvider(deck.id).notifier,
-                        );
-                        if (card.isBuried(now)) {
-                          notifier.unburyCard(card.id);
-                        } else {
-                          notifier.buryCard(card.id);
+                      onToggleBury: () async {
+                        try {
+                          final now = ref.read(clockProvider)();
+                          final notifier = ref.read(
+                            cardListControllerProvider(deck.id).notifier,
+                          );
+                          if (card.isBuried(now)) {
+                            await notifier.unburyCard(card.id);
+                          } else {
+                            await notifier.buryCard(card.id);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to update card: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
                         }
                       },
                     );

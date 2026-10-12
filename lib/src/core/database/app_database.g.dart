@@ -2572,6 +2572,26 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TagsTable tags = $TagsTable(this);
   late final $CardTagsTable cardTags = $CardTagsTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final Index idxCardsDeckId = Index(
+    'idx_cards_deck_id',
+    'CREATE INDEX idx_cards_deck_id ON cards (deck_id)',
+  );
+  late final Index idxCardsDue = Index(
+    'idx_cards_due',
+    'CREATE INDEX idx_cards_due ON cards (due)',
+  );
+  late final Index idxReviewLogsCardId = Index(
+    'idx_review_logs_card_id',
+    'CREATE INDEX idx_review_logs_card_id ON review_logs (card_id)',
+  );
+  late final Index idxReviewLogsReviewedAt = Index(
+    'idx_review_logs_reviewed_at',
+    'CREATE INDEX idx_review_logs_reviewed_at ON review_logs (reviewed_at)',
+  );
+  late final Index idxCardTagsTagId = Index(
+    'idx_card_tags_tag_id',
+    'CREATE INDEX idx_card_tags_tag_id ON card_tags (tag_id)',
+  );
   late final DecksDao decksDao = DecksDao(this as AppDatabase);
   late final CardsDao cardsDao = CardsDao(this as AppDatabase);
   late final StudySessionDao studySessionDao = StudySessionDao(
@@ -2590,6 +2610,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tags,
     cardTags,
     appSettings,
+    idxCardsDeckId,
+    idxCardsDue,
+    idxReviewLogsCardId,
+    idxReviewLogsReviewedAt,
+    idxCardTagsTagId,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([

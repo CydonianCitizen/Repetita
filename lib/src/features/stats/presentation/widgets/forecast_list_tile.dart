@@ -16,12 +16,17 @@ class ForecastListTile extends StatelessWidget {
   final int index;
   final int maxCount;
 
+  static final Map<String, DateFormat> _formatters = {};
+
+  static DateFormat _getFormatter(String locale) =>
+      _formatters.putIfAbsent(locale, () => DateFormat('E, MMM d', locale));
+
   String _formatDate(BuildContext context, DateTime date, int index) {
     final l10n = AppLocalizations.of(context);
     if (index == 0) return l10n?.today ?? 'Today';
     if (index == 1) return l10n?.tomorrow ?? 'Tomorrow';
     final locale = Localizations.localeOf(context).toString();
-    return DateFormat('E, MMM d', locale).format(date);
+    return _getFormatter(locale).format(date);
   }
 
   @override

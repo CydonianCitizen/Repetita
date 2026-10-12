@@ -10,9 +10,13 @@ class FsrsParametersController extends _$FsrsParametersController {
   static const _retentionKey = 'fsrs_request_retention';
   static const _maxIntervalKey = 'fsrs_maximum_interval';
 
+  Future<void>? _loadFuture;
+
+  Future<void> ensureLoaded() => _loadFuture ??= _loadFromDb();
+
   @override
   FsrsParameters build() {
-    _loadFromDb();
+    ensureLoaded();
     return const FsrsParameters();
   }
 
@@ -29,41 +33,53 @@ class FsrsParametersController extends _$FsrsParametersController {
         : 36500;
 
     if (retention != 0.9 || maxInterval != 36500) {
-      state = FsrsParameters(
-        requestRetention: retention,
-        maximumInterval: maxInterval,
-      );
+      if (ref.mounted) {
+        state = FsrsParameters(
+          requestRetention: retention,
+          maximumInterval: maxInterval,
+        );
+      }
     }
   }
 
-  void setRequestRetention(double retention) {
+  Future<void> setRequestRetention(double retention) async {
     state = FsrsParameters(
       requestRetention: retention,
       maximumInterval: state.maximumInterval,
       w: state.w,
     );
-    ref.read(databaseProvider).setSetting(
-      _retentionKey,
-      retention.toString(),
-    );
+    try {
+      await ref
+          .read(databaseProvider)
+          .setSetting(_retentionKey, retention.toString());
+    } catch (e) {
+      // ignore
+    }
   }
 
-  void setMaximumInterval(int maxInterval) {
+  Future<void> setMaximumInterval(int maxInterval) async {
     state = FsrsParameters(
       requestRetention: state.requestRetention,
       maximumInterval: maxInterval,
       w: state.w,
     );
-    ref.read(databaseProvider).setSetting(
-      _maxIntervalKey,
-      maxInterval.toString(),
-    );
+    try {
+      await ref
+          .read(databaseProvider)
+          .setSetting(_maxIntervalKey, maxInterval.toString());
+    } catch (e) {
+      // ignore
+    }
   }
 
-  void resetToDefaults() {
+  Future<void> resetToDefaults() async {
     state = const FsrsParameters();
     final db = ref.read(databaseProvider);
-    db.setSetting(_retentionKey, '0.9');
-    db.setSetting(_maxIntervalKey, '36500');
+    try {
+      await db.setSetting(_retentionKey, '0.9');
+      await db.setSetting(_maxIntervalKey, '36500');
+    } catch (e) {
+      // ignore
+    }
   }
 }

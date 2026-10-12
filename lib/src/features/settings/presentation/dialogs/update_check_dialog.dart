@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../data/update_service.dart';
@@ -10,11 +11,13 @@ class UpdateCheckDialog extends ConsumerWidget {
   const UpdateCheckDialog({super.key});
 
   static Future<void> show(BuildContext context, WidgetRef ref) {
-    ref.read(appVersionProvider.future).then(
-      (version) => ref
-          .read(updateCheckControllerProvider.notifier)
-          .checkForUpdates(currentVersion: version),
-    );
+    ref
+        .read(appVersionProvider.future)
+        .then(
+          (version) => ref
+              .read(updateCheckControllerProvider.notifier)
+              .checkForUpdates(currentVersion: version),
+        );
 
     return showDialog<void>(
       context: context,
@@ -107,9 +110,9 @@ class UpdateCheckDialog extends ConsumerWidget {
                 if (info.publishedAt != null) ...[
                   const SizedBox(height: 6),
                   Text(
-                    'Published: ${info.publishedAt!.toLocal().year}-${info.publishedAt!.toLocal().month.toString().padLeft(2, '0')}-${info.publishedAt!.toLocal().day.toString().padLeft(2, '0')}',
+                    'Published: ${DateFormat('yyyy-MM-dd').format(info.publishedAt!.toLocal())}',
                     style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: colorScheme.outline),
+                        ?.copyWith(color: colorScheme.onSurfaceVariant),
                   ),
                 ],
                 if (info.releaseNotes != null &&

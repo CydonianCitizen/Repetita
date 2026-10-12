@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 
@@ -99,7 +100,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                         size: 16,
                         color: currentStreak > 0
                             ? scheme.tertiary
-                            : scheme.outline,
+                            : scheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -108,7 +109,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: currentStreak > 0
                               ? scheme.tertiary
-                              : scheme.outline,
+                              : scheme.onSurfaceVariant,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -168,8 +169,8 @@ class ReviewHeatmapWidget extends StatelessWidget {
                                 );
                               }
 
-                              final dateStr =
-                                  '${cellDate.year}-${cellDate.month.toString().padLeft(2, '0')}-${cellDate.day.toString().padLeft(2, '0')}';
+                              final dateStr = DateFormat('yyyy-MM-dd')
+                                  .format(cellDate);
                               final tooltip = count == 1
                                   ? '1 review on $dateStr'
                                   : '$count reviews on $dateStr';
@@ -261,7 +262,7 @@ class _WeekdayLabel extends StatelessWidget {
       child: Text(
         text,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.outline,
+          color: theme.colorScheme.onSurfaceVariant,
           fontSize: 9,
           height: 1.2,
         ),

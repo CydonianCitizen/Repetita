@@ -2,9 +2,32 @@ import 'dart:convert';
 
 import 'package:csv/csv.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show compute;
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/backup_payload.dart';
+
+String _encodeJsonPayload(Map<String, dynamic> json) =>
+    const JsonEncoder.withIndent('  ').convert(json);
+
+BackupPayload _decodeJsonPayload(String jsonString) {
+  final Map<String, dynamic> decoded;
+  try {
+    decoded = jsonDecode(jsonString) as Map<String, dynamic>;
+  } catch (e) {
+    throw FormatException('Invalid JSON format: $e');
+  }
+  return BackupPayload.fromJson(decoded);
+}
+
+String _encodeCsvRows(List<List<dynamic>> rows) => csv.encode(rows);
+
+List<List<dynamic>> _decodeCsvRows(String csvString) => csv.decode(csvString);
+
+/// Under this size, encode/decode stays on the main isolate: the cost of
+/// spawning a worker isolate outweighs the parsing cost.
+const int _offloadThresholdChars = 256 * 1024;
+const int _offloadThresholdRows = 2000;
 
 class BackupService {
   const BackupService(this.db);
@@ -93,21 +116,26 @@ class BackupService {
           .toList(),
     );
 
-    return const JsonEncoder.withIndent('  ').convert(payload.toJson());
+    final json = payload.toJson();
+    final totalRows =
+        payload.decks.length +
+        payload.cards.length +
+        payload.reviewLogs.length +
+        payload.tags.length +
+        payload.cardTags.length;
+    if (totalRows < _offloadThresholdRows) {
+      return _encodeJsonPayload(json);
+    }
+    return compute(_encodeJsonPayload, json);
   }
 
   Future<void> importJsonPayload(
     String jsonString, {
     bool replaceExisting = true,
   }) async {
-    final Map<String, dynamic> decoded;
-    try {
-      decoded = jsonDecode(jsonString) as Map<String, dynamic>;
-    } catch (e) {
-      throw FormatException('Invalid JSON format: $e');
-    }
-
-    final payload = BackupPayload.fromJson(decoded);
+    final payload = jsonString.length < _offloadThresholdChars
+        ? _decodeJsonPayload(jsonString)
+        : await compute(_decodeJsonPayload, jsonString);
 
     await db.transaction(() async {
       if (replaceExisting) {
@@ -236,7 +264,10 @@ class BackupService {
         ],
     ];
 
-    return csv.encode(csvData);
+    if (csvData.length < _offloadThresholdRows) {
+      return _encodeCsvRows(csvData);
+    }
+    return compute(_encodeCsvRows, csvData);
   }
 
   Future<CsvImportResult> importCardsFromCsv(
@@ -244,7 +275,9 @@ class BackupService {
     required int targetDeckId,
     DateTime? now,
   }) async {
-    final parsedRows = csv.decode(csvString);
+    final parsedRows = csvString.length < _offloadThresholdChars
+        ? _decodeCsvRows(csvString)
+        : await compute(_decodeCsvRows, csvString);
 
     if (parsedRows.isEmpty) {
       return const CsvImportResult(importedCount: 0, skippedCount: 0);
@@ -296,10 +329,8 @@ class BackupService {
     }
 
     if (companions.isNotEmpty) {
-      await db.transaction(() async {
-        for (final comp in companions) {
-          await db.into(db.cards).insert(comp);
-        }
+      await db.batch((batch) {
+        batch.insertAll(db.cards, companions);
       });
     }
 

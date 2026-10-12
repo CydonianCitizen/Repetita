@@ -8,6 +8,8 @@ class Decks extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@TableIndex(name: 'idx_cards_deck_id', columns: {#deckId})
+@TableIndex(name: 'idx_cards_due', columns: {#due})
 class Cards extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get deckId =>
@@ -27,6 +29,8 @@ class Cards extends Table {
   IntColumn get clozeIndex => integer().nullable()();
 }
 
+@TableIndex(name: 'idx_review_logs_card_id', columns: {#cardId})
+@TableIndex(name: 'idx_review_logs_reviewed_at', columns: {#reviewedAt})
 class ReviewLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get cardId =>
@@ -49,6 +53,7 @@ class Tags extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+@TableIndex(name: 'idx_card_tags_tag_id', columns: {#tagId})
 class CardTags extends Table {
   IntColumn get cardId =>
       integer().references(Cards, #id, onDelete: KeyAction.cascade)();

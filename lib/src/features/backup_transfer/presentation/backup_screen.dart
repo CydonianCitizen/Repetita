@@ -44,6 +44,34 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
 
     if (result != null && result.json.trim().isNotEmpty) {
+      if (result.replaceExisting && mounted) {
+        final l10n = AppLocalizations.of(context);
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n?.restoreBackupTitle ?? 'Confirm Restore'),
+            content: Text(
+              l10n?.restoreWarning ?? 'Warning: Restoring with "Replace existing" will overwrite all existing decks and cards. Do you want to continue?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(l10n?.cancel ?? 'Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(ctx).colorScheme.error,
+                  foregroundColor: Theme.of(ctx).colorScheme.onError,
+                ),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(l10n?.restore ?? 'Restore'),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+      }
+
       try {
         await ref
             .read(backupControllerProvider.notifier)
@@ -171,63 +199,65 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.backupTitle ?? 'Backup & Transfer')),
-      body: Stack(
-        children: [
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _SectionCard(
-                icon: Icons.storage,
-                title:
-                    l10n?.fullDatabaseBackup ?? 'Full Database Backup (JSON)',
-                description: l10n?.exportDescription ?? 'Export entire study database including all decks, cards, scheduling states, and historical review logs.',
-                actions: [
-                  FilledButton.icon(
-                    key: const Key('export_json_button'),
-                    onPressed: isLoading ? null : _handleExportJson,
-                    icon: const Icon(Icons.file_upload_outlined),
-                    label: Text(l10n?.exportBackup ?? 'Export Full Backup'),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    key: const Key('restore_json_button'),
-                    onPressed: isLoading ? null : _handleRestoreJson,
-                    icon: const Icon(Icons.file_download_outlined),
-                    label: Text(l10n?.restoreJson ?? 'Restore Backup'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _SectionCard(
-                icon: Icons.table_chart_outlined,
-                title:
-                    l10n?.flashcardsInterchange ??
-                    'Flashcards Interchange (CSV)',
-                description: l10n?.csvSectionDescription ?? 'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.',
-                actions: [
-                  FilledButton.icon(
-                    key: const Key('export_csv_button'),
-                    onPressed: isLoading ? null : _handleExportCsv,
-                    icon: const Icon(Icons.upload_file),
-                    label: Text(l10n?.exportCsv ?? 'Export Cards to CSV'),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    key: const Key('import_csv_button'),
-                    onPressed: isLoading ? null : _handleImportCsv,
-                    icon: const Icon(Icons.download_for_offline_outlined),
-                    label: Text(l10n?.importCsv ?? 'Import Cards from CSV'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          if (isLoading)
-            ColoredBox(
-              color: colorScheme.scrim.withValues(alpha: 0.32),
-              child: const Center(child: CircularProgressIndicator()),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _SectionCard(
+                  icon: Icons.storage,
+                  title:
+                      l10n?.fullDatabaseBackup ?? 'Full Database Backup (JSON)',
+                  description: l10n?.exportDescription ?? 'Export entire study database including all decks, cards, scheduling states, and historical review logs.',
+                  actions: [
+                    FilledButton.icon(
+                      key: const Key('export_json_button'),
+                      onPressed: isLoading ? null : _handleExportJson,
+                      icon: const Icon(Icons.file_upload_outlined),
+                      label: Text(l10n?.exportBackup ?? 'Export Full Backup'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: const Key('restore_json_button'),
+                      onPressed: isLoading ? null : _handleRestoreJson,
+                      icon: const Icon(Icons.file_download_outlined),
+                      label: Text(l10n?.restoreJson ?? 'Restore Backup'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _SectionCard(
+                  icon: Icons.table_chart_outlined,
+                  title:
+                      l10n?.flashcardsInterchange ??
+                      'Flashcards Interchange (CSV)',
+                  description: l10n?.csvSectionDescription ?? 'Export or import cards as CSV with Front and Back fields for interchange with spreadsheets and other tools.',
+                  actions: [
+                    FilledButton.icon(
+                      key: const Key('export_csv_button'),
+                      onPressed: isLoading ? null : _handleExportCsv,
+                      icon: const Icon(Icons.upload_file),
+                      label: Text(l10n?.exportCsv ?? 'Export Cards to CSV'),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      key: const Key('import_csv_button'),
+                      onPressed: isLoading ? null : _handleImportCsv,
+                      icon: const Icon(Icons.download_for_offline_outlined),
+                      label: Text(l10n?.importCsv ?? 'Import Cards from CSV'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-        ],
+            if (isLoading)
+              ColoredBox(
+                color: colorScheme.scrim.withValues(alpha: 0.32),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -242,7 +272,7 @@ class _JsonRestoreDialog extends StatefulWidget {
 
 class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
   late final TextEditingController _controller;
-  bool _replaceExisting = true;
+  bool _replaceExisting = false;
 
   @override
   void initState() {

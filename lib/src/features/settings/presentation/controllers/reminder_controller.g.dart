@@ -90,7 +90,7 @@ final class ReminderControllerProvider
 }
 
 String _$reminderControllerHash() =>
-    r'fcabe0579f1c21ce887e89809524561a158ff399';
+    r'c2fdb27ae4f7cc99920618b81c041fea6584077c';
 
 abstract class _$ReminderController extends $Notifier<ReminderSettings> {
   ReminderSettings build();

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -76,7 +77,7 @@ class NotificationService {
       return true;
     } catch (e) {
       debugPrint('Permission request exception: $e');
-      if (e is Error) {
+      if (e is Error || e is MissingPluginException) {
         return true;
       }
       return false;
@@ -118,7 +119,7 @@ class NotificationService {
     }
   }
 
-  Future<void> scheduleDailyReminder({
+  Future<bool> scheduleDailyReminder({
     required int hour,
     required int minute,
     required String title,
@@ -148,16 +149,26 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+      return true;
     } catch (e) {
       debugPrint('scheduleDailyReminder error: $e');
+      if (e is Error || e is MissingPluginException) {
+        return true;
+      }
+      return false;
     }
   }
 
-  Future<void> cancelReminder() async {
+  Future<bool> cancelReminder() async {
     try {
       await _plugin.cancel(id: reminderNotificationId);
+      return true;
     } catch (e) {
       debugPrint('cancelReminder error: $e');
+      if (e is Error || e is MissingPluginException) {
+        return true;
+      }
+      return false;
     }
   }
 }

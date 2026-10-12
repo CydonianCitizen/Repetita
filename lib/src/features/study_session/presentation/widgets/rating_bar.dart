@@ -81,7 +81,7 @@ class RatingBar extends ConsumerWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: cfg.backgroundColor,
                   foregroundColor: cfg.foregroundColor,
-                  minimumSize: Size(compact ? 40 : 48, 56),
+                  minimumSize: const Size(48, 56),
                   padding: EdgeInsets.symmetric(
                     vertical: 10,
                     horizontal: compact ? 4 : 8,
