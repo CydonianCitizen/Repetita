@@ -42,7 +42,7 @@ final class AnimationLevelControllerProvider
 }
 
 String _$animationLevelControllerHash() =>
-    r'42b79825f9a06d0caa865b1f1da503b4d8edc588';
+    r'863f9d57363b56f393c3a01276354e5bfca0193a';
 
 abstract class _$AnimationLevelController extends $Notifier<AnimationLevel> {
   AnimationLevel build();

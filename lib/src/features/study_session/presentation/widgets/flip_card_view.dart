@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/algorithms/cloze/cloze_parser.dart';
+import '../../../../core/algorithms/cloze/cloze_segment.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../cards/domain/card_entity.dart';
 
@@ -24,6 +25,48 @@ class FlipCardView extends StatefulWidget {
 }
 
 class _FlipCardViewState extends State<FlipCardView> {
+  late bool _isCloze;
+  late String _promptText;
+  late String _answerText;
+  late List<ClozeSegment> _promptSegments;
+  late List<ClozeSegment> _answerSegments;
+
+  @override
+  void initState() {
+    super.initState();
+    _recomputeCardData();
+  }
+
+  @override
+  void didUpdateWidget(FlipCardView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.card.front != widget.card.front ||
+        oldWidget.card.clozeIndex != widget.card.clozeIndex) {
+      _recomputeCardData();
+    }
+  }
+
+  void _recomputeCardData() {
+    final activeIndex = widget.card.activeClozeIndex;
+    _isCloze = widget.card.isCloze;
+    _promptText = ClozeParser.renderClozePrompt(
+      widget.card.front,
+      activeIndex: activeIndex,
+    );
+    _answerText = ClozeParser.renderClozeAnswer(
+      widget.card.front,
+      activeIndex: activeIndex,
+    );
+    _promptSegments = ClozeParser.getPromptSegments(
+      widget.card.front,
+      activeIndex: activeIndex,
+    );
+    _answerSegments = ClozeParser.getAnswerSegments(
+      widget.card.front,
+      activeIndex: activeIndex,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,7 +130,7 @@ class _FlipCardViewState extends State<FlipCardView> {
     ThemeData theme,
     AppLocalizations? l10n,
   ) {
-    final isCloze = widget.card.isCloze;
+    final isCloze = _isCloze;
     final promptBadgeText = isCloze
         ? (l10n?.clozeBadge(widget.card.activeClozeIndex) ??
               'CLOZE c${widget.card.activeClozeIndex}')
@@ -158,23 +201,14 @@ class _FlipCardViewState extends State<FlipCardView> {
               Semantics(
                 label:
                     l10n?.cardPromptSemantics(
-                      isCloze
-                          ? ClozeParser.renderClozePrompt(
-                              widget.card.front,
-                              activeIndex: widget.card.activeClozeIndex,
-                            )
-                          : widget.card.front,
+                      isCloze ? _promptText : widget.card.front,
                     ) ??
-                    'Card Prompt: ${isCloze ? ClozeParser.renderClozePrompt(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.front}',
+                    'Card Prompt: ${isCloze ? _promptText : widget.card.front}',
                 readOnly: true,
                 child: isCloze
                     ? Text.rich(
                         TextSpan(
-                          children:
-                              ClozeParser.getPromptSegments(
-                                widget.card.front,
-                                activeIndex: widget.card.activeClozeIndex,
-                              ).map((s) {
+                          children: _promptSegments.map((s) {
                                 if (s.isActive) {
                                   return TextSpan(
                                     text: s.text,
@@ -242,7 +276,7 @@ class _FlipCardViewState extends State<FlipCardView> {
     ThemeData theme,
     AppLocalizations? l10n,
   ) {
-    final isCloze = widget.card.isCloze;
+    final isCloze = _isCloze;
 
     return Card(
       elevation: 3,
@@ -304,12 +338,7 @@ class _FlipCardViewState extends State<FlipCardView> {
             ),
             const SizedBox(height: 16),
             Text(
-              isCloze
-                  ? ClozeParser.renderClozePrompt(
-                      widget.card.front,
-                      activeIndex: widget.card.activeClozeIndex,
-                    )
-                  : widget.card.front,
+              isCloze ? _promptText : widget.card.front,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -323,23 +352,14 @@ class _FlipCardViewState extends State<FlipCardView> {
             Semantics(
               label:
                   l10n?.cardAnswerSemantics(
-                    isCloze
-                        ? ClozeParser.renderClozeAnswer(
-                            widget.card.front,
-                            activeIndex: widget.card.activeClozeIndex,
-                          )
-                        : widget.card.back,
+                    isCloze ? _answerText : widget.card.back,
                   ) ??
-                  'Card Answer: ${isCloze ? ClozeParser.renderClozeAnswer(widget.card.front, activeIndex: widget.card.activeClozeIndex) : widget.card.back}',
+                  'Card Answer: ${isCloze ? _answerText : widget.card.back}',
               readOnly: true,
               child: isCloze
                   ? Text.rich(
                       TextSpan(
-                        children:
-                            ClozeParser.getAnswerSegments(
-                              widget.card.front,
-                              activeIndex: widget.card.activeClozeIndex,
-                            ).map((s) {
+                        children: _answerSegments.map((s) {
                               if (s.isActive) {
                                 return TextSpan(
                                   text: s.text,

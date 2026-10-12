@@ -300,95 +300,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           const SizedBox(height: 12),
 
                           // Material 3 Slider with discrete step division
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 6,
-                              activeTrackColor: colorScheme.primary,
-                              inactiveTrackColor:
-                                  colorScheme.surfaceContainerHighest,
-                              thumbColor: colorScheme.primary,
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 10,
-                                elevation: 2,
-                              ),
-                              overlayColor: colorScheme.primary.withValues(
-                                alpha: 0.16,
-                              ),
-                              tickMarkShape: const RoundSliderTickMarkShape(
-                                tickMarkRadius: 3,
-                              ),
-                              activeTickMarkColor: colorScheme.onPrimary,
-                              inactiveTickMarkColor: colorScheme.outline,
-                            ),
-                            child: Slider(
-                              key: const Key('setting_animation_slider'),
-                              value: animLevel.value.toDouble(),
-                              min: 0.0,
-                              max: 2.0,
-                              divisions: 2,
-                              label: switch (animLevel) {
-                                AnimationLevel.reduced =>
-                                  l10n?.animationReduced ?? 'Reduced',
-                                AnimationLevel.standard =>
-                                  l10n?.animationStandard ?? 'Standard',
-                                AnimationLevel.expressive =>
-                                  l10n?.animationExpressive ?? 'Expressive',
-                              },
-                              onChanged: (val) {
-                                final newLevel = AnimationLevel.fromValue(
-                                  val.round(),
-                                );
-                                ref
-                                    .read(
-                                      animationLevelControllerProvider.notifier,
-                                    )
-                                    .setLevel(newLevel);
-                                _triggerMotionPreview(newLevel);
-                              },
-                            ),
-                          ),
-
-                          // Step labels below slider
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  l10n?.animationReduced ?? 'Reduced',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: animLevel.isReduced
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: animLevel.isReduced
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  l10n?.animationStandard ?? 'Standard',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: animLevel.isStandard
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: animLevel.isStandard
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  l10n?.animationExpressive ?? 'Expressive',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: animLevel.isExpressive
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: animLevel.isExpressive
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _LevelSlider(
+                            sliderKey: const Key('setting_animation_slider'),
+                            value: animLevel.value.toDouble(),
+                            divisions: 2,
+                            labels: [
+                              l10n?.animationReduced ?? 'Reduced',
+                              l10n?.animationStandard ?? 'Standard',
+                              l10n?.animationExpressive ?? 'Expressive',
+                            ],
+                            activeIndex: animLevel.value,
+                            onChanged: (val) {
+                              final newLevel = AnimationLevel.fromValue(
+                                val.round(),
+                              );
+                              ref
+                                  .read(
+                                    animationLevelControllerProvider.notifier,
+                                  )
+                                  .setLevel(newLevel);
+                              _triggerMotionPreview(newLevel);
+                            },
                           ),
                           const SizedBox(height: 10),
 
@@ -558,121 +490,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           const SizedBox(height: 12),
 
                           // Material 3 Slider with discrete step division
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 6,
-                              activeTrackColor: colorScheme.primary,
-                              inactiveTrackColor:
-                                  colorScheme.surfaceContainerHighest,
-                              thumbColor: colorScheme.primary,
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 10,
-                                elevation: 2,
-                              ),
-                              overlayColor: colorScheme.primary.withValues(
-                                alpha: 0.16,
-                              ),
-                              tickMarkShape: const RoundSliderTickMarkShape(
-                                tickMarkRadius: 3,
-                              ),
-                              activeTickMarkColor: colorScheme.onPrimary,
-                              inactiveTickMarkColor: colorScheme.outline,
-                            ),
-                            child: Slider(
-                              key: const Key('setting_haptic_slider'),
-                              value: hapticIntensity.level.toDouble(),
-                              min: 0.0,
-                              max: 3.0,
-                              divisions: 3,
-                              label: switch (hapticIntensity) {
-                                HapticIntensity.off => l10n?.hapticOff ?? 'Off',
-                                HapticIntensity.light =>
-                                  l10n?.hapticLight ?? 'Light',
-                                HapticIntensity.medium =>
-                                  l10n?.hapticMedium ?? 'Medium',
-                                HapticIntensity.strong =>
-                                  l10n?.hapticStrong ?? 'Strong',
-                              },
-                              onChanged: (val) {
-                                final newIntensity = HapticIntensity.fromLevel(
-                                  val.round(),
-                                );
-                                ref
-                                    .read(
-                                      hapticFeedbackControllerProvider.notifier,
-                                    )
-                                    .setIntensity(newIntensity);
-                                ref
-                                    .read(hapticServiceProvider)
-                                    .triggerTest(newIntensity);
-                              },
-                            ),
-                          ),
-
-                          // Step labels below slider
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  l10n?.hapticOff ?? 'Off',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight:
-                                        hapticIntensity == HapticIntensity.off
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color:
-                                        hapticIntensity == HapticIntensity.off
-                                        ? colorScheme.primary
-                                        : colorScheme.outline,
-                                  ),
-                                ),
-                                Text(
-                                  l10n?.hapticLight ?? 'Light',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight:
-                                        hapticIntensity == HapticIntensity.light
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color:
-                                        hapticIntensity == HapticIntensity.light
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  l10n?.hapticMedium ?? 'Medium',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight:
-                                        hapticIntensity ==
-                                            HapticIntensity.medium
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color:
-                                        hapticIntensity ==
-                                            HapticIntensity.medium
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                Text(
-                                  l10n?.hapticStrong ?? 'Strong',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight:
-                                        hapticIntensity ==
-                                            HapticIntensity.strong
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color:
-                                        hapticIntensity ==
-                                            HapticIntensity.strong
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          _LevelSlider(
+                            sliderKey: const Key('setting_haptic_slider'),
+                            value: hapticIntensity.level.toDouble(),
+                            divisions: 3,
+                            labels: [
+                              l10n?.hapticOff ?? 'Off',
+                              l10n?.hapticLight ?? 'Light',
+                              l10n?.hapticMedium ?? 'Medium',
+                              l10n?.hapticStrong ?? 'Strong',
+                            ],
+                            activeIndex: hapticIntensity.level,
+                            onChanged: (val) {
+                              final newIntensity = HapticIntensity.fromLevel(
+                                val.round(),
+                              );
+                              ref
+                                  .read(
+                                    hapticFeedbackControllerProvider.notifier,
+                                  )
+                                  .setIntensity(newIntensity);
+                              ref
+                                  .read(hapticServiceProvider)
+                                  .triggerTest(newIntensity);
+                            },
                           ),
                           const SizedBox(height: 10),
 
@@ -945,6 +786,81 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ),
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
+    );
+  }
+}
+
+/// Discrete-step slider with labels, shared by animation and haptic settings.
+class _LevelSlider extends StatelessWidget {
+  const _LevelSlider({
+    required this.sliderKey,
+    required this.value,
+    required this.divisions,
+    required this.labels,
+    required this.activeIndex,
+    required this.onChanged,
+  });
+
+  final Key sliderKey;
+  final double value;
+  final int divisions;
+  final List<String> labels;
+  final int activeIndex;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      children: [
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 6,
+            activeTrackColor: colorScheme.primary,
+            inactiveTrackColor: colorScheme.surfaceContainerHighest,
+            thumbColor: colorScheme.primary,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 10,
+              elevation: 2,
+            ),
+            overlayColor: colorScheme.primary.withValues(alpha: 0.16),
+            tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 3),
+            activeTickMarkColor: colorScheme.onPrimary,
+            inactiveTickMarkColor: colorScheme.outline,
+          ),
+          child: Slider(
+            key: sliderKey,
+            value: value,
+            min: 0.0,
+            max: divisions.toDouble(),
+            divisions: divisions,
+            label: labels[value.round()],
+            onChanged: onChanged,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (var i = 0; i < labels.length; i++)
+                Text(
+                  labels[i],
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: i == activeIndex
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: i == activeIndex
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

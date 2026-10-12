@@ -7,6 +7,7 @@ import '../../../core/database/app_database.dart' show Deck;
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/card_state_colors.dart';
 import '../../../core/utils/clock_provider.dart';
+import '../../../core/widgets/error_view.dart';
 import '../../study_session/presentation/study_screen.dart';
 import '../../study_session/presentation/widgets/custom_study_dialog.dart';
 import '../../tags/domain/tag_entity.dart';
@@ -22,8 +23,6 @@ class DeckDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final cardsAsync = ref.watch(cardListControllerProvider(deck.id));
     final deckTagsAsync = ref.watch(deckTagsProvider(deck.id));
@@ -33,42 +32,10 @@ class DeckDetailScreen extends ConsumerWidget {
       body: SafeArea(
         child: cardsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 48,
-                    color: colorScheme.error,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Error loading cards',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$error',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.tonalIcon(
-                    onPressed: () =>
-                        ref.invalidate(cardListControllerProvider(deck.id)),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(l10n?.retry ?? 'Retry'),
-                  ),
-                ],
-              ),
-            ),
+          error: (error, _) => ErrorView(
+            title: 'Error loading cards',
+            error: error,
+            onRetry: () => ref.invalidate(cardListControllerProvider(deck.id)),
           ),
           data: (cards) {
             final cardTagsMap = deckTagsAsync.value ?? <int, List<TagEntity>>{};
@@ -559,16 +526,7 @@ class _DeckCardsSection extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final selectedTagId = ref.watch(deckTagFilterProvider);
-
-    final displayedCards = selectedTagId == null
-        ? cards
-        : cards
-              .where(
-                (c) =>
-                    cardTagsMap[c.id]?.any((t) => t.id == selectedTagId) ??
-                    false,
-              )
-              .toList();
+    final displayedCards = ref.watch(filteredDeckCardsProvider(deck.id));
 
     final cardIndexMap = <int, int>{
       for (int i = 0; i < displayedCards.length; i++) displayedCards[i].id: i,

@@ -42,7 +42,7 @@ final class HapticFeedbackControllerProvider
 }
 
 String _$hapticFeedbackControllerHash() =>
-    r'29be5671e739d8262a4f3b385b9d86245bca3de8';
+    r'781314a6dc194193f83b8c653196d537337b6be3';
 
 abstract class _$HapticFeedbackController extends $Notifier<HapticIntensity> {
   HapticIntensity build();

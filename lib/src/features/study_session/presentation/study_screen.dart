@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/widgets/error_view.dart';
 import '../../settings/data/haptic_service.dart';
 import '../../settings/presentation/controllers/animation_level_controller.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
@@ -171,10 +172,12 @@ class StudyScreen extends ConsumerWidget {
           final stateAsync = ref.watch(provider);
           return stateAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Center(
-              child: Text(
-                '${l10n?.errorLoadingStudySession ?? "Error loading study session"}: $error',
-                style: TextStyle(color: colorScheme.error),
+            error: (error, _) => ErrorView(
+              title:
+                  l10n?.errorLoadingStudySession ?? 'Error loading study session',
+              error: error,
+              onRetry: () => ref.invalidate(
+                studySessionControllerProvider(deckId, customStudyConfig),
               ),
             ),
             data: (sessionState) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/widgets/error_view.dart';
 import '../../cards/presentation/deck_detail_screen.dart';
 import 'controllers/deck_list_controller.dart';
 import 'widgets/deck_form_dialog.dart';
@@ -20,39 +21,10 @@ class DeckListScreen extends ConsumerWidget {
       body: SafeArea(
         child: decksAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 48,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n?.failedToLoadDecks ?? 'Failed to load decks',
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$error',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: Theme.of(context).colorScheme.error),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.tonalIcon(
-                    onPressed: () => ref.invalidate(deckListControllerProvider),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(l10n?.retry ?? 'Retry'),
-                  ),
-                ],
-              ),
-            ),
+          error: (error, stack) => ErrorView(
+            title: l10n?.failedToLoadDecks ?? 'Failed to load decks',
+            error: error,
+            onRetry: () => ref.invalidate(deckListControllerProvider),
           ),
           data: (decks) {
             if (decks.isEmpty) {

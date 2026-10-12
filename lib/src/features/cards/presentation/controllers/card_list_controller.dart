@@ -1,10 +1,31 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../tags/presentation/controllers/tags_controller.dart';
 import '../../data/cards_dao.dart';
 import '../../domain/card_entity.dart';
 
 part 'card_list_controller.g.dart';
+
+/// Page size for the rendered card list; further rows load in chunks.
+const int kCardListPageSize = 100;
+
+/// Cards of [deckId] filtered by the currently selected tag.
+/// Recomputed only when the card list, the tag map or the filter change.
+@riverpod
+List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
+  final cards =
+      ref.watch(cardListControllerProvider(deckId)).value ??
+      const <CardEntity>[];
+  final selectedTagId = ref.watch(deckTagFilterProvider);
+  if (selectedTagId == null) return cards;
+  final tagsMap = ref.watch(deckTagsProvider(deckId)).value;
+  return cards
+      .where(
+        (c) => (tagsMap?[c.id] ?? const []).any((t) => t.id == selectedTagId),
+      )
+      .toList();
+}
 
 @riverpod
 class CardListController extends _$CardListController {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/widgets/error_view.dart';
 import 'controllers/stats_controller.dart';
 import 'widgets/forecast_list_tile.dart';
 import 'widgets/metric_summary_card.dart';
@@ -41,42 +42,11 @@ class StatsScreen extends ConsumerWidget {
       body: SafeArea(
         child: statsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 48,
-                    color: colorScheme.error,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n?.errorLoadingStats ?? 'Error loading statistics',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$error',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.tonalIcon(
-                    onPressed: () =>
-                        ref.invalidate(statsControllerProvider(deckId: deckId)),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: Text(l10n?.retry ?? 'Retry'),
-                  ),
-                ],
-              ),
-            ),
+          error: (error, _) => ErrorView(
+            title: l10n?.errorLoadingStats ?? 'Error loading statistics',
+            error: error,
+            onRetry: () =>
+                ref.invalidate(statsControllerProvider(deckId: deckId)),
           ),
           data: (stats) {
             final retentionPct = (stats.retentionRate * 100).round();

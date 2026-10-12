@@ -13,7 +13,11 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
     with _$StudySessionDaoMixin {
   StudySessionDao(super.db);
 
-  Future<List<Card>> fetchDueCards(int deckId, {required DateTime cutoff}) {
+  Future<List<Card>> fetchDueCards(
+    int deckId, {
+    required DateTime cutoff,
+    int limit = 200,
+  }) {
     final cutoffUtc = cutoff.toUtc();
     return (select(cards)
           ..where(
@@ -27,7 +31,8 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           ..orderBy([
             (t) => OrderingTerm.asc(t.due),
             (t) => OrderingTerm.asc(t.id),
-          ]))
+          ])
+          ..limit(limit))
         .get();
   }
 
@@ -37,6 +42,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
     required CustomStudyScope scope,
     int? tagId,
     int daysAhead = 1,
+    int limit = 200,
   }) async {
     final nowUtc = now.toUtc();
     final baseCondition =
@@ -52,7 +58,8 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
               ..orderBy([
                 (t) => OrderingTerm.asc(t.due),
                 (t) => OrderingTerm.asc(t.id),
-              ]))
+              ])
+              ..limit(limit))
             .get();
 
       case CustomStudyScope.reviewAhead:
@@ -67,7 +74,8 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
               ..orderBy([
                 (t) => OrderingTerm.asc(t.due),
                 (t) => OrderingTerm.asc(t.id),
-              ]))
+              ])
+              ..limit(limit))
             .get();
 
       case CustomStudyScope.byTag:
@@ -77,7 +85,8 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
                 ..orderBy([
                   (t) => OrderingTerm.asc(t.due),
                   (t) => OrderingTerm.asc(t.id),
-                ]))
+                ])
+                ..limit(limit))
               .get();
         }
         final query =
@@ -89,7 +98,8 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
               ..orderBy([
                 OrderingTerm.asc(cards.due),
                 OrderingTerm.asc(cards.id),
-              ]);
+              ])
+              ..limit(limit);
         final rows = await query.get();
         return rows.map((r) => r.readTable(cards)).toList();
     }

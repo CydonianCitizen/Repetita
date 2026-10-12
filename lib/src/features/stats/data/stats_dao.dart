@@ -95,37 +95,28 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
   }) async {
     final fromUtc = fromDate.toUtc();
     final todayStart = DateTime.utc(fromUtc.year, fromUtc.month, fromUtc.day);
-    final forecastEnd = todayStart.add(Duration(days: days));
-
-    final query = select(cards);
-    if (deckId != null) {
-      query.where((t) => t.deckId.equals(deckId));
-    }
-    query.where(
-      (t) => t.state.equals(0) | t.due.isSmallerThanValue(forecastEnd),
-    );
-    final cardList = await query.get();
+    final countExp = cards.id.count();
 
     final result = <ForecastDay>[];
+
     for (int i = 0; i < days; i++) {
       final dayStart = todayStart.add(Duration(days: i));
       final dayEnd = dayStart.add(const Duration(days: 1));
 
-      int count = 0;
-      for (final card in cardList) {
-        final dueUtc = card.due.toUtc();
-        if (i == 0) {
-          if (card.state == 0 || dueUtc.isBefore(dayEnd)) {
-            count++;
-          }
-        } else {
-          if (card.state != 0 &&
-              (dueUtc.isAfter(dayStart) || dueUtc.isAtSameMomentAs(dayStart)) &&
-              dueUtc.isBefore(dayEnd)) {
-            count++;
-          }
-        }
-      }
+      final dayCondition = i == 0
+          ? (cards.state.equals(0) | cards.due.isSmallerThanValue(dayEnd))
+          : (cards.state.equals(0).not() &
+                cards.due.isBiggerOrEqualValue(dayStart) &
+                cards.due.isSmallerThanValue(dayEnd));
+
+      final query = selectOnly(cards)
+        ..addColumns([countExp])
+        ..where(
+          deckId != null
+              ? cards.deckId.equals(deckId) & dayCondition
+              : dayCondition,
+        );
+      final count = await query.map((r) => r.read(countExp)).getSingle() ?? 0;
       result.add(ForecastDay(date: dayStart, count: count));
     }
 

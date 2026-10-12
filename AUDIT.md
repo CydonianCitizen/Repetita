@@ -14,10 +14,8 @@ Rimossa la costante `SettingsScreen.appVersion = 'v0.3.0'`. Ora la versione arri
 ### 1.2 ~~Nessun indice secondario nel DB — `tables.dart`~~ ✅ RISOLTO (2026-10-12)
 `@TableIndex` su `Cards(deckId)`, `Cards(due)`, `ReviewLogs(cardId)`, `ReviewLogs(reviewedAt)`, `CardTags(tagId)` + `schemaVersion` 4→5 con migration `CREATE INDEX IF NOT EXISTS` (installazioni esistenti) e indici generati da drift (installazioni nuove).
 
-### 1.3 Query senza LIMIT
-- `study_session_dao.dart:16` `fetchDueCards` e `fetchCustomStudyCards`: caricano l'intero mazzo in memoria a ogni sessione.
-- `cards_dao.dart:33` `watchCardsByDeck`: stream dell'intero mazzo senza paginazione (esiste un'API paginata... morta, vedi §3).
-**Fix:** cap giornaliero configurabile per la coda studio; paginazione sulla lista carte.
+### 1.3 Query senza LIMIT — PARZIALE ✅ (2026-10-12)
+~~`fetchDueCards`/`fetchCustomStudyCards`~~ ora con `limit = 200` default su tutte le 4 query. Resta aperto: `watchCardsByDeck` stream intero mazzo (filtro tag ora memoized in provider, ma la paginazione SQL vera resta da fare).
 
 ### 1.4 ~~Statistiche calcolate in Dart invece che in SQL — `stats_dao.dart`~~ ✅ RISOLTO (2026-10-12)
 - `:51` `getRetentionRate`: sostituito conteggio in-memory con query aggregata SQL `count()` filtrando `rating >= 2`.
@@ -31,13 +29,12 @@ Aggiunto metodo `ensureLoaded()` in `fsrs_parameters_controller.dart` e chiamata
 
 ### 1.7 Rebuild eccessivi lato UI
 - `deck_detail_screen.dart:71–105`: l'intero subtree `data:` si ricostruisce a ogni cambio carta/tag; aggregazione tag e scan `dueCount` ricalcolati a ogni emissione.
-- `deck_detail_screen.dart:560–568`: filtro in memoria `cards.where(...).toList()` in `build`, O(n) per rebuild, jank con 5k+ carte.
-- `study_screen.dart:152–154`: il `Consumer` radice osserva l'intero `studySessionControllerProvider`; ogni voto ricostruisce progress bar, flip card e rating bar.
-**Fix:** provider family memoizzati, filtro spostato nel DAO/controller, split in `Consumer` con `select` (pattern già usato solo nell'AppBar).
+- ~~`deck_detail_screen.dart:560–568`: filtro in memoria in `build`~~ ✅ (2026-10-12) nuovo `filteredDeckCardsProvider(deckId)` memoized: ricomputa solo su cambio carte/tag/filtro.
+- `study_screen.dart`: ~~Consumer radice~~ ✅ AppBar con `select` (Gemini); il `body` resta un unico `Consumer` sull'intero stato sessione (parziale, jank residuo possibile).
+- Restante: provider family per header deck (✅ Gemini `cardListControllerProvider(deckId)`).
 
-### 1.8 Animazione flip che flickera — `flip_card_view.dart:36–72`
-`TweenAnimationBuilder` avvolge l'intera card (inclusi `SingleChildScrollView` e `Text.rich` con parsing cloze) → ogni frame ricostruisce tutto il volto. L'`.animate(key: ValueKey(card.id))` esterno ri-esegue fade+slide a ogni cambio carta. Inoltre `ClozeParser` è chiamato 4–6 volte per build per faccia (`:153–191`), regex ri-parsate a ogni frame di animazione.
-**Fix:** estrarre i volti in widget separati costruiti una volta; cache dei segmenti cloze in `didUpdateWidget`; `AnimationController` in `State`.
+### 1.8 Animazione flip — PARZIALE ✅ (2026-10-12)
+~~`ClozeParser` chiamato 4–6 volte per build~~ ✅ parsing cachato in `State` (`_promptSegments`, `_answerText`, ecc.) con recompute in `didUpdateWidget`; `RepaintBoundary` su entrambi i volti (Gemini). Restante: `TweenAnimationBuilder` implicito (nessun `AnimationController` esplicito) — flicker mitigato ma non eliminato alla radice.
 
 ### 1.8bis ~~Race condition sul rating — `study_session_controller.dart`~~ ✅ RISOLTO (2026-10-12)
 Guard flag `_isSubmitting` su `submitRating`: doppio tap ignorato durante `await recordReview`, reset in `finally`.
@@ -60,12 +57,12 @@ Implementato metodo `createClozeCards()` atomico con transazione singola in `car
 | 2.4 | ~~`notification_service.dart:44,77,116,152,160`~~ ✅ | Catch silenziosi con solo `debugPrint` | Risolto: return tipizzati `bool` + rethrow in `reminder_controller.dart` su fallimento |
 | 2.5 | ~~`deck_list_screen.dart:136–149`, `deck_detail_screen.dart:730–750`~~ ✅ | Mutazioni async fire-and-forget senza feedback | Risolto: await + SnackBar errore in deck list, deck detail e study screen |
 | 2.6 | ~~`backup_screen.dart:290–297,304`~~ ✅ | Restore distruttivo senza dialog di conferma; `replaceExisting` default `true` | Risolto: default `false` + dialog di conferma esplicita |
-| 2.7 | `settings_screen.dart:102–886` | Build di ~780 righe; due blocchi slider quasi identici (animazione 187–444 vs aptica 448–725) duplicati 1:1 (~400 righe) | Estrarre `_LevelSliderSetting` riusabile |
+| 2.7 | ~~slider duplicati~~ ✅ | Blocchi slider animazione/aptica unificati in `_LevelSlider` (2026-10-12). Resta: settings_screen.dart ancora ~900 righe (monolite) | |
 | 2.8 | ~~`deck_detail_screen.dart:700–708`~~ ✅ | `findChildIndexCallback` fa `indexWhere` O(n) per key → O(n²) scroll | Risolto: mappa `cardIndexMap` [id→indice] precomputata O(1) |
 | 2.9 | ~~`fsrs_parameters_controller.dart:45,57,66–67`~~ ✅ | `db.setSetting(...)` unawaited | Risolto: `await` con try/catch e log |
 | 2.10 | `deck_detail_screen.dart:84–85,259,312,741` | `DateTime.now().toUtc()` nei builder: ricalcolo per tile, niente refresh al cambio giorno | `nowProvider` o calcolo nel controller |
 | 2.11 | ~~Animazioni incoerenti~~ ✅ | Shimmer che ignora `animationLevelControllerProvider` | Risolto: gating uniforme con `animationLevelControllerProvider` |
-| 2.12 | Error view copiata 3× | `deck_list_screen.dart:22–55`, `deck_detail_screen.dart:34–70`, `stats_screen.dart:43–79`; `study_screen.dart:158` ha invece solo `Text('$error')` senza retry | Widget condiviso `ErrorView` |
+| 2.12 | ~~Error view copiata 3×~~ ✅ | `core/widgets/error_view.dart` condiviso; usato in deck_list, deck_detail, stats, study (2026-10-12) | |
 | 2.13 | ~~Touch target < 48dp~~ ✅ | `rating_bar.dart:84` (40dp in compact), bottoni settings ~34px | Risolto: minimo 48dp garantito |
 | 2.14 | ~~Contrasto~~ ✅ | `colorScheme.outline` usato come colore testo | Risolto: sostituito con `onSurfaceVariant` (settings, study, review heatmap) |
 | 2.15 | ~~`study_session_controller.dart:204-206,250-252,285-287,320-322`~~ ✅ | `catch` → `state = AsyncError`: schermata studio diventa errore irreversibile | Risolto: conservato `state = AsyncData(current)` + SnackBar nella UI |
