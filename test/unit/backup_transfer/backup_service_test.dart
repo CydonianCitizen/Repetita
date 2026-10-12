@@ -308,7 +308,8 @@ Valid Front 3,Valid Back 3''';
       final decksCountAfterFirst = (await db.select(db.decks).get()).length;
       final cardsCountAfterFirst = (await db.select(db.cards).get()).length;
       final tagsCountAfterFirst = (await db.select(db.tags).get()).length;
-      final cardTagsCountAfterFirst = (await db.select(db.cardTags).get()).length;
+      final cardTagsCountAfterFirst =
+          (await db.select(db.cardTags).get()).length;
 
       expect(decksCountAfterFirst, equals(2));
       expect(cardsCountAfterFirst, equals(2));

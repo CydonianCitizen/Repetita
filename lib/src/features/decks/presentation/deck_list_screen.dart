@@ -162,7 +162,10 @@ class DeckListScreen extends ConsumerWidget {
             try {
               await ref
                   .read(deckListControllerProvider.notifier)
-                  .createDeck(name: result.name, description: result.description);
+                  .createDeck(
+                    name: result.name,
+                    description: result.description,
+                  );
             } catch (e) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(

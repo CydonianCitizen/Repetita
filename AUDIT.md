@@ -77,12 +77,12 @@ Implementato metodo `createClozeCards()` atomico con transazione singola in `car
 
 | Simbolo | Posizione | Nota |
 |---|---|---|
-| `CardsDao.getCardsByDeckPaged` | `cards_dao.dart:59` | Nessun chiamante. Ironia: è l'unica API paginata e non è usata (vedi §1.3) |
-| `CardsDao.getCardsByDeck` | `cards_dao.dart:46` | Chiamato solo dal metodo morto sopra |
-| `AppDatabase.watchSetting` | `app_database.dart:65` | Zero call site |
-| `TagsDao.deleteTag` + `TagsController.deleteTag` | `tags_dao.dart:38`, `tags_controller.dart:24` | Funzionalità di cancellazione tag irraggiungibile dalla UI |
+| ~~`CardsDao.getCardsByDeckPaged`~~ ✅ | `cards_dao.dart:59` | Risolto: rimosso metodo morto non utilizzato |
+| `CardsDao.getCardsByDeck` | `cards_dao.dart:46` | Mantenuto: impiegato nelle suite di test e helper di verifica |
+| ~~`AppDatabase.watchSetting`~~ ✅ | `app_database.dart:65` | Risolto: rimosso metodo morto non utilizzato |
+| ~~`TagsDao.deleteTag` + `TagsController.deleteTag`~~ ✅ | `tags_dao.dart:38`, `tags_controller.dart:24` | Risolto: collegato alla UI dei filtri tag con dialog di conferma e SnackBar |
 | ~~`StudySessionController.getIntervalPreviews()`~~ ✅ | `study_session_controller.dart:324` | Risolto: rimosso metodo morto |
-| `CardsDao.buryCard` (pubblico) | `cards_dao.dart:115` | Testato nelle suite di unità |
+| ~~`CardsDao.buryCard` (pubblico)~~ ✅ | `cards_dao.dart:115` | Risolto: reso privato `_buryCard`, esposta API safe `buryCardUntilTomorrow` |
 | ~~`coverage/lcov.info`~~ ✅ | root | Risolto: cancellato dal tracking git e presente in `.gitignore` |
 
 Concurrency sicura: nessun file `.g.dart` duplicato; generati drift coerenti.

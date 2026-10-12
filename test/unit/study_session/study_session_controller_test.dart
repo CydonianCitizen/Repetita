@@ -213,88 +213,82 @@ void main() {
       },
     );
 
-    test(
-      'reviewAhead scope with recordReviews: false advances queue without writing to DB',
-      () async {
-        final cardId = await db.cardsDao.createCard(
-          deckId: testDeckId,
-          front: 'Ahead Prompt',
-          back: 'Ahead Answer',
-        );
+    test('reviewAhead scope with recordReviews: false advances queue without writing to DB', () async {
+      final cardId = await db.cardsDao.createCard(
+        deckId: testDeckId,
+        front: 'Ahead Prompt',
+        back: 'Ahead Answer',
+      );
 
-        const config = CustomStudyConfig(
-          scope: CustomStudyScope.reviewAhead,
-          daysAhead: 3,
-          isCram: true,
-          recordReviews: false,
-        );
+      const config = CustomStudyConfig(
+        scope: CustomStudyScope.reviewAhead,
+        daysAhead: 3,
+        isCram: true,
+        recordReviews: false,
+      );
 
-        final provider = studySessionControllerProvider(testDeckId, config);
-        await container.read(provider.future);
+      final provider = studySessionControllerProvider(testDeckId, config);
+      await container.read(provider.future);
 
-        final state = container.read(provider).value!;
-        expect(state.recordReviews, isFalse);
-        expect(state.intervalPreviews[Rating.again], equals('Re-queue'));
-        expect(state.intervalPreviews[Rating.good], equals('Pass'));
+      final state = container.read(provider).value!;
+      expect(state.recordReviews, isFalse);
+      expect(state.intervalPreviews[Rating.again], equals('Re-queue'));
+      expect(state.intervalPreviews[Rating.good], equals('Pass'));
 
-        await container.read(provider.notifier).submitRating(Rating.good);
+      await container.read(provider.notifier).submitRating(Rating.good);
 
-        // Verify no ReviewLogs created
-        final logs = await db.select(db.reviewLogs).get();
-        expect(logs, isEmpty);
+      // Verify no ReviewLogs created
+      final logs = await db.select(db.reviewLogs).get();
+      expect(logs, isEmpty);
 
-        // Verify card FSRS state unchanged (still state 0)
-        final cardInDb = await (db.select(
-          db.cards,
-        )..where((t) => t.id.equals(cardId))).getSingle();
-        expect(cardInDb.state, equals(0));
-        expect(cardInDb.reps, equals(0));
+      // Verify card FSRS state unchanged (still state 0)
+      final cardInDb = await (db.select(
+        db.cards,
+      )..where((t) => t.id.equals(cardId))).getSingle();
+      expect(cardInDb.state, equals(0));
+      expect(cardInDb.reps, equals(0));
 
-        // In-memory queue completed
-        final finalState = container.read(provider).value!;
-        expect(finalState.isCompleted, isTrue);
-        expect(finalState.reviewedCount, equals(1));
-      },
-    );
+      // In-memory queue completed
+      final finalState = container.read(provider).value!;
+      expect(finalState.isCompleted, isTrue);
+      expect(finalState.reviewedCount, equals(1));
+    });
 
-    test(
-      'reviewAhead scope with recordReviews: true calculates FSRS intervals and writes ReviewLog',
-      () async {
-        final cardId = await db.cardsDao.createCard(
-          deckId: testDeckId,
-          front: 'Ahead Early Prompt',
-          back: 'Ahead Early Answer',
-        );
+    test('reviewAhead scope with recordReviews: true calculates FSRS intervals and writes ReviewLog', () async {
+      final cardId = await db.cardsDao.createCard(
+        deckId: testDeckId,
+        front: 'Ahead Early Prompt',
+        back: 'Ahead Early Answer',
+      );
 
-        const config = CustomStudyConfig(
-          scope: CustomStudyScope.reviewAhead,
-          daysAhead: 3,
-          isCram: false,
-          recordReviews: true,
-        );
+      const config = CustomStudyConfig(
+        scope: CustomStudyScope.reviewAhead,
+        daysAhead: 3,
+        isCram: false,
+        recordReviews: true,
+      );
 
-        final provider = studySessionControllerProvider(testDeckId, config);
-        await container.read(provider.future);
+      final provider = studySessionControllerProvider(testDeckId, config);
+      await container.read(provider.future);
 
-        final state = container.read(provider).value!;
-        expect(state.recordReviews, isTrue);
-        expect(state.intervalPreviews[Rating.again], equals('10m'));
+      final state = container.read(provider).value!;
+      expect(state.recordReviews, isTrue);
+      expect(state.intervalPreviews[Rating.again], equals('10m'));
 
-        await container.read(provider.notifier).submitRating(Rating.good);
+      await container.read(provider.notifier).submitRating(Rating.good);
 
-        // Verify ReviewLog created
-        final logs = await db.select(db.reviewLogs).get();
-        expect(logs, hasLength(1));
-        expect(logs.first.cardId, equals(cardId));
-        expect(logs.first.rating, equals(Rating.good.value));
+      // Verify ReviewLog created
+      final logs = await db.select(db.reviewLogs).get();
+      expect(logs, hasLength(1));
+      expect(logs.first.cardId, equals(cardId));
+      expect(logs.first.rating, equals(Rating.good.value));
 
-        // Verify card transitioned to review state (state 2)
-        final cardInDb = await (db.select(
-          db.cards,
-        )..where((t) => t.id.equals(cardId))).getSingle();
-        expect(cardInDb.state, equals(2));
-        expect(cardInDb.reps, equals(1));
-      },
-    );
+      // Verify card transitioned to review state (state 2)
+      final cardInDb = await (db.select(
+        db.cards,
+      )..where((t) => t.id.equals(cardId))).getSingle();
+      expect(cardInDb.state, equals(2));
+      expect(cardInDb.reps, equals(1));
+    });
   });
 }

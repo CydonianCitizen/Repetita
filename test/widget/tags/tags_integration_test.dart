@@ -170,5 +170,62 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pumpAndSettle();
     });
+
+    testWidgets(
+      'tag deletion from filter chip confirms dialog, removes tag and resets filter',
+      (tester) async {
+        final tagChemistry = await db.tagsDao.getOrCreateTag('Chemistry');
+        final cardId = await db.cardsDao.createCard(
+          deckId: testDeck.id,
+          front: 'Water formula?',
+          back: 'H2O',
+        );
+        await db.tagsDao.setCardTags(cardId, [tagChemistry]);
+
+        await tester.pumpWidget(
+          buildSubject(child: DeckDetailScreen(deck: testDeck)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(Key('filter_tag_$tagChemistry')), findsOneWidget);
+
+        // Tap delete icon on Chemistry chip
+        final deleteIconFinder = find.descendant(
+          of: find.byKey(Key('filter_tag_$tagChemistry')),
+          matching: find.byIcon(Icons.close),
+        );
+        expect(deleteIconFinder, findsOneWidget);
+        await tester.tap(deleteIconFinder);
+        await tester.pumpAndSettle();
+
+        // Confirm dialog visible
+        expect(
+          find.text(
+            'Are you sure you want to delete "#Chemistry"? It will be removed from all cards.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('confirm_delete_tag_button')),
+          findsOneWidget,
+        );
+
+        // Tap confirm delete
+        await tester.tap(find.byKey(const Key('confirm_delete_tag_button')));
+        await tester.pumpAndSettle();
+
+        // Verify chip is gone from filter row
+        expect(find.byKey(Key('filter_tag_$tagChemistry')), findsNothing);
+
+        // Verify tag removed from DB
+        final allTags = await (db.select(db.tags)).get();
+        expect(allTags.any((t) => t.id == tagChemistry), isFalse);
+
+        ScaffoldMessenger.of(tester.element(find.byType(Scaffold)))
+            .clearSnackBars();
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpAndSettle();
+      },
+    );
   });
 }

@@ -204,8 +204,8 @@ void main() {
           back: 'Answer',
         );
 
-        final tomorrow = now.add(const Duration(days: 1));
-        await cardsDao.buryCard(cardId, tomorrow);
+        final tomorrow = CardsDao.computeTomorrowMidnight(now);
+        await cardsDao.buryCardUntilTomorrow(cardId, now);
 
         final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
         expect(cards.first.buriedUntil, isNotNull);

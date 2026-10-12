@@ -56,14 +56,6 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     return query.get();
   }
 
-  Future<List<Card>> getCardsByDeckPaged(
-    int deckId, {
-    int limit = 50,
-    int offset = 0,
-  }) {
-    return getCardsByDeck(deckId, limit: limit, offset: offset);
-  }
-
   static DateTime computeTomorrowMidnight([DateTime? now]) {
     final base = (now ?? DateTime.now()).toUtc().add(const Duration(days: 1));
     return DateTime.utc(base.year, base.month, base.day);
@@ -113,14 +105,14 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
         .then((rows) => rows > 0);
   }
 
-  Future<bool> buryCard(int id, DateTime until) {
+  Future<bool> _buryCard(int id, DateTime until) {
     return (update(cards)..where((t) => t.id.equals(id)))
         .write(CardsCompanion(buriedUntil: Value(until.toUtc())))
         .then((rows) => rows > 0);
   }
 
   Future<bool> buryCardUntilTomorrow(int id, [DateTime? now]) {
-    return buryCard(id, computeTomorrowMidnight(now));
+    return _buryCard(id, computeTomorrowMidnight(now));
   }
 
   Future<bool> unburyCard(int id) {

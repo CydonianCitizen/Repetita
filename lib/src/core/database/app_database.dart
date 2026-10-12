@@ -78,12 +78,6 @@ class AppDatabase extends _$AppDatabase {
       AppSettingsCompanion.insert(key: key, value: value),
     );
   }
-
-  Stream<String?> watchSetting(String key) {
-    return (select(appSettings)..where((t) => t.key.equals(key)))
-        .watchSingleOrNull()
-        .map((row) => row?.value);
-  }
 }
 
 LazyDatabase _openConnection() {

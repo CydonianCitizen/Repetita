@@ -559,13 +559,16 @@ class _DeckCardsSection extends ConsumerWidget {
                   final tag = allDeckTags[index - 1];
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
+                    child: InputChip(
                       key: Key('filter_tag_${tag.id}'),
                       label: Text('#${tag.name}'),
                       selected: selectedTagId == tag.id,
                       onSelected: (selected) => ref
                           .read(deckTagFilterProvider.notifier)
                           .selectTag(selected ? tag.id : null),
+                      onDeleted: () => _showDeleteTagDialog(context, ref, tag),
+                      deleteIcon: const Icon(Icons.close, size: 16),
+                      deleteButtonTooltipMessage: 'Delete tag',
                     ),
                   );
                 },
@@ -753,5 +756,56 @@ class _DeckCardsSection extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _showDeleteTagDialog(
+    BuildContext context,
+    WidgetRef ref,
+    TagEntity tag,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n?.delete ?? 'Delete Tag'),
+        content: Text(
+          'Are you sure you want to delete "#${tag.name}"? It will be removed from all cards.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirm_delete_tag_button'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
+              foregroundColor: Theme.of(dialogContext).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n?.delete ?? 'Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        if (ref.read(deckTagFilterProvider) == tag.id) {
+          ref.read(deckTagFilterProvider.notifier).selectTag(null);
+        }
+        await ref.read(tagsControllerProvider.notifier).deleteTag(tag.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Tag "#${tag.name}" deleted')));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(e.toString())));
+        }
+      }
+    }
   }
 }

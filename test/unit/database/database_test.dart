@@ -201,31 +201,15 @@ void main() {
       },
     );
 
-    test(
-      'getSetting, setSetting, and watchSetting operate correctly',
-      () async {
-        expect(await db.getSetting('unknown_key'), equals(null));
+    test('getSetting and setSetting operate correctly', () async {
+      expect(await db.getSetting('unknown_key'), equals(null));
 
-        await db.setSetting('theme_mode', 'dark');
-        expect(await db.getSetting('theme_mode'), equals('dark'));
+      await db.setSetting('theme_mode', 'dark');
+      expect(await db.getSetting('theme_mode'), equals('dark'));
 
-        // Update existing key
-        await db.setSetting('theme_mode', 'light');
-        expect(await db.getSetting('theme_mode'), equals('light'));
-
-        // Watch setting
-        final stream = db.watchSetting('reminder_enabled');
-        final expectation = expectLater(
-          stream,
-          emitsInOrder([equals(null), 'true']),
-        );
-
-        await pumpEventQueue();
-        await db.setSetting('reminder_enabled', 'true');
-        await pumpEventQueue();
-
-        await expectation;
-      },
-    );
+      // Update existing key
+      await db.setSetting('theme_mode', 'light');
+      expect(await db.getSetting('theme_mode'), equals('light'));
+    });
   });
 }

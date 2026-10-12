@@ -174,7 +174,8 @@ class StudyScreen extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) => ErrorView(
               title:
-                  l10n?.errorLoadingStudySession ?? 'Error loading study session',
+                  l10n?.errorLoadingStudySession ??
+                  'Error loading study session',
               error: error,
               onRetry: () => ref.invalidate(
                 studySessionControllerProvider(deckId, customStudyConfig),

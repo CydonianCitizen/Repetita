@@ -104,8 +104,10 @@ class ReminderController extends _$ReminderController {
     if (!granted) {
       throw Exception('Notification permission denied');
     }
-    final success =
-        await service.showTestNotification(title: title, body: body);
+    final success = await service.showTestNotification(
+      title: title,
+      body: body,
+    );
     if (!success) {
       throw Exception('Failed to send test notification');
     }

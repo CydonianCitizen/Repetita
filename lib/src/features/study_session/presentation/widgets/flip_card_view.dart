@@ -209,29 +209,27 @@ class _FlipCardViewState extends State<FlipCardView> {
                     ? Text.rich(
                         TextSpan(
                           children: _promptSegments.map((s) {
-                                if (s.isActive) {
-                                  return TextSpan(
-                                    text: s.text,
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(
-                                          color: colorScheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                          decoration: TextDecoration.underline,
-                                          decorationColor: colorScheme.primary
-                                              .withValues(alpha: 0.5),
-                                        ),
-                                  );
-                                }
-                                return TextSpan(
-                                  text: s.text,
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(
-                                        color: colorScheme.onSurface,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.4,
-                                      ),
-                                );
-                              }).toList(),
+                            if (s.isActive) {
+                              return TextSpan(
+                                text: s.text,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: colorScheme.primary
+                                      .withValues(alpha: 0.5),
+                                ),
+                              );
+                            }
+                            return TextSpan(
+                              text: s.text,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w600,
+                                height: 1.4,
+                              ),
+                            );
+                          }).toList(),
                         ),
                         key: const Key('card_front_text'),
                       )
@@ -360,29 +358,28 @@ class _FlipCardViewState extends State<FlipCardView> {
                   ? Text.rich(
                       TextSpan(
                         children: _answerSegments.map((s) {
-                              if (s.isActive) {
-                                return TextSpan(
-                                  text: s.text,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 19,
-                                    backgroundColor: colorScheme
-                                        .primaryContainer
-                                        .withValues(alpha: 0.45),
-                                  ),
-                                );
-                              }
-                              return TextSpan(
-                                text: s.text,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: colorScheme.onSurface,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
-                                  height: 1.5,
-                                ),
-                              );
-                            }).toList(),
+                          if (s.isActive) {
+                            return TextSpan(
+                              text: s.text,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 19,
+                                backgroundColor: colorScheme.primaryContainer
+                                    .withValues(alpha: 0.45),
+                              ),
+                            );
+                          }
+                          return TextSpan(
+                            text: s.text,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18,
+                              height: 1.5,
+                            ),
+                          );
+                        }).toList(),
                       ),
                       key: const Key('card_back_text'),
                     )
