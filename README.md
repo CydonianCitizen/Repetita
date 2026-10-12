@@ -1,5 +1,9 @@
 # Repetita 🧠⚡
 
+[![CI](https://github.com/CydonianCitizen/Repetita/actions/workflows/ci.yml/badge.svg)](https://github.com/CydonianCitizen/Repetita/actions/workflows/ci.yml)
+![Version](https://img.shields.io/badge/version-0.5.6-blue.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 An offline-first, local-only spaced repetition flashcard application built with Flutter and Dart, powered by the state-of-the-art **Free Spaced Repetition Scheduler (FSRS)** algorithm.
 
 Repetita is crafted for privacy, mathematical precision, and high performance. It operates completely disconnected from remote servers and cloud backends—your study data, retention history, and decks remain 100% on your device.
@@ -119,6 +123,20 @@ flutter analyze --fatal-infos --fatal-warnings
 # Build debug APK locally
 flutter build apk --debug
 ```
+
+---
+
+## 🤖 F-Droid Readiness & Open Source Compliance
+
+Repetita is fully compatible with F-Droid and free/open-source distribution standards:
+
+* **Zero Proprietary Blobs:** Contains no Google Mobile Services (GMS), Firebase, crash reporting libraries, proprietary advertising, or tracking SDKs.
+* **Local Notifications:** Daily reminders are implemented using Android's native `AlarmManager` and `NotificationManager` via `flutter_local_notifications`. No push notification services or external daemons are used.
+* **Core Library Desugaring:** The Android build configuration (`android/app/build.gradle.kts`) enables Java 8+ API desugaring (`isCoreLibraryDesugaringEnabled = true`) using the open-source `com.android.tools:desugar_jdk_libs:2.1.4`.
+* **Reproducible Local Build:**
+  ```bash
+  flutter build apk --release --split-per-abi
+  ```
 
 ---
 
