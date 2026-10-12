@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/tables/cards_table.dart';
-import '../../../core/database/tables/tags_table.dart';
+import '../../../core/database/tables.dart';
 import '../domain/tag_entity.dart';
 
 part 'tags_dao.g.dart';
@@ -18,10 +17,6 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
 
   Stream<List<Tag>> watchAllTags() {
     return (select(tags)..orderBy([(t) => OrderingTerm.asc(t.name)])).watch();
-  }
-
-  Future<List<Tag>> getAllTags() {
-    return (select(tags)..orderBy([(t) => OrderingTerm.asc(t.name)])).get();
   }
 
   Future<int> getOrCreateTag(String name, {int color = 0}) async {
@@ -56,18 +51,6 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
         );
       }
     });
-  }
-
-  Stream<List<Tag>> watchTagsForCard(int cardId) {
-    final query =
-        select(tags)
-            .join([innerJoin(cardTags, cardTags.tagId.equalsExp(tags.id))])
-          ..where(cardTags.cardId.equals(cardId))
-          ..orderBy([OrderingTerm.asc(tags.name)]);
-
-    return query.watch().map(
-      (rows) => rows.map((r) => r.readTable(tags)).toList(),
-    );
   }
 
   Future<List<Tag>> getTagsForCard(int cardId) {

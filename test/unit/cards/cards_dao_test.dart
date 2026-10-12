@@ -33,7 +33,7 @@ void main() {
 
       expect(cardId, greaterThan(0));
 
-      final cards = await cardsDao.getCardsByDeck(deck1Id);
+      final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
       expect(cards, hasLength(1));
 
       final card = cards.first;
@@ -50,7 +50,7 @@ void main() {
     });
 
     test(
-      'getCardsByDeck filters by deck and orders by createdAt/id DESC',
+      'watchCardsByDeck filters by deck and orders by createdAt/id DESC',
       () async {
         final card1Id = await cardsDao.createCard(
           deckId: deck1Id,
@@ -68,12 +68,12 @@ void main() {
           back: 'Ans D2',
         );
 
-        final deck1Cards = await cardsDao.getCardsByDeck(deck1Id);
+        final deck1Cards = await cardsDao.watchCardsByDeck(deck1Id).first;
         expect(deck1Cards, hasLength(2));
         expect(deck1Cards[0].id, equals(card2Id)); // newest first
         expect(deck1Cards[1].id, equals(card1Id));
 
-        final deck2Cards = await cardsDao.getCardsByDeck(deck2Id);
+        final deck2Cards = await cardsDao.watchCardsByDeck(deck2Id).first;
         expect(deck2Cards, hasLength(1));
         expect(deck2Cards.first.front, equals('Deck 2 Card'));
       },
@@ -92,7 +92,7 @@ void main() {
       await expectation;
     });
 
-    test('getDueCards returns cards due before cutoff or in New state ordered by due ASC', () async {
+    test('StudySessionDao.fetchDueCards returns cards due before cutoff or in New state ordered by due ASC', () async {
       final now = DateTime.now().toUtc();
 
       // Card 1: Review card overdue (due 2 hours ago)
@@ -134,7 +134,10 @@ void main() {
         ),
       );
 
-      final dueCards = await cardsDao.getDueCards(deck1Id, now);
+      final dueCards = await db.studySessionDao.fetchDueCards(
+        deck1Id,
+        cutoff: now,
+      );
       expect(dueCards, hasLength(2));
       expect(dueCards[0].front, equals('Overdue'));
       expect(dueCards[1].front, equals('New Card Future Due'));
@@ -154,14 +157,14 @@ void main() {
       );
       expect(updated, isTrue);
 
-      final cards = await cardsDao.getCardsByDeck(deck1Id);
+      final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
       expect(cards.first.front, equals('Modified Front'));
       expect(cards.first.back, equals('Modified Back'));
 
       final deleted = await cardsDao.deleteCard(cardId);
       expect(deleted, equals(1));
 
-      final emptyCards = await cardsDao.getCardsByDeck(deck1Id);
+      final emptyCards = await cardsDao.watchCardsByDeck(deck1Id).first;
       expect(emptyCards, isEmpty);
     });
 
@@ -175,18 +178,18 @@ void main() {
           back: 'Answer',
         );
 
-        var due = await cardsDao.getDueCards(deck1Id, now);
+        var due = await db.studySessionDao.fetchDueCards(deck1Id, cutoff: now);
         expect(due, hasLength(1));
 
         await cardsDao.setCardSuspended(cardId, true);
-        final cards = await cardsDao.getCardsByDeck(deck1Id);
+        final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
         expect(cards.first.isSuspended, isTrue);
 
-        due = await cardsDao.getDueCards(deck1Id, now);
+        due = await db.studySessionDao.fetchDueCards(deck1Id, cutoff: now);
         expect(due, isEmpty);
 
         await cardsDao.setCardSuspended(cardId, false);
-        due = await cardsDao.getDueCards(deck1Id, now);
+        due = await db.studySessionDao.fetchDueCards(deck1Id, cutoff: now);
         expect(due, hasLength(1));
       },
     );
@@ -204,23 +207,43 @@ void main() {
         final tomorrow = now.add(const Duration(days: 1));
         await cardsDao.buryCard(cardId, tomorrow);
 
-        final cards = await cardsDao.getCardsByDeck(deck1Id);
+        final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
         expect(cards.first.buriedUntil, isNotNull);
 
-        var due = await cardsDao.getDueCards(deck1Id, now);
+        var due = await db.studySessionDao.fetchDueCards(deck1Id, cutoff: now);
         expect(due, isEmpty);
 
         // After tomorrow, it should be due again
-        due = await cardsDao.getDueCards(
+        due = await db.studySessionDao.fetchDueCards(
           deck1Id,
-          tomorrow.add(const Duration(hours: 1)),
+          cutoff: tomorrow.add(const Duration(hours: 1)),
         );
         expect(due, hasLength(1));
 
         // Explicit unbury
         await cardsDao.unburyCard(cardId);
-        due = await cardsDao.getDueCards(deck1Id, now);
+        due = await db.studySessionDao.fetchDueCards(deck1Id, cutoff: now);
         expect(due, hasLength(1));
+      },
+    );
+
+    test(
+      'buryCardUntilTomorrow calculates midnight tomorrow and buries card',
+      () async {
+        final now = DateTime.utc(2026, 10, 12, 14, 30);
+        final cardId = await cardsDao.createCard(
+          deckId: deck1Id,
+          front: 'Card midnight',
+          back: 'Answer',
+        );
+
+        await cardsDao.buryCardUntilTomorrow(cardId, now);
+
+        final cards = await cardsDao.watchCardsByDeck(deck1Id).first;
+        expect(
+          cards.first.buriedUntil?.toUtc(),
+          equals(DateTime.utc(2026, 10, 13, 0, 0)),
+        );
       },
     );
   });

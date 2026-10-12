@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../domain/stats_models.dart';
@@ -19,40 +20,8 @@ class ForecastListTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     if (index == 0) return l10n?.today ?? 'Today';
     if (index == 1) return l10n?.tomorrow ?? 'Tomorrow';
-    final isIt = Localizations.localeOf(context).languageCode == 'it';
-    final weekdays = isIt
-        ? const ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
-        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final months = isIt
-        ? const [
-            'Gen',
-            'Feb',
-            'Mar',
-            'Apr',
-            'Mag',
-            'Giu',
-            'Lug',
-            'Ago',
-            'Set',
-            'Ott',
-            'Nov',
-            'Dic',
-          ]
-        : const [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
-          ];
-    return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat('E, MMM d', locale).format(date);
   }
 
   @override
@@ -84,6 +53,8 @@ class ForecastListTile extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: ratio,
                 minHeight: 10,
+                semanticsLabel: 'Due forecast count',
+                semanticsValue: '${(ratio * 100).round()}%',
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 valueColor: AlwaysStoppedAnimation<Color>(
                   index == 0 ? colorScheme.primary : colorScheme.secondary,

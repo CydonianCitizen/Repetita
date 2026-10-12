@@ -3,9 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../core/algorithms/fsrs/models/fsrs_card.dart';
 import '../../../core/algorithms/fsrs/models/record_log.dart';
 import '../../../core/database/app_database.dart';
-import '../../../core/database/tables/cards_table.dart';
-import '../../../core/database/tables/review_logs_table.dart';
-import '../../../core/database/tables/tags_table.dart';
+import '../../../core/database/tables.dart';
 import '../domain/models/custom_study_config.dart';
 
 part 'study_session_dao.g.dart';

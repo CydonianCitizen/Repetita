@@ -8,3 +8,14 @@ enum CardState {
 
   final int value;
 }
+
+enum Rating {
+  again(1),
+  hard(2),
+  good(3),
+  easy(4);
+
+  const Rating(this.value);
+
+  final int value;
+}

@@ -118,78 +118,89 @@ class ReviewHeatmapWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              reverse: true,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Weekday labels: Mon, Wed, Fri
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6, top: 2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _WeekdayLabel(text: 'M', theme: theme),
-                        const SizedBox(height: 18),
-                        _WeekdayLabel(text: 'W', theme: theme),
-                        const SizedBox(height: 18),
-                        _WeekdayLabel(text: 'F', theme: theme),
-                      ],
+            RepaintBoundary(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                reverse: true,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Weekday labels: Mon, Wed, Fri
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6, top: 2),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _WeekdayLabel(text: 'M', theme: theme),
+                          const SizedBox(height: 18),
+                          _WeekdayLabel(text: 'W', theme: theme),
+                          const SizedBox(height: 18),
+                          _WeekdayLabel(text: 'F', theme: theme),
+                        ],
+                      ),
                     ),
-                  ),
-                  // Weeks columns
-                  Row(
-                    children: List.generate(weeks, (col) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: Column(
-                          children: List.generate(7, (row) {
-                            final cellDate = startMonday.add(
-                              Duration(days: col * 7 + row),
-                            );
-                            final isFuture = cellDate.isAfter(today);
-                            final count = isFuture
-                                ? 0
-                                : (dailyCounts[cellDate] ?? 0);
+                    // Weeks columns
+                    Row(
+                      children: List.generate(weeks, (col) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Column(
+                            children: List.generate(7, (row) {
+                              final cellDate = startMonday.add(
+                                Duration(days: col * 7 + row),
+                              );
+                              final isFuture = cellDate.isAfter(today);
+                              final count = isFuture
+                                  ? 0
+                                  : (dailyCounts[cellDate] ?? 0);
 
-                            if (isFuture) {
-                              return Container(
-                                width: 14,
-                                height: 14,
-                                margin: const EdgeInsets.symmetric(vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(3),
+                              if (isFuture) {
+                                return Container(
+                                  width: 14,
+                                  height: 14,
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                );
+                              }
+
+                              final dateStr =
+                                  '${cellDate.year}-${cellDate.month.toString().padLeft(2, '0')}-${cellDate.day.toString().padLeft(2, '0')}';
+                              final tooltip = count == 1
+                                  ? '1 review on $dateStr'
+                                  : '$count reviews on $dateStr';
+
+                              return Semantics(
+                                label: tooltip,
+                                child: Tooltip(
+                                  message: tooltip,
+                                  waitDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  child: Container(
+                                    width: 14,
+                                    height: 14,
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _cellColor(count, scheme),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
                                 ),
                               );
-                            }
-
-                            final dateStr =
-                                '${cellDate.year}-${cellDate.month.toString().padLeft(2, '0')}-${cellDate.day.toString().padLeft(2, '0')}';
-                            final tooltip = count == 1
-                                ? '1 review on $dateStr'
-                                : '$count reviews on $dateStr';
-
-                            return Tooltip(
-                              message: tooltip,
-                              waitDuration: const Duration(milliseconds: 300),
-                              child: Container(
-                                width: 14,
-                                height: 14,
-                                margin: const EdgeInsets.symmetric(vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: _cellColor(count, scheme),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+                            }),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 12),

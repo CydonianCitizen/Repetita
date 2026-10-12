@@ -102,6 +102,14 @@ class UpdateCheckDialog extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
+                if (info.publishedAt != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Published: ${info.publishedAt!.toLocal().year}-${info.publishedAt!.toLocal().month.toString().padLeft(2, '0')}-${info.publishedAt!.toLocal().day.toString().padLeft(2, '0')}',
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: colorScheme.outline),
+                  ),
+                ],
                 if (info.releaseNotes != null &&
                     info.releaseNotes!.isNotEmpty) ...[
                   const SizedBox(height: 12),

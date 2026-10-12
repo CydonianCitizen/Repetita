@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   NotificationService({FlutterLocalNotificationsPlugin? plugin})
@@ -18,6 +20,8 @@ class NotificationService {
 
   Future<void> initialize() async {
     if (_initialized) return;
+
+    tz.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
@@ -53,7 +57,7 @@ class NotificationService {
           >();
       if (androidImpl != null) {
         final granted = await androidImpl.requestNotificationsPermission();
-        return granted ?? true;
+        return granted ?? false;
       }
 
       // iOS permissions
@@ -67,13 +71,16 @@ class NotificationService {
           badge: true,
           sound: true,
         );
-        return granted ?? true;
+        return granted ?? false;
       }
+      return true;
     } catch (e) {
       debugPrint('Permission request exception: $e');
+      if (e is Error) {
+        return true;
+      }
+      return false;
     }
-
-    return true;
   }
 
   NotificationDetails _notificationDetails() {
@@ -119,12 +126,27 @@ class NotificationService {
   }) async {
     await initialize();
     try {
-      // Show notification to confirm scheduling on Android/iOS
-      await _plugin.show(
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      await _plugin.zonedSchedule(
         id: reminderNotificationId,
-        title: '$title ($hour:${minute.toString().padLeft(2, '0')})',
+        title: title,
         body: body,
+        scheduledDate: scheduledDate,
         notificationDetails: _notificationDetails(),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (e) {
       debugPrint('scheduleDailyReminder error: $e');

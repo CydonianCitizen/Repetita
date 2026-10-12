@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/tags_dao.dart';
-import '../../data/tags_dao_provider.dart';
+import '../../../../core/database/database_provider.dart';
 import '../../domain/tag_entity.dart';
 
 part 'tags_controller.g.dart';
@@ -43,7 +43,7 @@ Stream<Map<int, List<TagEntity>>> deckTags(Ref ref, int deckId) {
 @riverpod
 class DeckTagFilter extends _$DeckTagFilter {
   @override
-  int? build(int deckId) => null;
+  int? build() => null;
 
   void selectTag(int? tagId) {
     state = tagId;

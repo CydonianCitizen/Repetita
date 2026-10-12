@@ -15,10 +15,7 @@ class BackupScreen extends ConsumerStatefulWidget {
 }
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
-  bool _isLoading = false;
-
   Future<void> _handleExportJson() async {
-    setState(() => _isLoading = true);
     try {
       final jsonString = await ref
           .read(backupControllerProvider.notifier)
@@ -37,23 +34,23 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         final l10n = AppLocalizations.of(context);
         _showErrorSnackBar('${l10n?.exportFailed ?? "Export failed"}: $e');
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleRestoreJson() async {
-    final jsonText = await showDialog<String>(
+    final result = await showDialog<({String json, bool replaceExisting})>(
       context: context,
       builder: (context) => const _JsonRestoreDialog(),
     );
 
-    if (jsonText != null && jsonText.trim().isNotEmpty) {
-      setState(() => _isLoading = true);
+    if (result != null && result.json.trim().isNotEmpty) {
       try {
         await ref
             .read(backupControllerProvider.notifier)
-            .importJson(jsonText.trim());
+            .importJson(
+              result.json.trim(),
+              replaceExisting: result.replaceExisting,
+            );
         if (mounted) {
           final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -69,14 +66,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           final l10n = AppLocalizations.of(context);
           _showErrorSnackBar('${l10n?.restoreFailed ?? "Restore failed"}: $e');
         }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
 
   Future<void> _handleExportCsv() async {
-    setState(() => _isLoading = true);
     try {
       final csvString = await ref
           .read(backupControllerProvider.notifier)
@@ -95,8 +89,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         final l10n = AppLocalizations.of(context);
         _showErrorSnackBar('${l10n?.exportFailed ?? "Export failed"}: $e');
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -118,11 +110,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     );
 
     if (result != null && result.csv.trim().isNotEmpty) {
-      setState(() => _isLoading = true);
       try {
         final importResult = await ref
             .read(backupControllerProvider.notifier)
-            .importCardsFromCsv(result.csv.trim(), targetDeckId: result.deckId);
+            .importCsv(result.csv.trim(), targetDeckId: result.deckId);
         if (mounted) {
           final snackL10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -142,8 +133,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           final errL10n = AppLocalizations.of(context);
           _showErrorSnackBar('${errL10n?.importFailed ?? "Import failed"}: $e');
         }
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -178,6 +167,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final isLoading = ref.watch(backupControllerProvider).isLoading;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n?.backupTitle ?? 'Backup & Transfer')),
@@ -194,14 +184,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 actions: [
                   FilledButton.icon(
                     key: const Key('export_json_button'),
-                    onPressed: _isLoading ? null : _handleExportJson,
+                    onPressed: isLoading ? null : _handleExportJson,
                     icon: const Icon(Icons.file_upload_outlined),
                     label: Text(l10n?.exportBackup ?? 'Export Full Backup'),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     key: const Key('restore_json_button'),
-                    onPressed: _isLoading ? null : _handleRestoreJson,
+                    onPressed: isLoading ? null : _handleRestoreJson,
                     icon: const Icon(Icons.file_download_outlined),
                     label: Text(l10n?.restoreJson ?? 'Restore Backup'),
                   ),
@@ -217,14 +207,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 actions: [
                   FilledButton.icon(
                     key: const Key('export_csv_button'),
-                    onPressed: _isLoading ? null : _handleExportCsv,
+                    onPressed: isLoading ? null : _handleExportCsv,
                     icon: const Icon(Icons.upload_file),
                     label: Text(l10n?.exportCsv ?? 'Export Cards to CSV'),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     key: const Key('import_csv_button'),
-                    onPressed: _isLoading ? null : _handleImportCsv,
+                    onPressed: isLoading ? null : _handleImportCsv,
                     icon: const Icon(Icons.download_for_offline_outlined),
                     label: Text(l10n?.importCsv ?? 'Import Cards from CSV'),
                   ),
@@ -232,7 +222,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               ),
             ],
           ),
-          if (_isLoading)
+          if (isLoading)
             ColoredBox(
               color: colorScheme.scrim.withValues(alpha: 0.32),
               child: const Center(child: CircularProgressIndicator()),
@@ -252,6 +242,7 @@ class _JsonRestoreDialog extends StatefulWidget {
 
 class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
   late final TextEditingController _controller;
+  bool _replaceExisting = true;
 
   @override
   void initState() {
@@ -285,14 +276,31 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                l10n?.restoreWarning ?? 'Warning: Restoring a backup will overwrite all existing decks and cards.',
+                _replaceExisting
+                    ? (l10n?.restoreWarning ??
+                          'Warning: Restoring with "Replace existing" will overwrite all existing decks and cards.')
+                    : 'Merging backup data with existing decks and cards.',
                 style: TextStyle(
                   color: colorScheme.onErrorContainer,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              key: const Key('replace_existing_switch'),
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Replace existing data'),
+              subtitle: Text(
+                _replaceExisting
+                    ? 'Erase existing decks and start fresh'
+                    : 'Keep existing decks and merge data',
+                style: theme.textTheme.bodySmall,
+              ),
+              value: _replaceExisting,
+              onChanged: (val) => setState(() => _replaceExisting = val),
+            ),
+            const SizedBox(height: 12),
             TextField(
               key: const Key('json_input_field'),
               controller: _controller,
@@ -313,7 +321,8 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
         ),
         FilledButton(
           key: const Key('confirm_restore_button'),
-          onPressed: () => Navigator.of(context).pop(_controller.text),
+          onPressed: () => Navigator.of(context)
+              .pop((json: _controller.text, replaceExisting: _replaceExisting)),
           child: Text(l10n?.restore ?? 'Restore'),
         ),
       ],
@@ -416,12 +425,27 @@ class _DisplayResultDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isTruncated = content.length > 4000;
+    final preview = isTruncated
+        ? '${content.substring(0, 4000)}\n\n... [${(content.length / 1024).toStringAsFixed(1)} KB total - preview truncated]'
+        : content;
 
     return AlertDialog(
       title: Text(title),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(child: SelectableText(content)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 300),
+          child: SingleChildScrollView(
+            child: SelectableText(
+              preview,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ),
       ),
       actions: [
         TextButton.icon(

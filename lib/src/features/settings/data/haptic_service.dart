@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/algorithms/fsrs/models/rating.dart';
+import '../../../core/algorithms/fsrs/models/fsrs_models.dart';
 import '../domain/haptic_intensity.dart';
 
 final hapticServiceProvider = Provider<HapticService>((ref) {

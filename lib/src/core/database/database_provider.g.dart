@@ -49,3 +49,250 @@ final class DatabaseProvider
 }
 
 String _$databaseHash() => r'0fe56aaf5bde72ce9021e425b918c495557124c1';
+
+@ProviderFor(decksDao)
+final decksDaoProvider = DecksDaoProvider._();
+
+final class DecksDaoProvider
+    extends $FunctionalProvider<DecksDao, DecksDao, DecksDao>
+    with $Provider<DecksDao> {
+  DecksDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'decksDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$decksDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<DecksDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DecksDao create(Ref ref) {
+    return decksDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DecksDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DecksDao>(value),
+    );
+  }
+}
+
+String _$decksDaoHash() => r'30897c928283b1167366d77ea72dcca748fc31d6';
+
+@ProviderFor(cardsDao)
+final cardsDaoProvider = CardsDaoProvider._();
+
+final class CardsDaoProvider
+    extends $FunctionalProvider<CardsDao, CardsDao, CardsDao>
+    with $Provider<CardsDao> {
+  CardsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'cardsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$cardsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<CardsDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CardsDao create(Ref ref) {
+    return cardsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CardsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CardsDao>(value),
+    );
+  }
+}
+
+String _$cardsDaoHash() => r'895c6723a1f338d7967d87da368ac75f0875e787';
+
+@ProviderFor(studySessionDao)
+final studySessionDaoProvider = StudySessionDaoProvider._();
+
+final class StudySessionDaoProvider
+    extends
+        $FunctionalProvider<StudySessionDao, StudySessionDao, StudySessionDao>
+    with $Provider<StudySessionDao> {
+  StudySessionDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'studySessionDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$studySessionDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<StudySessionDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  StudySessionDao create(Ref ref) {
+    return studySessionDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StudySessionDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StudySessionDao>(value),
+    );
+  }
+}
+
+String _$studySessionDaoHash() => r'2a218a1678e4d081ee63b53a4f79e00a197ea400';
+
+@ProviderFor(statsDao)
+final statsDaoProvider = StatsDaoProvider._();
+
+final class StatsDaoProvider
+    extends $FunctionalProvider<StatsDao, StatsDao, StatsDao>
+    with $Provider<StatsDao> {
+  StatsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'statsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$statsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<StatsDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  StatsDao create(Ref ref) {
+    return statsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StatsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StatsDao>(value),
+    );
+  }
+}
+
+String _$statsDaoHash() => r'0dc7aa129f9ed1a03ac603adf4894c3c148b7a3a';
+
+@ProviderFor(tagsDao)
+final tagsDaoProvider = TagsDaoProvider._();
+
+final class TagsDaoProvider
+    extends $FunctionalProvider<TagsDao, TagsDao, TagsDao>
+    with $Provider<TagsDao> {
+  TagsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tagsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tagsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<TagsDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TagsDao create(Ref ref) {
+    return tagsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TagsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TagsDao>(value),
+    );
+  }
+}
+
+String _$tagsDaoHash() => r'caeb7b9a777c785f6eb216a680197de9e1db1cb8';
+
+@ProviderFor(backupService)
+final backupServiceProvider = BackupServiceProvider._();
+
+final class BackupServiceProvider
+    extends $FunctionalProvider<BackupService, BackupService, BackupService>
+    with $Provider<BackupService> {
+  BackupServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<BackupService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  BackupService create(Ref ref) {
+    return backupService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BackupService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BackupService>(value),
+    );
+  }
+}
+
+String _$backupServiceHash() => r'0c0fa92bf66179c32f39f95b2278dbdcd18408a3';

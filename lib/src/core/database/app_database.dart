@@ -10,15 +10,12 @@ import '../../features/decks/data/decks_dao.dart';
 import '../../features/stats/data/stats_dao.dart';
 import '../../features/study_session/data/study_session_dao.dart';
 import '../../features/tags/data/tags_dao.dart';
-import 'tables/cards_table.dart';
-import 'tables/decks_table.dart';
-import 'tables/review_logs_table.dart';
-import 'tables/tags_table.dart';
+import 'tables.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Decks, Cards, ReviewLogs, Tags, CardTags],
+  tables: [Decks, Cards, ReviewLogs, Tags, CardTags, AppSettings],
   daos: [DecksDao, CardsDao, StudySessionDao, StatsDao, TagsDao],
 )
 class AppDatabase extends _$AppDatabase {
@@ -27,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -45,8 +42,30 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(tags);
           await m.createTable(cardTags);
         }
+        if (from < 4) {
+          await m.createTable(appSettings);
+        }
       },
     );
+  }
+
+  Future<String?> getSetting(String key) async {
+    final row = await (select(
+      appSettings,
+    )..where((t) => t.key.equals(key))).getSingleOrNull();
+    return row?.value;
+  }
+
+  Future<void> setSetting(String key, String value) async {
+    await into(appSettings).insertOnConflictUpdate(
+      AppSettingsCompanion.insert(key: key, value: value),
+    );
+  }
+
+  Stream<String?> watchSetting(String key) {
+    return (select(appSettings)..where((t) => t.key.equals(key)))
+        .watchSingleOrNull()
+        .map((row) => row?.value);
   }
 }
 

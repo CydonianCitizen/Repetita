@@ -4,23 +4,9 @@ import 'font_theme.dart';
 import 'material_theme.dart';
 
 abstract final class AppTheme {
-  static const Color seedColor = Color(0xff6d5e0f);
-
   static ThemeData get lightTheme => _buildTheme(MaterialTheme.lightScheme());
 
   static ThemeData get darkTheme => _buildTheme(MaterialTheme.darkScheme());
-
-  static ThemeData get lightMediumContrastTheme =>
-      _buildTheme(MaterialTheme.lightMediumContrastScheme());
-
-  static ThemeData get lightHighContrastTheme =>
-      _buildTheme(MaterialTheme.lightHighContrastScheme());
-
-  static ThemeData get darkMediumContrastTheme =>
-      _buildTheme(MaterialTheme.darkMediumContrastScheme());
-
-  static ThemeData get darkHighContrastTheme =>
-      _buildTheme(MaterialTheme.darkHighContrastScheme());
 
   static ThemeData _buildTheme(ColorScheme colorScheme) {
     final textTheme = createAppTextTheme(brightness: colorScheme.brightness);

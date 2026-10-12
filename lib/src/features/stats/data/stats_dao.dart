@@ -1,8 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-import '../../../core/database/tables/cards_table.dart';
-import '../../../core/database/tables/review_logs_table.dart';
+import '../../../core/database/tables.dart';
 import '../domain/stats_models.dart';
 
 part 'stats_dao.g.dart';

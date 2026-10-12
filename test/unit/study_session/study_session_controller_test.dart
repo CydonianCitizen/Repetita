@@ -1,10 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
+import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
-import 'package:repetita/src/features/study_session/data/study_session_dao_provider.dart';
 import 'package:repetita/src/features/study_session/domain/models/custom_study_config.dart';
 import 'package:repetita/src/features/study_session/presentation/controllers/study_session_controller.dart';
 
@@ -64,7 +63,7 @@ void main() {
         final stateAfterRating = container.read(provider).value!;
         expect(stateAfterRating.currentIndex, equals(1));
         expect(stateAfterRating.currentCard?.id, equals(card2Id));
-        expect(stateAfterRating.lastReviewLogId, isNull);
+        expect(stateAfterRating.undoStack.last.reviewLogId, isNull);
 
         // Verify DB remains untouched (0 review logs)
         final logs = await db.select(db.reviewLogs).get();
@@ -163,6 +162,54 @@ void main() {
         )..where((t) => t.id.equals(cardId))).getSingle();
         expect(cardInDb.state, equals(2));
         expect(cardInDb.reps, equals(1));
+      },
+    );
+
+    test(
+      'Multi-step undo stack restores previous states sequentially',
+      () async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Card 1',
+          back: 'Ans 1',
+        );
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Card 2',
+          back: 'Ans 2',
+        );
+
+        const config = CustomStudyConfig(
+          scope: CustomStudyScope.allCards,
+          isCram: false,
+        );
+
+        final provider = studySessionControllerProvider(testDeckId, config);
+        await container.read(provider.future);
+
+        final notifier = container.read(provider.notifier);
+
+        // Review card 1
+        await notifier.submitRating(Rating.good);
+        expect(container.read(provider).value!.currentIndex, equals(1));
+        expect(container.read(provider).value!.undoStack, hasLength(1));
+
+        // Review card 2
+        await notifier.submitRating(Rating.easy);
+        expect(container.read(provider).value!.currentIndex, equals(2));
+        expect(container.read(provider).value!.isCompleted, isTrue);
+        expect(container.read(provider).value!.undoStack, hasLength(2));
+
+        // First undo: back to card 2
+        await notifier.undoReview();
+        expect(container.read(provider).value!.currentIndex, equals(1));
+        expect(container.read(provider).value!.isCompleted, isFalse);
+        expect(container.read(provider).value!.canUndo, isTrue);
+
+        // Second undo: back to card 1
+        await notifier.undoReview();
+        expect(container.read(provider).value!.currentIndex, equals(0));
+        expect(container.read(provider).value!.canUndo, isFalse);
       },
     );
   });

@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/algorithms/fsrs/fsrs_engine.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/card_state.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_card.dart';
+import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_parameters.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
 
 void main() {
   const engine = FsrsEngine();
@@ -304,9 +303,9 @@ void main() {
   });
 
   group('Fsrs Models - copyWith, hashCode, and value checks', () {
-    test('FsrsCard copyWith and equality work accurately', () {
+    test('FsrsCard properties and equality work accurately', () {
       final card = FsrsCard(due: baseTime);
-      final copied = card.copyWith(
+      final custom = FsrsCard(
         state: CardState.review,
         stability: 3.5,
         difficulty: 4.2,
@@ -316,14 +315,14 @@ void main() {
         lapses: 0,
       );
 
-      expect(copied.state, equals(CardState.review));
-      expect(copied.stability, equals(3.5));
-      expect(copied.difficulty, equals(4.2));
-      expect(copied.reps, equals(1));
-      expect(copied.lapses, equals(0));
-      expect(copied == card, isFalse);
+      expect(custom.state, equals(CardState.review));
+      expect(custom.stability, equals(3.5));
+      expect(custom.difficulty, equals(4.2));
+      expect(custom.reps, equals(1));
+      expect(custom.lapses, equals(0));
+      expect(custom == card, isFalse);
       expect(card.hashCode, isA<int>());
-      expect(copied.hashCode, isA<int>());
+      expect(custom.hashCode, isA<int>());
     });
 
     test('ReviewLogSnapshot and RecordLog hashCode and equality work', () {

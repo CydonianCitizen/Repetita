@@ -33,7 +33,7 @@ void main() {
       final tagId3 = await tagsDao.getOrCreateTag('Vocab');
       expect(tagId3, isNot(equals(tagId1)));
 
-      final allTags = await tagsDao.getAllTags();
+      final allTags = await tagsDao.watchAllTags().first;
       expect(allTags, hasLength(2));
       expect(allTags.map((t) => t.name), containsAll(['Grammar', 'Vocab']));
     });
@@ -103,7 +103,7 @@ void main() {
       await tagsDao.deleteTag(tagId);
 
       expect(await tagsDao.getTagsForCard(cardId), isEmpty);
-      expect(await tagsDao.getAllTags(), isEmpty);
+      expect(await tagsDao.watchAllTags().first, isEmpty);
     });
   });
 }

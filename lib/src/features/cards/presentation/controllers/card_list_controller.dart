@@ -1,8 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../tags/data/tags_dao_provider.dart';
+import '../../../../core/database/database_provider.dart';
 import '../../data/cards_dao.dart';
-import '../../data/cards_dao_provider.dart';
 import '../../domain/card_entity.dart';
 
 part 'card_list_controller.g.dart';
@@ -24,17 +23,19 @@ class CardListController extends _$CardListController {
     List<int> tagIds = const [],
   }) async {
     final dao = ref.read(cardsDaoProvider);
-    final tagsDao = tagIds.isNotEmpty ? ref.read(tagsDaoProvider) : null;
-    final cardId = await dao.createCard(
-      deckId: deckId,
-      front: front,
-      back: back,
-      clozeIndex: clozeIndex,
-    );
-    if (tagsDao != null) {
-      await tagsDao.setCardTags(cardId, tagIds);
-    }
-    return cardId;
+    final tagsDao = ref.read(tagsDaoProvider);
+    return dao.attachedDatabase.transaction(() async {
+      final cardId = await dao.createCard(
+        deckId: deckId,
+        front: front,
+        back: back,
+        clozeIndex: clozeIndex,
+      );
+      if (tagIds.isNotEmpty) {
+        await tagsDao.setCardTags(cardId, tagIds);
+      }
+      return cardId;
+    });
   }
 
   Future<void> updateCard({
@@ -44,11 +45,13 @@ class CardListController extends _$CardListController {
     List<int>? tagIds,
   }) async {
     final dao = ref.read(cardsDaoProvider);
-    final tagsDao = tagIds != null ? ref.read(tagsDaoProvider) : null;
-    await dao.updateCardContent(id: id, front: front, back: back);
-    if (tagsDao != null && tagIds != null) {
-      await tagsDao.setCardTags(id, tagIds);
-    }
+    final tagsDao = ref.read(tagsDaoProvider);
+    await dao.attachedDatabase.transaction(() async {
+      await dao.updateCardContent(id: id, front: front, back: back);
+      if (tagIds != null) {
+        await tagsDao.setCardTags(id, tagIds);
+      }
+    });
   }
 
   Future<void> deleteCard(int id) async {
@@ -63,13 +66,7 @@ class CardListController extends _$CardListController {
 
   Future<void> buryCard(int id) async {
     final dao = ref.read(cardsDaoProvider);
-    final tomorrow = DateTime.now().toUtc().add(const Duration(days: 1));
-    final tomorrowMidnight = DateTime.utc(
-      tomorrow.year,
-      tomorrow.month,
-      tomorrow.day,
-    );
-    await dao.buryCard(id, tomorrowMidnight);
+    await dao.buryCardUntilTomorrow(id);
   }
 
   Future<void> unburyCard(int id) async {

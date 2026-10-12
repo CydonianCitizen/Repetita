@@ -78,5 +78,27 @@ void main() {
         );
       },
     );
+
+    test('checkForUpdates handles malformed JSON string gracefully', () async {
+      final service = UpdateService(
+        fetcher: (uri) async => 'invalid-json-content{{{',
+      );
+
+      expect(
+        () => service.checkForUpdates(currentVersion: 'v0.0.5'),
+        throwsA(isA<UpdateCheckException>()),
+      );
+    });
+
+    test('checkForUpdates handles non-object JSON array gracefully', () async {
+      final service = UpdateService(
+        fetcher: (uri) async => '[{"tag_name": "v0.1.0"}]',
+      );
+
+      expect(
+        () => service.checkForUpdates(currentVersion: 'v0.0.5'),
+        throwsA(isA<UpdateCheckException>()),
+      );
+    });
   });
 }

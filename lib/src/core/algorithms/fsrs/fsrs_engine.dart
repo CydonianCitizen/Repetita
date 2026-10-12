@@ -1,9 +1,8 @@
 import 'dart:math';
 
-import 'models/card_state.dart';
 import 'models/fsrs_card.dart';
+import 'models/fsrs_models.dart';
 import 'models/fsrs_parameters.dart';
-import 'models/rating.dart';
 import 'models/record_log.dart';
 
 class FsrsEngine {

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:csv/csv.dart';
 import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/backup_payload.dart';
-import '../../domain/models/csv_card_row.dart';
 
 class BackupService {
   const BackupService(this.db);
@@ -12,11 +12,19 @@ class BackupService {
   final AppDatabase db;
 
   Future<String> exportJsonPayload() async {
-    final decksList = await db.select(db.decks).get();
-    final cardsList = await db.select(db.cards).get();
-    final reviewLogsList = await db.select(db.reviewLogs).get();
-    final tagsList = await db.select(db.tags).get();
-    final cardTagsList = await db.select(db.cardTags).get();
+    final results = await Future.wait([
+      db.select(db.decks).get(),
+      db.select(db.cards).get(),
+      db.select(db.reviewLogs).get(),
+      db.select(db.tags).get(),
+      db.select(db.cardTags).get(),
+    ]);
+
+    final decksList = results[0] as List<Deck>;
+    final cardsList = results[1] as List<Card>;
+    final reviewLogsList = results[2] as List<ReviewLog>;
+    final tagsList = results[3] as List<Tag>;
+    final cardTagsList = results[4] as List<CardTag>;
 
     final payload = BackupPayload(
       version: 1,
@@ -218,29 +226,25 @@ class BackupService {
     }
 
     final rows = await query.get();
+    final csvData = <List<dynamic>>[
+      ['Front', 'Back', 'DeckName'],
+      for (final row in rows)
+        [
+          row.readTable(db.cards).front,
+          row.readTable(db.cards).back,
+          row.readTable(db.decks).name,
+        ],
+    ];
 
-    final buffer = StringBuffer();
-    buffer.writeln('Front,Back,DeckName');
-
-    for (final row in rows) {
-      final card = row.readTable(db.cards);
-      final deck = row.readTable(db.decks);
-
-      final frontEscaped = _escapeCsvField(card.front);
-      final backEscaped = _escapeCsvField(card.back);
-      final deckNameEscaped = _escapeCsvField(deck.name);
-
-      buffer.writeln('$frontEscaped,$backEscaped,$deckNameEscaped');
-    }
-
-    return buffer.toString();
+    return csv.encode(csvData);
   }
 
   Future<CsvImportResult> importCardsFromCsv(
     String csvString, {
     required int targetDeckId,
   }) async {
-    final parsedRows = _parseCsv(csvString);
+    final parsedRows = csv.decode(csvString);
+
     if (parsedRows.isEmpty) {
       return const CsvImportResult(importedCount: 0, skippedCount: 0);
     }
@@ -250,12 +254,14 @@ class BackupService {
 
     int startIndex = 0;
     final firstRow = parsedRows.first;
-    if (firstRow.isNotEmpty && firstRow[0].trim().toLowerCase() == 'front') {
+    if (firstRow.isNotEmpty &&
+        firstRow[0].toString().trim().toLowerCase() == 'front') {
       startIndex = 1;
     }
 
     final now = DateTime.now().toUtc();
 
+    final companions = <CardsCompanion>[];
     for (int i = startIndex; i < parsedRows.length; i++) {
       final row = parsedRows[i];
       if (row.length < 2) {
@@ -263,116 +269,42 @@ class BackupService {
         continue;
       }
 
-      final front = row[0].trim();
-      final back = row[1].trim();
+      final front = row[0].toString().trim();
+      final back = row[1].toString().trim();
 
       if (front.isEmpty || back.isEmpty) {
         skippedCount++;
         continue;
       }
 
-      await db
-          .into(db.cards)
-          .insert(
-            CardsCompanion.insert(
-              deckId: targetDeckId,
-              front: front,
-              back: back,
-              state: const Value(0),
-              stability: const Value(0.0),
-              difficulty: const Value(0.0),
-              due: now,
-              reps: const Value(0),
-              lapses: const Value(0),
-              createdAt: Value(now),
-            ),
-          );
+      companions.add(
+        CardsCompanion.insert(
+          deckId: targetDeckId,
+          front: front,
+          back: back,
+          state: const Value(0),
+          stability: const Value(0.0),
+          difficulty: const Value(0.0),
+          due: now,
+          reps: const Value(0),
+          lapses: const Value(0),
+          createdAt: Value(now),
+        ),
+      );
       importedCount++;
+    }
+
+    if (companions.isNotEmpty) {
+      await db.transaction(() async {
+        for (final comp in companions) {
+          await db.into(db.cards).insert(comp);
+        }
+      });
     }
 
     return CsvImportResult(
       importedCount: importedCount,
       skippedCount: skippedCount,
     );
-  }
-
-  String _escapeCsvField(String field) {
-    if (field.contains(',') ||
-        field.contains('"') ||
-        field.contains('\n') ||
-        field.contains('\r')) {
-      final escaped = field.replaceAll('"', '""');
-      return '"$escaped"';
-    }
-    return field;
-  }
-
-  List<List<String>> _parseCsv(String input) {
-    final rows = <List<String>>[];
-    final currentField = StringBuffer();
-    final currentRow = <String>[];
-    bool inQuotes = false;
-    int i = 0;
-
-    while (i < input.length) {
-      final char = input[i];
-
-      if (inQuotes) {
-        if (char == '"') {
-          if (i + 1 < input.length && input[i + 1] == '"') {
-            currentField.write('"');
-            i += 2;
-            continue;
-          } else {
-            inQuotes = false;
-            i++;
-            continue;
-          }
-        } else {
-          currentField.write(char);
-          i++;
-          continue;
-        }
-      } else {
-        if (char == '"') {
-          inQuotes = true;
-          i++;
-          continue;
-        } else if (char == ',') {
-          currentRow.add(currentField.toString());
-          currentField.clear();
-          i++;
-          continue;
-        } else if (char == '\r') {
-          if (i + 1 < input.length && input[i + 1] == '\n') {
-            i++;
-          }
-          currentRow.add(currentField.toString());
-          currentField.clear();
-          rows.add(List.from(currentRow));
-          currentRow.clear();
-          i++;
-          continue;
-        } else if (char == '\n') {
-          currentRow.add(currentField.toString());
-          currentField.clear();
-          rows.add(List.from(currentRow));
-          currentRow.clear();
-          i++;
-          continue;
-        } else {
-          currentField.write(char);
-          i++;
-          continue;
-        }
-      }
-    }
-
-    if (currentField.isNotEmpty || currentRow.isNotEmpty) {
-      currentRow.add(currentField.toString());
-      rows.add(currentRow);
-    }
-
-    return rows;
   }
 }

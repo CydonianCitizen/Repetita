@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/decks_dao.dart';
-import '../../data/decks_dao_provider.dart';
+import '../../../../core/database/database_provider.dart';
 
 part 'deck_list_controller.g.dart';
 

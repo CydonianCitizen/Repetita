@@ -11,15 +11,6 @@ class TagEntity {
   final int color;
   final DateTime createdAt;
 
-  TagEntity copyWith({int? id, String? name, int? color, DateTime? createdAt}) {
-    return TagEntity(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      color: color ?? this.color,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

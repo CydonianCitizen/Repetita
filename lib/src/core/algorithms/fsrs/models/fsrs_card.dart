@@ -1,4 +1,4 @@
-import 'card_state.dart';
+import 'fsrs_models.dart';
 
 class FsrsCard {
   const FsrsCard({
@@ -18,26 +18,6 @@ class FsrsCard {
   final DateTime? lastReview;
   final int reps;
   final int lapses;
-
-  FsrsCard copyWith({
-    CardState? state,
-    double? stability,
-    double? difficulty,
-    DateTime? due,
-    DateTime? lastReview,
-    int? reps,
-    int? lapses,
-  }) {
-    return FsrsCard(
-      state: state ?? this.state,
-      stability: stability ?? this.stability,
-      difficulty: difficulty ?? this.difficulty,
-      due: due ?? this.due,
-      lastReview: lastReview ?? this.lastReview,
-      reps: reps ?? this.reps,
-      lapses: lapses ?? this.lapses,
-    );
-  }
 
   @override
   bool operator ==(Object other) =>

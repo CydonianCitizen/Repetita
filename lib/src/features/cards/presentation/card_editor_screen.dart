@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../tags/data/tags_dao.dart';
-import '../../tags/data/tags_dao_provider.dart';
+import '../../../core/database/database_provider.dart';
 import '../../tags/domain/tag_entity.dart';
 import '../../tags/presentation/controllers/tags_controller.dart';
 import 'controllers/card_list_controller.dart';
@@ -40,7 +40,6 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   void initState() {
     super.initState();
     _frontController = TextEditingController(text: widget.initialFront);
-    _frontController.addListener(_onFrontChanged);
     _backController = TextEditingController(text: widget.initialBack);
     if (widget.isEditing) {
       _loadExistingTags();
@@ -57,13 +56,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     }
   }
 
-  void _onFrontChanged() {
-    setState(() {});
-  }
-
   @override
   void dispose() {
-    _frontController.removeListener(_onFrontChanged);
     _frontController.dispose();
     _backController.dispose();
     super.dispose();
@@ -315,7 +309,6 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final title = widget.isEditing
         ? (l10n?.editCard ?? 'Edit Card')
         : (l10n?.newCard ?? 'New Card');
-    final isCloze = ClozeParser.isCloze(_frontController.text);
 
     return Scaffold(
       appBar: AppBar(
@@ -380,48 +373,64 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                       'Wrap selection with Cloze deletion',
                   onPressed: _insertCloze,
                 ),
-                if (isCloze) ...[
-                  const SizedBox(width: 8),
-                  Chip(
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: colorScheme.primaryContainer,
-                    label: Text(
-                      '${ClozeParser.extractClozeIndices(_frontController.text).length} Cloze',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.w600,
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _frontController,
+                  builder: (context, value, _) {
+                    final isCloze = ClozeParser.isCloze(value.text);
+                    if (!isCloze) return const SizedBox.shrink();
+                    final count = ClozeParser.extractClozeIndices(value.text)
+                        .length;
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Chip(
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: colorScheme.primaryContainer,
+                        label: Text(
+                          '$count Cloze',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              key: const Key('card_back_field'),
-              controller: _backController,
-              maxLines: 5,
-              minLines: 3,
-              decoration: InputDecoration(
-                labelText: isCloze
-                    ? (l10n?.cardBackNotes ?? 'Back (Extra Notes, Optional)')
-                    : (l10n?.cardBack ?? 'Back (Answer)'),
-                hintText: isCloze
-                    ? (l10n?.cardBackNotes ??
-                          'Optional notes or explanation...')
-                    : (l10n?.answerHint ?? 'Enter answer...'),
-                alignLabelWithHint: true,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (!isCloze) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l10n?.backAnswerCannotBeEmpty ??
-                        'Back answer cannot be empty';
-                  }
-                }
-                return null;
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _frontController,
+              builder: (context, value, _) {
+                final isCloze = ClozeParser.isCloze(value.text);
+                return TextFormField(
+                  key: const Key('card_back_field'),
+                  controller: _backController,
+                  maxLines: 5,
+                  minLines: 3,
+                  decoration: InputDecoration(
+                    labelText: isCloze
+                        ? (l10n?.cardBackNotes ??
+                              'Back (Extra Notes, Optional)')
+                        : (l10n?.cardBack ?? 'Back (Answer)'),
+                    hintText: isCloze
+                        ? (l10n?.cardBackNotes ??
+                              'Optional notes or explanation...')
+                        : (l10n?.answerHint ?? 'Enter answer...'),
+                    alignLabelWithHint: true,
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (val) {
+                    if (!isCloze) {
+                      if (val == null || val.trim().isEmpty) {
+                        return l10n?.backAnswerCannotBeEmpty ??
+                            'Back answer cannot be empty';
+                      }
+                    }
+                    return null;
+                  },
+                );
               },
             ),
             const SizedBox(height: 20),

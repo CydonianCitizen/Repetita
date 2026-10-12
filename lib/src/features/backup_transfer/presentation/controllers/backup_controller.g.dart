@@ -13,7 +13,7 @@ part of 'backup_controller.dart';
 final backupControllerProvider = BackupControllerProvider._();
 
 final class BackupControllerProvider
-    extends $NotifierProvider<BackupController, void> {
+    extends $NotifierProvider<BackupController, AsyncValue<void>> {
   BackupControllerProvider._()
     : super(
         from: null,
@@ -33,27 +33,27 @@ final class BackupControllerProvider
   BackupController create() => BackupController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(AsyncValue<void> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<void>>(value),
     );
   }
 }
 
-String _$backupControllerHash() => r'ca77c4e6192c109477422a007092ae334b7edd21';
+String _$backupControllerHash() => r'c9c2fa9f93c99b6170eef05a02a8579ed941f7ac';
 
-abstract class _$BackupController extends $Notifier<void> {
-  void build();
+abstract class _$BackupController extends $Notifier<AsyncValue<void>> {
+  AsyncValue<void> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<AsyncValue<void>, AsyncValue<void>>,
+              AsyncValue<void>,
               Object?,
               Object?
             >;

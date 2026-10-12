@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../data/stats_dao_provider.dart';
+import '../../../../core/database/database_provider.dart';
 import '../../domain/stats_models.dart';
 
 part 'stats_controller.g.dart';
@@ -12,31 +12,22 @@ class StatsController extends _$StatsController {
     final dao = ref.watch(statsDaoProvider);
     final now = DateTime.now().toUtc();
 
-    final stateCounts = await dao.getCardStateCounts(deckId: deckId);
-    final retentionRate = await dao.getRetentionRate(deckId: deckId);
-    final totalReviews = await dao.getTotalReviewsCount(deckId: deckId);
-    final forecast = await dao.getDueForecast(
-      deckId: deckId,
-      days: 7,
-      fromDate: now,
-    );
-    final dailyReviewCounts = await dao.getDailyReviewCounts(
-      deckId: deckId,
-      days: 105,
-      toDate: now,
-    );
-    final currentStreak = await dao.getCurrentStreak(
-      deckId: deckId,
-      today: now,
-    );
+    final results = await (
+      dao.getCardStateCounts(deckId: deckId),
+      dao.getRetentionRate(deckId: deckId),
+      dao.getTotalReviewsCount(deckId: deckId),
+      dao.getDueForecast(deckId: deckId, days: 7, fromDate: now),
+      dao.getDailyReviewCounts(deckId: deckId, days: 105, toDate: now),
+      dao.getCurrentStreak(deckId: deckId, today: now),
+    ).wait;
 
     return StatsData(
-      stateCounts: stateCounts,
-      retentionRate: retentionRate,
-      totalReviews: totalReviews,
-      forecast: forecast,
-      dailyReviewCounts: dailyReviewCounts,
-      currentStreak: currentStreak,
+      stateCounts: results.$1,
+      retentionRate: results.$2,
+      totalReviews: results.$3,
+      forecast: results.$4,
+      dailyReviewCounts: results.$5,
+      currentStreak: results.$6,
     );
   }
 }

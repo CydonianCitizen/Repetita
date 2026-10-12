@@ -39,13 +39,11 @@ class ClozeParser {
     return indices.reduce(math.max) + 1;
   }
 
-  /// Parses [text] into prompt segments for display on the front of a flashcard.
-  ///
-  /// The [activeIndex] specifies which cloze block is masked (`[...]` or `[hint]`).
-  /// All other cloze blocks are unmasked and rendered with their actual answers.
-  static List<ClozeSegment> getPromptSegments(
+  /// Parses [text] into segments, distinguishing prompt masking from answer display.
+  static List<ClozeSegment> parseSegments(
     String text, {
     int activeIndex = 1,
+    required bool isPrompt,
   }) {
     if (!isCloze(text)) {
       return [ClozeSegment(text: text)];
@@ -66,7 +64,7 @@ class ClozeParser {
       final parsed = _parseInnerContent(inner);
       final isActive = clozeIndex == activeIndex;
 
-      if (isActive) {
+      if (isPrompt && isActive) {
         final maskText = parsed.hint != null && parsed.hint!.trim().isNotEmpty
             ? '[${parsed.hint!.trim()}]'
             : '[...]';
@@ -83,7 +81,7 @@ class ClozeParser {
           ClozeSegment(
             text: parsed.answer,
             isCloze: true,
-            isActive: false,
+            isActive: isPrompt ? false : isActive,
             hint: parsed.hint,
           ),
         );
@@ -99,51 +97,17 @@ class ClozeParser {
     return segments;
   }
 
+  /// Parses [text] into prompt segments for display on the front of a flashcard.
+  static List<ClozeSegment> getPromptSegments(
+    String text, {
+    int activeIndex = 1,
+  }) => parseSegments(text, activeIndex: activeIndex, isPrompt: true);
+
   /// Parses [text] into answer segments for display on the back of a flashcard.
-  ///
-  /// The [activeIndex] cloze is marked with `isActive: true` so the UI can
-  /// highlight the revealed answer in the primary theme color.
   static List<ClozeSegment> getAnswerSegments(
     String text, {
     int activeIndex = 1,
-  }) {
-    if (!isCloze(text)) {
-      return [ClozeSegment(text: text)];
-    }
-
-    final segments = <ClozeSegment>[];
-    var lastIndex = 0;
-
-    for (final match in _clozeRegex.allMatches(text)) {
-      if (match.start > lastIndex) {
-        segments.add(
-          ClozeSegment(text: text.substring(lastIndex, match.start)),
-        );
-      }
-
-      final clozeIndex = int.tryParse(match.group(1) ?? '1') ?? 1;
-      final inner = match.group(2) ?? '';
-      final parsed = _parseInnerContent(inner);
-      final isActive = clozeIndex == activeIndex;
-
-      segments.add(
-        ClozeSegment(
-          text: parsed.answer,
-          isCloze: true,
-          isActive: isActive,
-          hint: parsed.hint,
-        ),
-      );
-
-      lastIndex = match.end;
-    }
-
-    if (lastIndex < text.length) {
-      segments.add(ClozeSegment(text: text.substring(lastIndex)));
-    }
-
-    return segments;
-  }
+  }) => parseSegments(text, activeIndex: activeIndex, isPrompt: false);
 
   /// Renders the plain string prompt for the front of a flashcard.
   static String renderClozePrompt(String text, {int activeIndex = 1}) {

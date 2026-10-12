@@ -131,30 +131,23 @@ final class DeckTagsFamily extends $Family
 }
 
 @ProviderFor(DeckTagFilter)
-final deckTagFilterProvider = DeckTagFilterFamily._();
+final deckTagFilterProvider = DeckTagFilterProvider._();
 
 final class DeckTagFilterProvider
     extends $NotifierProvider<DeckTagFilter, int?> {
-  DeckTagFilterProvider._({
-    required DeckTagFilterFamily super.from,
-    required int super.argument,
-  }) : super(
-         retry: null,
-         name: r'deckTagFilterProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+  DeckTagFilterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'deckTagFilterProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$deckTagFilterHash();
-
-  @override
-  String toString() {
-    return r'deckTagFilterProvider'
-        ''
-        '($argument)';
-  }
 
   @$internal
   @override
@@ -167,43 +160,12 @@ final class DeckTagFilterProvider
       providerOverride: $SyncValueProvider<int?>(value),
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is DeckTagFilterProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$deckTagFilterHash() => r'2134bba94781c222227951bbd06cb7447cc9ff89';
-
-final class DeckTagFilterFamily extends $Family
-    with $ClassFamilyOverride<DeckTagFilter, int?, int?, int?, int> {
-  DeckTagFilterFamily._()
-    : super(
-        retry: null,
-        name: r'deckTagFilterProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  DeckTagFilterProvider call(int deckId) =>
-      DeckTagFilterProvider._(argument: deckId, from: this);
-
-  @override
-  String toString() => r'deckTagFilterProvider';
-}
+String _$deckTagFilterHash() => r'd5f176d994b00333337ce85e823836c120bba667';
 
 abstract class _$DeckTagFilter extends $Notifier<int?> {
-  late final _$args = ref.$arg as int;
-  int get deckId => _$args;
-
-  int? build(int deckId);
+  int? build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -216,6 +178,6 @@ abstract class _$DeckTagFilter extends $Notifier<int?> {
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, build);
   }
 }

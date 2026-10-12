@@ -22,270 +22,332 @@ class StudyScreen extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final provider = studySessionControllerProvider(deckId, customStudyConfig);
-    final stateAsync = ref.watch(provider);
-    final isCram =
-        stateAsync.value?.isCram ?? (customStudyConfig?.isCram ?? false);
-    final titleText = isCram
-        ? (l10n?.cramSessionTitle ?? 'Cram Session')
-        : (l10n?.studySessionTitle ?? 'Study Session');
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(titleText),
-            if (isCram) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  l10n?.cramBadge ?? 'CRAM',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onTertiaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          if (stateAsync.value?.canUndo == true)
-            IconButton(
-              key: const Key('undo_review_button'),
-              icon: const Icon(Icons.undo_rounded),
-              tooltip: l10n?.undoReview ?? 'Undo Review',
-              onPressed: () async {
-                await ref.read(provider.notifier).undoReview();
-              },
-            ),
-          if (stateAsync.value?.currentCard != null)
-            PopupMenuButton<String>(
-              key: const Key('study_card_actions_menu'),
-              icon: const Icon(Icons.more_vert),
-              tooltip: l10n?.cardOptions ?? 'Card options',
-              onSelected: (value) async {
-                final controller = ref.read(provider.notifier);
-                if (value == 'suspend') {
-                  await controller.suspendCurrentCard();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n?.cardSuspended ?? 'Card suspended'),
-                      ),
-                    );
-                  }
-                } else if (value == 'bury') {
-                  await controller.buryCurrentCard();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          l10n?.cardBuried ?? 'Card buried until tomorrow',
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              itemBuilder: (context) {
-                final itemL10n = AppLocalizations.of(context);
-                return [
-                  PopupMenuItem(
-                    value: 'bury',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.alarm_off_rounded, size: 20),
-                        const SizedBox(width: 8),
-                        Text(itemL10n?.buryCard ?? 'Bury Card'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'suspend',
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.pause_circle_outline_rounded,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(itemL10n?.suspendCard ?? 'Suspend Card'),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-            ),
-        ],
-      ),
-      body: stateAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text(
-            '${l10n?.errorLoadingStudySession ?? "Error loading study session"}: $error',
-            style: TextStyle(color: colorScheme.error),
-          ),
-        ),
-        data: (sessionState) {
-          if (sessionState.isCompleted || sessionState.currentCard == null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                          width: 96,
-                          height: 96,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colorScheme.primaryContainer.withValues(
-                              alpha: 0.6,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.emoji_events_rounded,
-                            size: 56,
-                            color: colorScheme.primary,
-                          ),
-                        )
-                        .animate()
-                        .scale(
-                          duration: 450.ms,
-                          curve: Curves.elasticOut,
-                          begin: const Offset(0.35, 0.35),
-                        )
-                        .fadeIn(duration: 250.ms)
-                        .then()
-                        .shimmer(
-                          duration: 1200.ms,
-                          color: colorScheme.primary.withValues(alpha: 0.35),
-                        ),
-                    const SizedBox(height: 28),
-                    Text(
-                          sessionState.isCram
-                              ? (l10n?.cramCompletedTitle ??
-                                    'Cram session completed!')
-                              : (l10n?.allCardsReviewedTitle ??
-                                    'All cards reviewed for today!'),
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                          textAlign: TextAlign.center,
-                        )
-                        .animate()
-                        .fadeIn(delay: 150.ms, duration: 300.ms)
-                        .slideY(
-                          begin: 0.15,
-                          end: 0,
-                          curve: Curves.easeOutCubic,
-                        ),
-                    const SizedBox(height: 12),
-                    Text(
-                      sessionState.isCram
-                          ? (l10n?.cramCompletedDesc ??
-                                'You finished your practice run.')
-                          : (l10n?.greatJobUpcomingReviews ??
-                                'Great job! Check back later for upcoming reviews.'),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
-                    const SizedBox(height: 36),
-                    FilledButton.icon(
-                          key: const Key('back_to_deck_button'),
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.arrow_back),
-                          label: Text(l10n?.backToDeck ?? 'Back to Deck'),
-                        )
-                        .animate()
-                        .fadeIn(delay: 350.ms, duration: 300.ms)
-                        .scale(
-                          begin: const Offset(0.9, 0.9),
-                          curve: Curves.easeOutBack,
-                        ),
-                  ],
-                ),
+        title: Consumer(
+          builder: (context, ref, _) {
+            final isCram = ref.watch(
+              provider.select(
+                (s) => s.value?.isCram ?? (customStudyConfig?.isCram ?? false),
               ),
             );
-          }
-
-          final currentCard = sessionState.currentCard!;
-          final total = sessionState.totalCards;
-          final currentNum = sessionState.currentIndex + 1;
-          final progress = total > 0 ? currentNum / total : 0.0;
-          final controller = ref.read(provider.notifier);
-
-          return SafeArea(
-            child: Column(
+            final titleText = isCram
+                ? (l10n?.cramSessionTitle ?? 'Cram Session')
+                : (l10n?.studySessionTitle ?? 'Study Session');
+            return Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                Text(titleText),
+                if (isCram) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      l10n?.cramBadge ?? 'CRAM',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onTertiaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n?.cardProgress(currentNum, total) ??
-                                'Card $currentNum of $total',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
-                            ),
+                ],
+              ],
+            );
+          },
+        ),
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final canUndo = ref.watch(
+                provider.select((s) => s.value?.canUndo ?? false),
+              );
+              if (!canUndo) return const SizedBox.shrink();
+              return IconButton(
+                key: const Key('undo_review_button'),
+                icon: const Icon(Icons.undo_rounded),
+                tooltip: l10n?.undoReview ?? 'Undo Review',
+                onPressed: () async {
+                  await ref.read(provider.notifier).undoReview();
+                },
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final hasCurrentCard = ref.watch(
+                provider.select((s) => s.value?.currentCard != null),
+              );
+              if (!hasCurrentCard) return const SizedBox.shrink();
+              return PopupMenuButton<String>(
+                key: const Key('study_card_actions_menu'),
+                icon: const Icon(Icons.more_vert),
+                tooltip: l10n?.cardOptions ?? 'Card options',
+                onSelected: (value) async {
+                  final controller = ref.read(provider.notifier);
+                  if (value == 'suspend') {
+                    await controller.suspendCurrentCard();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n?.cardSuspended ?? 'Card suspended',
                           ),
-                          Text(
-                            l10n?.cardsRemaining(sessionState.remainingCards) ??
-                                '${sessionState.remainingCards} remaining',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.outline,
+                        ),
+                      );
+                    }
+                  } else if (value == 'bury') {
+                    await controller.buryCurrentCard();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n?.cardBuried ?? 'Card buried until tomorrow',
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+                itemBuilder: (context) {
+                  final itemL10n = AppLocalizations.of(context);
+                  return [
+                    PopupMenuItem(
+                      value: 'bury',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.alarm_off_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.buryCard ?? 'Bury Card'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'suspend',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.pause_circle_outline_rounded,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.suspendCard ?? 'Suspend Card'),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer(
+        builder: (context, ref, _) {
+          final stateAsync = ref.watch(provider);
+          return stateAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(
+              child: Text(
+                '${l10n?.errorLoadingStudySession ?? "Error loading study session"}: $error',
+                style: TextStyle(color: colorScheme.error),
+              ),
+            ),
+            data: (sessionState) {
+              if (sessionState.isCompleted ||
+                  sessionState.currentCard == null) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                              width: 96,
+                              height: 96,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colorScheme.primaryContainer.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.emoji_events_rounded,
+                                size: 56,
+                                color: colorScheme.primary,
+                              ),
+                            )
+                            .animate()
+                            .scale(
+                              duration: 450.ms,
+                              curve: Curves.elasticOut,
+                              begin: const Offset(0.35, 0.35),
+                            )
+                            .fadeIn(duration: 250.ms)
+                            .then()
+                            .shimmer(
+                              duration: 1200.ms,
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.35,
+                              ),
+                            ),
+                        const SizedBox(height: 28),
+                        Text(
+                              sessionState.isCram
+                                  ? (l10n?.cramCompletedTitle ??
+                                        'Cram session completed!')
+                                  : (l10n?.allCardsReviewedTitle ??
+                                        'All cards reviewed for today!'),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                              ),
+                              textAlign: TextAlign.center,
+                            )
+                            .animate()
+                            .fadeIn(delay: 150.ms, duration: 300.ms)
+                            .slideY(
+                              begin: 0.15,
+                              end: 0,
+                              curve: Curves.easeOutCubic,
+                            ),
+                        const SizedBox(height: 12),
+                        Text(
+                          sessionState.isCram
+                              ? (l10n?.cramCompletedDesc ??
+                                    'You finished your practice run.')
+                              : (l10n?.greatJobUpcomingReviews ??
+                                    'Great job! Check back later for upcoming reviews.'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
+                        const SizedBox(height: 36),
+                        FilledButton.icon(
+                              key: const Key('back_to_deck_button'),
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.arrow_back),
+                              label: Text(l10n?.backToDeck ?? 'Back to Deck'),
+                            )
+                            .animate()
+                            .fadeIn(delay: 350.ms, duration: 300.ms)
+                            .scale(
+                              begin: const Offset(0.9, 0.9),
+                              curve: Curves.easeOutBack,
+                            ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              final currentCard = sessionState.currentCard!;
+              final total = sessionState.totalCards;
+              final currentNum = sessionState.currentIndex + 1;
+              final progress = total > 0 ? currentNum / total : 0.0;
+              final controller = ref.read(provider.notifier);
+
+              return SafeArea(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n?.cardProgress(currentNum, total) ??
+                                    'Card $currentNum of $total',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                l10n?.cardsRemaining(
+                                      sessionState.remainingCards,
+                                    ) ??
+                                    '${sessionState.remainingCards} remaining',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween<double>(end: progress),
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              builder: (context, animatedProgress, _) {
+                                return LinearProgressIndicator(
+                                  key: const Key('study_progress_bar'),
+                                  value: animatedProgress,
+                                  minHeight: 6,
+                                  semanticsLabel:
+                                      l10n?.cardProgress(currentNum, total) ??
+                                      'Session progress',
+                                  semanticsValue:
+                                      '${(progress * 100).round()}%',
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    colorScheme.primary,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0.0, end: progress),
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          builder: (context, animatedProgress, _) {
-                            return LinearProgressIndicator(
-                              key: const Key('study_progress_bar'),
-                              value: animatedProgress,
-                              minHeight: 6,
-                              backgroundColor:
-                                  colorScheme.surfaceContainerHighest,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary,
-                              ),
-                            );
-                          },
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: FlipCardView(
+                          card: currentCard,
+                          isAnswerRevealed: sessionState.isAnswerRevealed,
+                          onCardTap: !sessionState.isAnswerRevealed
+                              ? () {
+                                  final intensity = ref.read(
+                                    hapticFeedbackControllerProvider,
+                                  );
+                                  ref
+                                      .read(hapticServiceProvider)
+                                      .triggerSelection(intensity);
+                                  controller.revealAnswer();
+                                }
+                              : null,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: FlipCardView(
-                      card: currentCard,
-                      isAnswerRevealed: sessionState.isAnswerRevealed,
-                      onCardTap: !sessionState.isAnswerRevealed
-                          ? () {
+                    ),
+                    if (!sessionState.isAnswerRevealed)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: FilledButton.icon(
+                            key: const Key('show_answer_button'),
+                            onPressed: () {
                               final intensity = ref.read(
                                 hapticFeedbackControllerProvider,
                               );
@@ -293,56 +355,36 @@ class StudyScreen extends ConsumerWidget {
                                   .read(hapticServiceProvider)
                                   .triggerSelection(intensity);
                               controller.revealAnswer();
-                            }
-                          : null,
-                    ),
-                  ),
-                ),
-                if (!sessionState.isAnswerRevealed)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton.icon(
-                        key: const Key('show_answer_button'),
-                        onPressed: () {
+                            },
+                            icon: const Icon(Icons.flip_rounded),
+                            label: Text(
+                              l10n?.showAnswer ?? 'Show Answer',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ).animate().fadeIn(duration: 150.ms),
+                      )
+                    else
+                      RatingBar(
+                        intervals: sessionState.intervalPreviews.isNotEmpty
+                            ? sessionState.intervalPreviews
+                            : controller.getIntervalPreviews(),
+                        onRatingSelected: (rating) {
+                          final haptic = ref.read(hapticServiceProvider);
                           final intensity = ref.read(
                             hapticFeedbackControllerProvider,
                           );
-                          ref
-                              .read(hapticServiceProvider)
-                              .triggerSelection(intensity);
-                          controller.revealAnswer();
+                          haptic.triggerRatingFeedback(rating, intensity);
+                          controller.submitRating(rating);
                         },
-                        icon: const Icon(Icons.flip_rounded),
-                        label: Text(
-                          l10n?.showAnswer ?? 'Show Answer',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ),
-                    ).animate().fadeIn(duration: 150.ms),
-                  )
-                else
-                  RatingBar(
-                    intervals: controller.getIntervalPreviews(),
-                    onRatingSelected: (rating) {
-                      final haptic = ref.read(hapticServiceProvider);
-                      final intensity = ref.read(
-                        hapticFeedbackControllerProvider,
-                      );
-                      haptic.triggerRatingFeedback(rating, intensity);
-                      controller.submitRating(rating);
-                    },
-                  ),
-              ],
-            ),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),

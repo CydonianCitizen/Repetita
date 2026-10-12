@@ -1,6 +1,5 @@
-import 'card_state.dart';
 import 'fsrs_card.dart';
-import 'rating.dart';
+import 'fsrs_models.dart';
 
 class ReviewLogSnapshot {
   const ReviewLogSnapshot({

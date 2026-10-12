@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
+import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/features/settings/data/haptic_service.dart';
 import 'package:repetita/src/features/settings/domain/haptic_intensity.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/haptic_controller.dart';

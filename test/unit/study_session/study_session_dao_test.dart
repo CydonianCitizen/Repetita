@@ -1,9 +1,8 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/card_state.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_card.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
+import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/record_log.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/features/study_session/data/study_session_dao.dart';

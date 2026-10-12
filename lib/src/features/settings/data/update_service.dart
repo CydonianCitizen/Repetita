@@ -85,8 +85,25 @@ class UpdateService {
       '/repos/$repoOwner/$repoName/releases/latest',
     );
 
-    final rawJson = await _fetcher(uri);
-    final data = jsonDecode(rawJson) as Map<String, dynamic>;
+    final String rawJson;
+    try {
+      rawJson = await _fetcher(uri);
+    } on UpdateCheckException {
+      rethrow;
+    } catch (e) {
+      throw UpdateCheckException('Failed to check for updates: $e');
+    }
+
+    final Map<String, dynamic> data;
+    try {
+      final decoded = jsonDecode(rawJson);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Expected JSON object in release response');
+      }
+      data = decoded;
+    } catch (e) {
+      throw UpdateCheckException('Malformed release payload from server: $e');
+    }
 
     final tagName = data['tag_name'] as String? ?? '';
     final releaseUrl =

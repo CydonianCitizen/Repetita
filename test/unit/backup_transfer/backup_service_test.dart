@@ -1,8 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/card_state.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_card.dart';
-import 'package:repetita/src/core/algorithms/fsrs/models/rating.dart';
+import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/record_log.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/features/backup_transfer/data/services/backup_service.dart';
@@ -199,7 +198,9 @@ void main() {
         expect(result.importedCount, equals(2));
         expect(result.skippedCount, equals(0));
 
-        final importedCards = await db.cardsDao.getCardsByDeck(targetDeckId);
+        final importedCards = await db.cardsDao
+            .watchCardsByDeck(targetDeckId)
+            .first;
         expect(importedCards, hasLength(2));
 
         final quoteCard = importedCards.firstWhere(
@@ -229,10 +230,47 @@ Valid Front 3,Valid Back 3''';
         equals(3),
       ); // Empty front, empty back, one column
 
-      final cards = await db.cardsDao.getCardsByDeck(targetDeckId);
+      final cards = await db.cardsDao.watchCardsByDeck(targetDeckId).first;
       expect(cards, hasLength(2));
       expect(cards.any((c) => c.front == 'Valid Front 1'), isTrue);
       expect(cards.any((c) => c.front == 'Valid Front 3'), isTrue);
+    });
+
+    test('importJsonPayload with replaceExisting: false merges records without wiping existing data', () async {
+      final existingDeckId = await db.decksDao.createDeck(
+        name: 'Pre-existing Deck',
+      );
+      await db.cardsDao.createCard(
+        deckId: existingDeckId,
+        front: 'Existing Card',
+        back: 'Existing Answer',
+      );
+
+      final tempDb = AppDatabase.forTesting(NativeDatabase.memory());
+      final tempService = BackupService(tempDb);
+      final importDeckId = await tempDb.decksDao.createDeck(
+        name: 'Imported Deck',
+      );
+      await tempDb.cardsDao.createCard(
+        deckId: importDeckId,
+        front: 'Imported Card',
+        back: 'Imported Answer',
+      );
+      final jsonPayload = await tempService.exportJsonPayload();
+      await tempDb.close();
+
+      await backupService.importJsonPayload(
+        jsonPayload,
+        replaceExisting: false,
+      );
+
+      final decks = await db.select(db.decks).get();
+      final cards = await db.select(db.cards).get();
+
+      expect(decks, hasLength(2));
+      expect(cards, hasLength(2));
+      expect(decks.any((d) => d.name == 'Pre-existing Deck'), isTrue);
+      expect(decks.any((d) => d.name == 'Imported Deck'), isTrue);
     });
   });
 }

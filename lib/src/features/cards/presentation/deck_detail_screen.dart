@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/algorithms/cloze/cloze_parser.dart';
@@ -25,7 +26,6 @@ class DeckDetailScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final cardsAsync = ref.watch(cardListControllerProvider(deck.id));
     final deckTagsAsync = ref.watch(deckTagsProvider(deck.id));
-    final selectedTagId = ref.watch(deckTagFilterProvider(deck.id));
 
     return Scaffold(
       appBar: AppBar(title: Text(deck.name)),
@@ -81,295 +81,24 @@ class DeckDetailScreen extends ConsumerWidget {
                   .toList()
                 ..sort((a, b) => a.name.compareTo(b.name));
 
-          final displayedCards = selectedTagId == null
-              ? cards
-              : cards
-                    .where(
-                      (c) =>
-                          cardTagsMap[c.id]?.any(
-                            (t) => t.id == selectedTagId,
-                          ) ??
-                          false,
-                    )
-                    .toList();
-
           final now = DateTime.now().toUtc();
-          final dueCount = cards.where((c) {
-            if (c.isSuspended || c.isBuried(now)) return false;
-            return c.state == 0 ||
-                c.due.isBefore(now) ||
-                c.due.isAtSameMomentAs(now);
-          }).length;
+          final dueCount = cards.where((c) => c.isDue(now)).length;
 
           return Column(
             children: [
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.school_outlined,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n?.cardsDueForReview(dueCount) ??
-                              '$dueCount cards due for review',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton.icon(
-                          key: const Key('start_study_button'),
-                          onPressed: dueCount > 0
-                              ? () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          StudyScreen(deckId: deck.id),
-                                    ),
-                                  );
-                                }
-                              : null,
-                          icon: const Icon(Icons.play_arrow),
-                          label: Text(
-                            l10n?.startStudySession ?? 'Start Study Session',
-                          ),
-                        ),
-                        OutlinedButton.icon(
-                          key: const Key('custom_study_button'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colorScheme.onPrimaryContainer,
-                            side: BorderSide(
-                              color: colorScheme.onPrimaryContainer.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
-                          ),
-                          onPressed: cards.isEmpty
-                              ? null
-                              : () async {
-                                  final config = await CustomStudyDialog.show(
-                                    context,
-                                    deckId: deck.id,
-                                    initialTags: allDeckTags,
-                                  );
-                                  if (config != null && context.mounted) {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => StudyScreen(
-                                          deckId: deck.id,
-                                          customStudyConfig: config,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                          icon: const Icon(Icons.tune_rounded),
-                          label: Text(l10n?.customStudy ?? 'Custom Study'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              if (allDeckTags.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: SizedBox(
-                    height: 38,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        FilterChip(
-                          key: const Key('filter_tag_all'),
-                          label: Text(l10n?.filterAll ?? 'All'),
-                          selected: selectedTagId == null,
-                          onSelected: (_) => ref
-                              .read(deckTagFilterProvider(deck.id).notifier)
-                              .selectTag(null),
-                        ),
-                        const SizedBox(width: 8),
-                        ...allDeckTags.map(
-                          (tag) => Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: FilterChip(
-                              key: Key('filter_tag_${tag.id}'),
-                              label: Text('#${tag.name}'),
-                              selected: selectedTagId == tag.id,
-                              onSelected: (selected) => ref
-                                  .read(deckTagFilterProvider(deck.id).notifier)
-                                  .selectTag(selected ? tag.id : null),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Cards (${displayedCards.length}${selectedTagId != null ? ' / ${cards.length}' : ''})',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              _DeckStudyHeader(
+                deck: deck,
+                cards: cards,
+                dueCount: dueCount,
+                allDeckTags: allDeckTags,
               ),
               Expanded(
-                child: cards.isEmpty
-                    ? Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 72,
-                                height: 72,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.post_add_rounded,
-                                  size: 36,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No cards in this deck yet.\nTap + to add one.',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              FilledButton.tonalIcon(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) =>
-                                          CardEditorScreen(deckId: deck.id),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.add, size: 18),
-                                label: Text(l10n?.addCard ?? 'Add Card'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : displayedCards.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.label_off_outlined,
-                              size: 48,
-                              color: colorScheme.outline,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No cards match this tag.',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: () => ref
-                                  .read(deckTagFilterProvider(deck.id).notifier)
-                                  .selectTag(null),
-                              child: Text(l10n?.filterAll ?? 'Show all cards'),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: displayedCards.length,
-                        itemBuilder: (context, index) {
-                          final card = displayedCards[index];
-                          final cardTags =
-                              cardTagsMap[card.id] ?? const <TagEntity>[];
-                          return _CardTile(
-                            key: ValueKey(card.id),
-                            card: card,
-                            tags: cardTags,
-                            onEdit: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => CardEditorScreen(
-                                    deckId: deck.id,
-                                    cardId: card.id,
-                                    initialFront: card.front,
-                                    initialBack: card.back,
-                                  ),
-                                ),
-                              );
-                            },
-                            onDelete: () {
-                              ref
-                                  .read(
-                                    cardListControllerProvider(deck.id)
-                                        .notifier,
-                                  )
-                                  .deleteCard(card.id);
-                            },
-                            onToggleSuspend: () {
-                              ref
-                                  .read(
-                                    cardListControllerProvider(deck.id)
-                                        .notifier,
-                                  )
-                                  .toggleSuspendCard(card.id, card.isSuspended);
-                            },
-                            onToggleBury: () {
-                              final now = DateTime.now().toUtc();
-                              final notifier = ref.read(
-                                cardListControllerProvider(deck.id).notifier,
-                              );
-                              if (card.isBuried(now)) {
-                                notifier.unburyCard(card.id);
-                              } else {
-                                notifier.buryCard(card.id);
-                              }
-                            },
-                          );
-                        },
-                      ),
+                child: _DeckCardsSection(
+                  deck: deck,
+                  cards: cards,
+                  allDeckTags: allDeckTags,
+                  cardTagsMap: cardTagsMap,
+                ),
               ),
             ],
           );
@@ -424,6 +153,29 @@ class _CardTile extends StatelessWidget {
         padding: const EdgeInsets.only(right: 20),
         child: Icon(Icons.delete, color: scheme.onError),
       ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text(l10n?.delete ?? 'Delete'),
+                content: Text(
+                  l10n?.deleteCardConfirmation ??
+                      'Are you sure you want to delete this card?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: Text(l10n?.cancel ?? 'Cancel'),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: Text(l10n?.delete ?? 'Delete'),
+                  ),
+                ],
+              ),
+            ) ??
+            false;
+      },
       onDismissed: (_) => onDelete(),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -675,6 +427,332 @@ class _CardTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DeckStudyHeader extends StatelessWidget {
+  const _DeckStudyHeader({
+    required this.deck,
+    required this.cards,
+    required this.dueCount,
+    required this.allDeckTags,
+  });
+
+  final Deck deck;
+  final List<CardEntity> cards;
+  final int dueCount;
+  final List<TagEntity> allDeckTags;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.school_outlined,
+                color: colorScheme.onPrimaryContainer,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n?.cardsDueForReview(dueCount) ??
+                    '$dueCount cards due for review',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilledButton.icon(
+                key: const Key('start_study_button'),
+                onPressed: dueCount > 0
+                    ? () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => StudyScreen(deckId: deck.id),
+                          ),
+                        );
+                      }
+                    : null,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(l10n?.startStudySession ?? 'Start Study Session'),
+              ),
+              OutlinedButton.icon(
+                key: const Key('custom_study_button'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.onPrimaryContainer,
+                  side: BorderSide(
+                    color: colorScheme.onPrimaryContainer.withValues(
+                      alpha: 0.5,
+                    ),
+                  ),
+                ),
+                onPressed: cards.isEmpty
+                    ? null
+                    : () async {
+                        final config = await CustomStudyDialog.show(
+                          context,
+                          deckId: deck.id,
+                          initialTags: allDeckTags,
+                        );
+                        if (config != null && context.mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => StudyScreen(
+                                deckId: deck.id,
+                                customStudyConfig: config,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                icon: const Icon(Icons.tune_rounded),
+                label: Text(l10n?.customStudy ?? 'Custom Study'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeckCardsSection extends ConsumerWidget {
+  const _DeckCardsSection({
+    required this.deck,
+    required this.cards,
+    required this.allDeckTags,
+    required this.cardTagsMap,
+  });
+
+  final Deck deck;
+  final List<CardEntity> cards;
+  final List<TagEntity> allDeckTags;
+  final Map<int, List<TagEntity>> cardTagsMap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final selectedTagId = ref.watch(deckTagFilterProvider);
+
+    final displayedCards = selectedTagId == null
+        ? cards
+        : cards
+              .where(
+                (c) =>
+                    cardTagsMap[c.id]?.any((t) => t.id == selectedTagId) ??
+                    false,
+              )
+              .toList();
+
+    return Column(
+      children: [
+        if (allDeckTags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: SizedBox(
+              height: 38,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: allDeckTags.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        key: const Key('filter_tag_all'),
+                        label: Text(l10n?.filterAll ?? 'All'),
+                        selected: selectedTagId == null,
+                        onSelected: (_) => ref
+                            .read(deckTagFilterProvider.notifier)
+                            .selectTag(null),
+                      ),
+                    );
+                  }
+                  final tag = allDeckTags[index - 1];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      key: Key('filter_tag_${tag.id}'),
+                      label: Text('#${tag.name}'),
+                      selected: selectedTagId == tag.id,
+                      onSelected: (selected) => ref
+                          .read(deckTagFilterProvider.notifier)
+                          .selectTag(selected ? tag.id : null),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Text(
+                'Cards (${displayedCards.length}${selectedTagId != null ? ' / ${cards.length}' : ''})',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: cards.isEmpty
+              ? Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.post_add_rounded,
+                            size: 36,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No cards in this deck yet.\nTap + to add one.',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.tonalIcon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    CardEditorScreen(deckId: deck.id),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(l10n?.addCard ?? 'Add Card'),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : displayedCards.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.label_off_outlined,
+                        size: 48,
+                        color: colorScheme.outline,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No cards match this tag.',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => ref
+                            .read(deckTagFilterProvider.notifier)
+                            .selectTag(null),
+                        child: Text(l10n?.filterAll ?? 'Show all cards'),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  scrollCacheExtent: const ScrollCacheExtent.pixels(500.0),
+                  padding: const EdgeInsets.only(bottom: 80),
+                  findChildIndexCallback: (Key key) {
+                    if (key is ValueKey<int>) {
+                      final idx = displayedCards.indexWhere(
+                        (c) => c.id == key.value,
+                      );
+                      return idx >= 0 ? idx : null;
+                    }
+                    return null;
+                  },
+                  itemCount: displayedCards.length,
+                  itemBuilder: (context, index) {
+                    final card = displayedCards[index];
+                    final cardTags =
+                        cardTagsMap[card.id] ?? const <TagEntity>[];
+                    return _CardTile(
+                      key: ValueKey(card.id),
+                      card: card,
+                      tags: cardTags,
+                      onEdit: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => CardEditorScreen(
+                              deckId: deck.id,
+                              cardId: card.id,
+                              initialFront: card.front,
+                              initialBack: card.back,
+                            ),
+                          ),
+                        );
+                      },
+                      onDelete: () {
+                        ref
+                            .read(cardListControllerProvider(deck.id).notifier)
+                            .deleteCard(card.id);
+                      },
+                      onToggleSuspend: () {
+                        ref
+                            .read(cardListControllerProvider(deck.id).notifier)
+                            .toggleSuspendCard(card.id, card.isSuspended);
+                      },
+                      onToggleBury: () {
+                        final now = DateTime.now().toUtc();
+                        final notifier = ref.read(
+                          cardListControllerProvider(deck.id).notifier,
+                        );
+                        if (card.isBuried(now)) {
+                          notifier.unburyCard(card.id);
+                        } else {
+                          notifier.buryCard(card.id);
+                        }
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

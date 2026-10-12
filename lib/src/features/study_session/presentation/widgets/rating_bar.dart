@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/algorithms/fsrs/models/rating.dart';
+import '../../../../core/algorithms/fsrs/models/fsrs_models.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../settings/presentation/controllers/animation_level_controller.dart';
 
-class RatingBar extends StatelessWidget {
+class RatingBar extends ConsumerWidget {
   const RatingBar({
     super.key,
     required this.intervals,
@@ -15,10 +17,12 @@ class RatingBar extends StatelessWidget {
   final ValueChanged<Rating> onRatingSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final animLevel = ref.watch(animationLevelControllerProvider);
+    final isReduced = animLevel.isReduced;
 
     final configs = [
       _RatingConfig(
@@ -51,10 +55,10 @@ class RatingBar extends StatelessWidget {
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: configs.asMap().entries.map((entry) {
+    Widget content = LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 340;
+        final buttons = configs.asMap().entries.map((entry) {
           final index = entry.key;
           final cfg = entry.value;
           final rawInterval = intervals[cfg.rating] ?? '';
@@ -64,65 +68,82 @@ class RatingBar extends StatelessWidget {
                     ? (l10n?.cramPass ?? 'Pass')
                     : rawInterval);
 
-          return Expanded(
-            child:
-                Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Semantics(
-                        button: true,
-                        label:
-                            l10n?.rateButtonSemantics(cfg.label, interval) ??
-                            'Rate ${cfg.label}, next review in $interval',
-                        child: FilledButton.tonal(
-                          key: cfg.key,
-                          onPressed: () => onRatingSelected(cfg.rating),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: cfg.backgroundColor,
-                            foregroundColor: cfg.foregroundColor,
-                            minimumSize: const Size(48, 56),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 1,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                cfg.label,
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: cfg.foregroundColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                interval,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: cfg.foregroundColor.withValues(
-                                    alpha: 0.85,
-                                  ),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+          Widget btn = Padding(
+            padding: EdgeInsets.symmetric(horizontal: compact ? 2 : 4),
+            child: Semantics(
+              button: true,
+              label:
+                  l10n?.rateButtonSemantics(cfg.label, interval) ??
+                  'Rate ${cfg.label}, next review in $interval',
+              child: FilledButton.tonal(
+                key: cfg.key,
+                onPressed: () => onRatingSelected(cfg.rating),
+                style: FilledButton.styleFrom(
+                  backgroundColor: cfg.backgroundColor,
+                  foregroundColor: cfg.foregroundColor,
+                  minimumSize: Size(compact ? 40 : 48, 56),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: compact ? 4 : 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 1,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cfg.label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: cfg.foregroundColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: compact ? 13 : null,
                       ),
-                    )
-                    .animate()
-                    .fadeIn(duration: 180.ms, delay: (index * 35).ms)
-                    .scale(
-                      duration: 180.ms,
-                      delay: (index * 35).ms,
-                      begin: const Offset(0.92, 0.92),
-                      curve: Curves.easeOutBack,
                     ),
+                    const SizedBox(height: 3),
+                    Text(
+                      interval,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: cfg.foregroundColor.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
+                        fontSize: compact ? 10 : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           );
-        }).toList(),
-      ),
-    ).animate().fadeIn(duration: 150.ms);
+
+          if (!isReduced) {
+            btn = btn
+                .animate()
+                .fadeIn(duration: 180.ms, delay: (index * 35).ms)
+                .scale(
+                  duration: 180.ms,
+                  delay: (index * 35).ms,
+                  begin: const Offset(0.92, 0.92),
+                  curve: Curves.easeOutBack,
+                );
+          }
+
+          return Expanded(child: btn);
+        }).toList();
+
+        return Row(children: buttons);
+      },
+    );
+
+    if (!isReduced) {
+      content = content.animate().fadeIn(duration: 150.ms);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: content,
+    );
   }
 }
 

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/l10n/generated/app_localizations.dart';
 import 'package:repetita/src/features/decks/data/decks_dao.dart';
-import 'package:repetita/src/features/decks/data/decks_dao_provider.dart';
+import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/decks/presentation/deck_list_screen.dart';
 import 'package:repetita/src/features/home/presentation/main_navigation_screen.dart';
 import 'package:repetita/src/features/settings/presentation/settings_screen.dart';

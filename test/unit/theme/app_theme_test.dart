@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/theme/app_theme.dart';
 import 'package:repetita/src/core/theme/font_theme.dart';
-import 'package:repetita/src/core/theme/material_theme.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/theme_mode_controller.dart';
 
 void main() {
@@ -49,22 +48,6 @@ void main() {
       expect(theme.colorScheme.onSurface, const Color(0xffe3e2e9));
       expect(theme.appBarTheme.centerTitle, isTrue);
       expect(theme.appBarTheme.elevation, 0);
-    });
-
-    test('contrast variants provide proper brightness schemes', () {
-      expect(AppTheme.lightMediumContrastTheme.brightness, Brightness.light);
-      expect(AppTheme.lightHighContrastTheme.brightness, Brightness.light);
-      expect(AppTheme.darkMediumContrastTheme.brightness, Brightness.dark);
-      expect(AppTheme.darkHighContrastTheme.brightness, Brightness.dark);
-
-      expect(
-        MaterialTheme.lightMediumContrastScheme().primary,
-        const Color(0xff403600),
-      );
-      expect(
-        MaterialTheme.darkHighContrastScheme().primary,
-        const Color(0xfffff0ba),
-      );
     });
 
     test('ThemeModeController initializes to system and transitions modes', () {

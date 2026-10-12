@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/l10n/generated/app_localizations.dart';
 import 'package:repetita/src/features/cards/data/cards_dao.dart';
-import 'package:repetita/src/features/cards/data/cards_dao_provider.dart';
+import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/cards/domain/card_entity.dart';
 import 'package:repetita/src/features/cards/presentation/card_editor_screen.dart';
 import 'package:repetita/src/features/study_session/presentation/widgets/flip_card_view.dart';

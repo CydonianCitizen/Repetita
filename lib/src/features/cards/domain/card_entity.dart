@@ -1,6 +1,6 @@
 import '../../../core/algorithms/cloze/cloze_parser.dart';
-import '../../../core/algorithms/fsrs/models/card_state.dart';
 import '../../../core/algorithms/fsrs/models/fsrs_card.dart';
+import '../../../core/algorithms/fsrs/models/fsrs_models.dart';
 
 class CardEntity {
   const CardEntity({
@@ -47,40 +47,9 @@ class CardEntity {
     return buriedUntil!.isAfter(now.toUtc());
   }
 
-  CardEntity copyWith({
-    int? id,
-    int? deckId,
-    String? front,
-    String? back,
-    int? state,
-    double? stability,
-    double? difficulty,
-    DateTime? due,
-    DateTime? lastReview,
-    int? reps,
-    int? lapses,
-    DateTime? createdAt,
-    bool? isSuspended,
-    DateTime? buriedUntil,
-    int? clozeIndex,
-  }) {
-    return CardEntity(
-      id: id ?? this.id,
-      deckId: deckId ?? this.deckId,
-      front: front ?? this.front,
-      back: back ?? this.back,
-      state: state ?? this.state,
-      stability: stability ?? this.stability,
-      difficulty: difficulty ?? this.difficulty,
-      due: due ?? this.due,
-      lastReview: lastReview ?? this.lastReview,
-      reps: reps ?? this.reps,
-      lapses: lapses ?? this.lapses,
-      createdAt: createdAt ?? this.createdAt,
-      isSuspended: isSuspended ?? this.isSuspended,
-      buriedUntil: buriedUntil ?? this.buriedUntil,
-      clozeIndex: clozeIndex ?? this.clozeIndex,
-    );
+  bool isDue(DateTime now) {
+    if (isSuspended || isBuried(now)) return false;
+    return state == 0 || !due.isAfter(now.toUtc());
   }
 
   FsrsCard toFsrsCard() => FsrsCard(

@@ -104,14 +104,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    final currentLocale = ref.watch(localeControllerProvider);
-    final themeMode = ref.watch(themeModeControllerProvider);
-    final animLevel = ref.watch(animationLevelControllerProvider);
-    final hapticIntensity = ref.watch(hapticFeedbackControllerProvider);
-    final reminderSettings = ref.watch(reminderControllerProvider);
-
-    final fsrsParams = ref.watch(fsrsParametersControllerProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n?.settingsTitle ?? 'Settings'),
@@ -174,522 +166,562 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           _buildSettingsCard(
             context,
             children: [
-              _SettingsTile(
-                key: const Key('setting_theme_tile'),
-                icon: Icons.palette_outlined,
-                iconColor: colorScheme.primary,
-                title: l10n?.themeMode ?? 'Theme Mode',
-                subtitle:
-                    l10n?.themeModeSubtitle ?? 'System default, Light, or Dark',
-                trailingText: _themeModeLabel(themeMode, l10n),
-                onTap: () => ThemeSelectorDialog.show(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final themeMode = ref.watch(themeModeControllerProvider);
+                  return _SettingsTile(
+                    key: const Key('setting_theme_tile'),
+                    icon: Icons.palette_outlined,
+                    iconColor: colorScheme.primary,
+                    title: l10n?.themeMode ?? 'Theme Mode',
+                    subtitle:
+                        l10n?.themeModeSubtitle ??
+                        'System default, Light, or Dark',
+                    trailingText: _themeModeLabel(themeMode, l10n),
+                    onTap: () => ThemeSelectorDialog.show(context),
+                  );
+                },
               ),
               const Divider(indent: 56, height: 1),
 
-              // Animation Intensity Slider (Material Design 3 Expressive)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              Consumer(
+                builder: (context, ref, _) {
+                  final animLevel = ref.watch(animationLevelControllerProvider);
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colorScheme.tertiary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                        Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: colorScheme.tertiary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.animation_rounded,
+                                color: colorScheme.tertiary,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n?.animationIntensity ??
+                                        'Animation Intensity',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    l10n?.animationIntensitySubtitle ??
+                                        'Motion level and micro-interactions',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Expressive level pill badge
+                            AnimatedBuilder(
+                              animation: _scaleAnimation,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _scaleAnimation.value,
+                                  child: child,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      switch (animLevel) {
+                                        AnimationLevel.reduced =>
+                                          Icons.motion_photos_off_outlined,
+                                        AnimationLevel.standard =>
+                                          Icons.motion_photos_auto_outlined,
+                                        AnimationLevel.expressive =>
+                                          Icons.auto_awesome_rounded,
+                                      },
+                                      size: 14,
+                                      color: colorScheme.onSecondaryContainer,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      switch (animLevel) {
+                                        AnimationLevel.reduced =>
+                                          l10n?.animationReduced ?? 'Reduced',
+                                        AnimationLevel.standard =>
+                                          l10n?.animationStandard ?? 'Standard',
+                                        AnimationLevel.expressive =>
+                                          l10n?.animationExpressive ??
+                                              'Expressive',
+                                      },
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme
+                                                .onSecondaryContainer,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Material 3 Slider with discrete step division
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 6,
+                            activeTrackColor: colorScheme.primary,
+                            inactiveTrackColor:
+                                colorScheme.surfaceContainerHighest,
+                            thumbColor: colorScheme.primary,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 10,
+                              elevation: 2,
+                            ),
+                            overlayColor: colorScheme.primary.withValues(
+                              alpha: 0.16,
+                            ),
+                            tickMarkShape: const RoundSliderTickMarkShape(
+                              tickMarkRadius: 3,
+                            ),
+                            activeTickMarkColor: colorScheme.onPrimary,
+                            inactiveTickMarkColor: colorScheme.outline,
                           ),
-                          child: Icon(
-                            Icons.animation_rounded,
-                            color: colorScheme.tertiary,
-                            size: 22,
+                          child: Slider(
+                            key: const Key('setting_animation_slider'),
+                            value: animLevel.value.toDouble(),
+                            min: 0.0,
+                            max: 2.0,
+                            divisions: 2,
+                            label: switch (animLevel) {
+                              AnimationLevel.reduced =>
+                                l10n?.animationReduced ?? 'Reduced',
+                              AnimationLevel.standard =>
+                                l10n?.animationStandard ?? 'Standard',
+                              AnimationLevel.expressive =>
+                                l10n?.animationExpressive ?? 'Expressive',
+                            },
+                            onChanged: (val) {
+                              final newLevel = AnimationLevel.fromValue(
+                                val.round(),
+                              );
+                              ref
+                                  .read(
+                                    animationLevelControllerProvider.notifier,
+                                  )
+                                  .setLevel(newLevel);
+                              _triggerMotionPreview(newLevel);
+                            },
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                        // Step labels below slider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                l10n?.animationIntensity ??
-                                    'Animation Intensity',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                l10n?.animationReduced ?? 'Reduced',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: animLevel.isReduced
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: animLevel.isReduced
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
                                 ),
                               ),
                               Text(
-                                l10n?.animationIntensitySubtitle ??
-                                    'Motion level and micro-interactions',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                                l10n?.animationStandard ?? 'Standard',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: animLevel.isStandard
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: animLevel.isStandard
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
+                                ),
+                              ),
+                              Text(
+                                l10n?.animationExpressive ?? 'Expressive',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: animLevel.isExpressive
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: animLevel.isExpressive
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // Expressive level pill badge
-                        AnimatedBuilder(
-                          animation: _scaleAnimation,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _scaleAnimation.value,
-                              child: child,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
+                        const SizedBox(height: 10),
+
+                        // Contextual descriptive card with live test preview
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
                                   switch (animLevel) {
                                     AnimationLevel.reduced =>
-                                      Icons.motion_photos_off_outlined,
+                                      l10n?.animationReducedDesc ?? 'Instant transitions, battery-friendly, accessibility-ready',
                                     AnimationLevel.standard =>
-                                      Icons.motion_photos_auto_outlined,
+                                      l10n?.animationStandardDesc ?? 'Balanced Material 3 fluid transitions',
                                     AnimationLevel.expressive =>
-                                      Icons.auto_awesome_rounded,
+                                      l10n?.animationExpressiveDesc ?? 'Playful spring physics, bouncy feedback, and lively motion',
                                   },
-                                  size: 14,
-                                  color: colorScheme.onSecondaryContainer,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  switch (animLevel) {
-                                    AnimationLevel.reduced =>
-                                      l10n?.animationReduced ?? 'Reduced',
-                                    AnimationLevel.standard =>
-                                      l10n?.animationStandard ?? 'Standard',
-                                    AnimationLevel.expressive =>
-                                      l10n?.animationExpressive ?? 'Expressive',
-                                  },
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme.onSecondaryContainer,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 8),
+                              FilledButton.tonalIcon(
+                                key: const Key('test_motion_button'),
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(
+                                  Icons.touch_app_rounded,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  l10n?.testMotion ?? 'Test Motion',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                onPressed: () =>
+                                    _triggerMotionPreview(animLevel),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-
-                    // Material 3 Slider with discrete step division
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 6,
-                        activeTrackColor: colorScheme.primary,
-                        inactiveTrackColor: colorScheme.surfaceContainerHighest,
-                        thumbColor: colorScheme.primary,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 10,
-                          elevation: 2,
-                        ),
-                        overlayColor: colorScheme.primary.withValues(
-                          alpha: 0.16,
-                        ),
-                        tickMarkShape: const RoundSliderTickMarkShape(
-                          tickMarkRadius: 3,
-                        ),
-                        activeTickMarkColor: colorScheme.onPrimary,
-                        inactiveTickMarkColor: colorScheme.outline,
-                      ),
-                      child: Slider(
-                        key: const Key('setting_animation_slider'),
-                        value: animLevel.value.toDouble(),
-                        min: 0.0,
-                        max: 2.0,
-                        divisions: 2,
-                        label: switch (animLevel) {
-                          AnimationLevel.reduced =>
-                            l10n?.animationReduced ?? 'Reduced',
-                          AnimationLevel.standard =>
-                            l10n?.animationStandard ?? 'Standard',
-                          AnimationLevel.expressive =>
-                            l10n?.animationExpressive ?? 'Expressive',
-                        },
-                        onChanged: (val) {
-                          final newLevel = AnimationLevel.fromValue(
-                            val.round(),
-                          );
-                          ref
-                              .read(animationLevelControllerProvider.notifier)
-                              .setLevel(newLevel);
-                          _triggerMotionPreview(newLevel);
-                        },
-                      ),
-                    ),
-
-                    // Step labels below slider
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n?.animationReduced ?? 'Reduced',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: animLevel.isReduced
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: animLevel.isReduced
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                          Text(
-                            l10n?.animationStandard ?? 'Standard',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: animLevel.isStandard
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: animLevel.isStandard
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                          Text(
-                            l10n?.animationExpressive ?? 'Expressive',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: animLevel.isExpressive
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: animLevel.isExpressive
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Contextual descriptive card with live test preview
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.45,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              switch (animLevel) {
-                                AnimationLevel.reduced =>
-                                  l10n?.animationReducedDesc ?? 'Instant transitions, battery-friendly, accessibility-ready',
-                                AnimationLevel.standard =>
-                                  l10n?.animationStandardDesc ??
-                                      'Balanced Material 3 fluid transitions',
-                                AnimationLevel.expressive =>
-                                  l10n?.animationExpressiveDesc ?? 'Playful spring physics, bouncy feedback, and lively motion',
-                              },
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          FilledButton.tonalIcon(
-                            key: const Key('test_motion_button'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            icon: const Icon(Icons.touch_app_rounded, size: 16),
-                            label: Text(
-                              l10n?.testMotion ?? 'Test Motion',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            onPressed: () => _triggerMotionPreview(animLevel),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               const Divider(indent: 56, height: 1),
 
               // Haptic Feedback Intensity Slider (Material Design 3 Expressive)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              Consumer(
+                builder: (context, ref, _) {
+                  final hapticIntensity = ref.watch(
+                    hapticFeedbackControllerProvider,
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(10),
+                        Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.vibration_rounded,
+                                color: colorScheme.primary,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n?.hapticFeedback ?? 'Haptic Feedback',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    l10n?.hapticFeedbackSubtitle ?? 'Vibrations on answer ratings and interactions',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Expressive level pill badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    switch (hapticIntensity) {
+                                      HapticIntensity.off =>
+                                        Icons.notifications_off_outlined,
+                                      HapticIntensity.light =>
+                                        Icons.touch_app_outlined,
+                                      HapticIntensity.medium =>
+                                        Icons.vibration_rounded,
+                                      HapticIntensity.strong =>
+                                        Icons.sensors_rounded,
+                                    },
+                                    size: 14,
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    switch (hapticIntensity) {
+                                      HapticIntensity.off =>
+                                        l10n?.hapticOff ?? 'Off',
+                                      HapticIntensity.light =>
+                                        l10n?.hapticLight ?? 'Light',
+                                      HapticIntensity.medium =>
+                                        l10n?.hapticMedium ?? 'Medium',
+                                      HapticIntensity.strong =>
+                                        l10n?.hapticStrong ?? 'Strong',
+                                    },
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSecondaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Material 3 Slider with discrete step division
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 6,
+                            activeTrackColor: colorScheme.primary,
+                            inactiveTrackColor:
+                                colorScheme.surfaceContainerHighest,
+                            thumbColor: colorScheme.primary,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 10,
+                              elevation: 2,
+                            ),
+                            overlayColor: colorScheme.primary.withValues(
+                              alpha: 0.16,
+                            ),
+                            tickMarkShape: const RoundSliderTickMarkShape(
+                              tickMarkRadius: 3,
+                            ),
+                            activeTickMarkColor: colorScheme.onPrimary,
+                            inactiveTickMarkColor: colorScheme.outline,
                           ),
-                          child: Icon(
-                            Icons.vibration_rounded,
-                            color: colorScheme.primary,
-                            size: 22,
+                          child: Slider(
+                            key: const Key('setting_haptic_slider'),
+                            value: hapticIntensity.level.toDouble(),
+                            min: 0.0,
+                            max: 3.0,
+                            divisions: 3,
+                            label: switch (hapticIntensity) {
+                              HapticIntensity.off => l10n?.hapticOff ?? 'Off',
+                              HapticIntensity.light =>
+                                l10n?.hapticLight ?? 'Light',
+                              HapticIntensity.medium =>
+                                l10n?.hapticMedium ?? 'Medium',
+                              HapticIntensity.strong =>
+                                l10n?.hapticStrong ?? 'Strong',
+                            },
+                            onChanged: (val) {
+                              final newIntensity = HapticIntensity.fromLevel(
+                                val.round(),
+                              );
+                              ref
+                                  .read(
+                                    hapticFeedbackControllerProvider.notifier,
+                                  )
+                                  .setIntensity(newIntensity);
+                              ref
+                                  .read(hapticServiceProvider)
+                                  .triggerTest(newIntensity);
+                            },
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                        // Step labels below slider
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                l10n?.hapticFeedback ?? 'Haptic Feedback',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                                l10n?.hapticOff ?? 'Off',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight:
+                                      hapticIntensity == HapticIntensity.off
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: hapticIntensity == HapticIntensity.off
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
                                 ),
                               ),
                               Text(
-                                l10n?.hapticFeedbackSubtitle ?? 'Vibrations on answer ratings and interactions',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                                l10n?.hapticLight ?? 'Light',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight:
+                                      hapticIntensity == HapticIntensity.light
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color:
+                                      hapticIntensity == HapticIntensity.light
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
+                                ),
+                              ),
+                              Text(
+                                l10n?.hapticMedium ?? 'Medium',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight:
+                                      hapticIntensity == HapticIntensity.medium
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color:
+                                      hapticIntensity == HapticIntensity.medium
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
+                                ),
+                              ),
+                              Text(
+                                l10n?.hapticStrong ?? 'Strong',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight:
+                                      hapticIntensity == HapticIntensity.strong
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color:
+                                      hapticIntensity == HapticIntensity.strong
+                                      ? colorScheme.primary
+                                      : colorScheme.outline,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // Expressive level pill badge
+                        const SizedBox(height: 10),
+
+                        // Contextual descriptive card with live test preview
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colorScheme.secondaryContainer,
+                            color: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.45),
                             borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
                           ),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                switch (hapticIntensity) {
-                                  HapticIntensity.off =>
-                                    Icons.notifications_off_outlined,
-                                  HapticIntensity.light =>
-                                    Icons.touch_app_outlined,
-                                  HapticIntensity.medium =>
-                                    Icons.vibration_rounded,
-                                  HapticIntensity.strong =>
-                                    Icons.sensors_rounded,
-                                },
-                                size: 14,
-                                color: colorScheme.onSecondaryContainer,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                switch (hapticIntensity) {
-                                  HapticIntensity.off =>
-                                    l10n?.hapticOff ?? 'Off',
-                                  HapticIntensity.light =>
-                                    l10n?.hapticLight ?? 'Light',
-                                  HapticIntensity.medium =>
-                                    l10n?.hapticMedium ?? 'Medium',
-                                  HapticIntensity.strong =>
-                                    l10n?.hapticStrong ?? 'Strong',
-                                },
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onSecondaryContainer,
+                              Expanded(
+                                child: Text(
+                                  switch (hapticIntensity) {
+                                    HapticIntensity.off =>
+                                      l10n?.hapticOffDesc ??
+                                          'Vibrations disabled',
+                                    HapticIntensity.light =>
+                                      l10n?.hapticLightDesc ??
+                                          'Subtle tactile clicks',
+                                    HapticIntensity.medium =>
+                                      l10n?.hapticMediumDesc ??
+                                          'Balanced physical response',
+                                    HapticIntensity.strong =>
+                                      l10n?.hapticStrongDesc ??
+                                          'Prominent tactile buzz and pulses',
+                                  },
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
+                              ),
+                              const SizedBox(width: 8),
+                              FilledButton.tonalIcon(
+                                key: const Key('test_haptic_button'),
+                                style: FilledButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                icon: const Icon(
+                                  Icons.vibration_rounded,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  l10n?.testHaptic ?? 'Test Haptics',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                onPressed: () => ref
+                                    .read(hapticServiceProvider)
+                                    .triggerTest(hapticIntensity),
                               ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-
-                    // Material 3 Slider with discrete step division
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 6,
-                        activeTrackColor: colorScheme.primary,
-                        inactiveTrackColor: colorScheme.surfaceContainerHighest,
-                        thumbColor: colorScheme.primary,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 10,
-                          elevation: 2,
-                        ),
-                        overlayColor: colorScheme.primary.withValues(
-                          alpha: 0.16,
-                        ),
-                        tickMarkShape: const RoundSliderTickMarkShape(
-                          tickMarkRadius: 3,
-                        ),
-                        activeTickMarkColor: colorScheme.onPrimary,
-                        inactiveTickMarkColor: colorScheme.outline,
-                      ),
-                      child: Slider(
-                        key: const Key('setting_haptic_slider'),
-                        value: hapticIntensity.level.toDouble(),
-                        min: 0.0,
-                        max: 3.0,
-                        divisions: 3,
-                        label: switch (hapticIntensity) {
-                          HapticIntensity.off => l10n?.hapticOff ?? 'Off',
-                          HapticIntensity.light => l10n?.hapticLight ?? 'Light',
-                          HapticIntensity.medium =>
-                            l10n?.hapticMedium ?? 'Medium',
-                          HapticIntensity.strong =>
-                            l10n?.hapticStrong ?? 'Strong',
-                        },
-                        onChanged: (val) {
-                          final newIntensity = HapticIntensity.fromLevel(
-                            val.round(),
-                          );
-                          ref
-                              .read(hapticFeedbackControllerProvider.notifier)
-                              .setIntensity(newIntensity);
-                          ref
-                              .read(hapticServiceProvider)
-                              .triggerTest(newIntensity);
-                        },
-                      ),
-                    ),
-
-                    // Step labels below slider
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n?.hapticOff ?? 'Off',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: hapticIntensity == HapticIntensity.off
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: hapticIntensity == HapticIntensity.off
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                          Text(
-                            l10n?.hapticLight ?? 'Light',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight:
-                                  hapticIntensity == HapticIntensity.light
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: hapticIntensity == HapticIntensity.light
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                          Text(
-                            l10n?.hapticMedium ?? 'Medium',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight:
-                                  hapticIntensity == HapticIntensity.medium
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: hapticIntensity == HapticIntensity.medium
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                          Text(
-                            l10n?.hapticStrong ?? 'Strong',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight:
-                                  hapticIntensity == HapticIntensity.strong
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: hapticIntensity == HapticIntensity.strong
-                                  ? colorScheme.primary
-                                  : colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Contextual descriptive card with live test preview
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.45,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              switch (hapticIntensity) {
-                                HapticIntensity.off =>
-                                  l10n?.hapticOffDesc ?? 'Vibrations disabled',
-                                HapticIntensity.light =>
-                                  l10n?.hapticLightDesc ??
-                                      'Subtle tactile clicks',
-                                HapticIntensity.medium =>
-                                  l10n?.hapticMediumDesc ??
-                                      'Balanced physical response',
-                                HapticIntensity.strong =>
-                                  l10n?.hapticStrongDesc ??
-                                      'Prominent tactile buzz and pulses',
-                              },
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          FilledButton.tonalIcon(
-                            key: const Key('test_haptic_button'),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            icon: const Icon(Icons.vibration_rounded, size: 16),
-                            label: Text(
-                              l10n?.testHaptic ?? 'Test Haptics',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            onPressed: () => ref
-                                .read(hapticServiceProvider)
-                                .triggerTest(hapticIntensity),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),
@@ -703,15 +735,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           _buildSettingsCard(
             context,
             children: [
-              _SettingsTile(
-                key: const Key('setting_language_tile'),
-                icon: Icons.translate_rounded,
-                iconColor: colorScheme.secondary,
-                title: l10n?.language ?? 'Language',
-                subtitle:
-                    l10n?.languageSubtitle ?? 'Select app interface language',
-                trailingText: _getLanguageDisplayText(currentLocale, l10n),
-                onTap: () => LanguageSelectorDialog.show(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final currentLocale = ref.watch(localeControllerProvider);
+                  return _SettingsTile(
+                    key: const Key('setting_language_tile'),
+                    icon: Icons.translate_rounded,
+                    iconColor: colorScheme.secondary,
+                    title: l10n?.language ?? 'Language',
+                    subtitle:
+                        l10n?.languageSubtitle ??
+                        'Select app interface language',
+                    trailingText: _getLanguageDisplayText(currentLocale, l10n),
+                    onTap: () => LanguageSelectorDialog.show(context),
+                  );
+                },
               ),
             ],
           ),
@@ -725,34 +763,51 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           _buildSettingsCard(
             context,
             children: [
-              _SettingsTile(
-                key: const Key('setting_fsrs_tile'),
-                icon: Icons.tune_rounded,
-                iconColor: colorScheme.tertiary,
-                title: l10n?.fsrsParameters ?? 'FSRS Scheduling Parameters',
-                subtitle:
-                    l10n?.fsrsParametersSubtitle ??
-                    'Desired retention, max intervals, request weights',
-                trailingText: '${(fsrsParams.requestRetention * 100).round()}%',
-                onTap: () => FsrsSettingsDialog.show(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final fsrsParams = ref.watch(
+                    fsrsParametersControllerProvider,
+                  );
+                  return _SettingsTile(
+                    key: const Key('setting_fsrs_tile'),
+                    icon: Icons.tune_rounded,
+                    iconColor: colorScheme.tertiary,
+                    title: l10n?.fsrsParameters ?? 'FSRS Scheduling Parameters',
+                    subtitle:
+                        l10n?.fsrsParametersSubtitle ??
+                        'Desired retention, max intervals, request weights',
+                    trailingText:
+                        '${(fsrsParams.requestRetention * 100).round()}%',
+                    onTap: () => FsrsSettingsDialog.show(context),
+                  );
+                },
               ),
               const Divider(indent: 56, height: 1),
-              _SettingsTile(
-                key: const Key('setting_notifications_tile'),
-                icon: reminderSettings.enabled
-                    ? Icons.notifications_active_rounded
-                    : Icons.notifications_none_rounded,
-                iconColor: colorScheme.primary,
-                title: l10n?.studyReminders ?? 'Study Reminders',
-                subtitle: reminderSettings.enabled
-                    ? (l10n?.reminderAtTime(reminderSettings.formattedTime) ??
-                          'Daily review notification at ${reminderSettings.formattedTime}')
-                    : (l10n?.studyRemindersSubtitle ??
-                          'Daily review notifications'),
-                trailingText: reminderSettings.enabled
-                    ? reminderSettings.formattedTime
-                    : (l10n?.remindersOff ?? 'Off'),
-                onTap: () => ReminderDialog.show(context),
+              Consumer(
+                builder: (context, ref, _) {
+                  final reminderSettings = ref.watch(
+                    reminderControllerProvider,
+                  );
+                  return _SettingsTile(
+                    key: const Key('setting_notifications_tile'),
+                    icon: reminderSettings.enabled
+                        ? Icons.notifications_active_rounded
+                        : Icons.notifications_none_rounded,
+                    iconColor: colorScheme.primary,
+                    title: l10n?.studyReminders ?? 'Study Reminders',
+                    subtitle: reminderSettings.enabled
+                        ? (l10n?.reminderAtTime(
+                                reminderSettings.formattedTime,
+                              ) ??
+                              'Daily review notification at ${reminderSettings.formattedTime}')
+                        : (l10n?.studyRemindersSubtitle ??
+                              'Daily review notifications'),
+                    trailingText: reminderSettings.enabled
+                        ? reminderSettings.formattedTime
+                        : (l10n?.remindersOff ?? 'Off'),
+                    onTap: () => ReminderDialog.show(context),
+                  );
+                },
               ),
             ],
           ),

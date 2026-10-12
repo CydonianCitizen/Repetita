@@ -384,8 +384,13 @@ class BackupPayload {
             .toList() ??
         const [];
 
+    final version = json['version'] as int?;
+    if (version == null || version < 1) {
+      throw const FormatException('Invalid or missing version in backup JSON');
+    }
+
     return BackupPayload(
-      version: json['version'] as int,
+      version: version,
       exportedAt: DateTime.parse(json['exportedAt'] as String).toUtc(),
       decks: decksList,
       cards: cardsList,
@@ -394,4 +399,25 @@ class BackupPayload {
       cardTags: cardTagsList,
     );
   }
+}
+
+class CsvImportResult {
+  const CsvImportResult({
+    required this.importedCount,
+    required this.skippedCount,
+  });
+
+  final int importedCount;
+  final int skippedCount;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CsvImportResult &&
+          runtimeType == other.runtimeType &&
+          importedCount == other.importedCount &&
+          skippedCount == other.skippedCount;
+
+  @override
+  int get hashCode => Object.hash(importedCount, skippedCount);
 }

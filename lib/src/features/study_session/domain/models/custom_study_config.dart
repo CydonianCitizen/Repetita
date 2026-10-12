@@ -13,20 +13,6 @@ class CustomStudyConfig {
   final int daysAhead;
   final bool isCram;
 
-  CustomStudyConfig copyWith({
-    CustomStudyScope? scope,
-    int? tagId,
-    int? daysAhead,
-    bool? isCram,
-  }) {
-    return CustomStudyConfig(
-      scope: scope ?? this.scope,
-      tagId: tagId ?? this.tagId,
-      daysAhead: daysAhead ?? this.daysAhead,
-      isCram: isCram ?? this.isCram,
-    );
-  }
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

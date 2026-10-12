@@ -20,18 +20,23 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   late int _currentIndex;
+  final Set<int> _activatedIndices = {0};
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _activatedIndices.add(_currentIndex);
   }
 
   void _onDestinationSelected(int index) {
     if (_currentIndex == index) return;
     final hapticIntensity = ref.read(hapticFeedbackControllerProvider);
     ref.read(hapticServiceProvider).triggerSelection(hapticIntensity);
-    setState(() => _currentIndex = index);
+    setState(() {
+      _currentIndex = index;
+      _activatedIndices.add(index);
+    });
   }
 
   @override
@@ -39,12 +44,18 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      body: switch (_currentIndex) {
-        0 => const DeckListScreen(),
-        1 => const StatsScreen(isEmbedded: true),
-        2 => const SettingsScreen(isEmbedded: true),
-        _ => const DeckListScreen(),
-      },
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          const DeckListScreen(),
+          _activatedIndices.contains(1)
+              ? const StatsScreen(isEmbedded: true)
+              : const SizedBox.shrink(),
+          _activatedIndices.contains(2)
+              ? const SettingsScreen(isEmbedded: true)
+              : const SizedBox.shrink(),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onDestinationSelected,
