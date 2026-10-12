@@ -51,11 +51,11 @@ Implementato metodo `createClozeCards()` atomico con transazione singola in `car
 
 | # | File:linea | Problema | Fix |
 |---|---|---|---|
-| 2.1 | `backup_service.dart:138` | Merge mode: carte con deckId non nel payload attaccate a mazzi esistenti con stesso id numerico; re-import dello stesso file duplica tutto (niente idempotenza) | Rifiutare/rilocare ref ignote; upsert per identità stabile |
+| 2.1 | ~~`backup_service.dart:138`~~ ✅ | Merge mode: idempotenza su payload id/contenuto, ref mazzi ignoti rifiutati | Risolto: match righe esistenti, skip duplicati su re-import, reject orphan cards, test doppia importazione |
 | 2.2 | ~~`backup_service.dart` JSON/CSV su main isolate~~ ✅ | Risolto: offload su isolate via `compute()` solo sopra soglia (256KB testo / 2000 righe); sotto soglia sync (costo spawn > guadagno, e mantiene i widget test in fake-time sincroni). Resta aperto: niente cap dimensione su payload incollato | Bound input |
-| 2.3 | ~~`backup_service.dart:122–215,298–302`~~ ✅ | Import riga per riga in loop | Risolto: `db.batch((b) => b.insertAll(db.cards, companions))` |
-| 2.4 | ~~`notification_service.dart:44,77,116,152,160`~~ ✅ | Catch silenziosi con solo `debugPrint` | Risolto: return tipizzati `bool` + rethrow in `reminder_controller.dart` su fallimento |
-| 2.5 | ~~`deck_list_screen.dart:136–149`, `deck_detail_screen.dart:730–750`~~ ✅ | Mutazioni async fire-and-forget senza feedback | Risolto: await + SnackBar errore in deck list, deck detail e study screen |
+| 2.3 | ~~`backup_service.dart:122–215,298–302`~~ ✅ | Import riga per riga in loop | Risolto: `db.batch((b) => b.insertAll(...))` per json (tutte le tabelle) e csv |
+| 2.4 | ~~`notification_service.dart:44,77,116,152,160`~~ ✅ | Catch silenziosi con solo `debugPrint` | Risolto: return tipizzati `bool` + rethrow in `reminder_controller.dart` su fallimento + check persistenza |
+| 2.5 | ~~`deck_list_screen.dart:136–149`, `deck_detail_screen.dart:730–750`~~ ✅ | Mutazioni async fire-and-forget senza feedback | Risolto: await + SnackBar errore in deck list (edit, delete, create), deck detail e study screen |
 | 2.6 | ~~`backup_screen.dart:290–297,304`~~ ✅ | Restore distruttivo senza dialog di conferma; `replaceExisting` default `true` | Risolto: default `false` + dialog di conferma esplicita |
 | 2.7 | ~~slider duplicati~~ ✅ | Blocchi slider animazione/aptica unificati in `_LevelSlider` (2026-10-12). Resta: settings_screen.dart ancora ~900 righe (monolite) | |
 | 2.8 | ~~`deck_detail_screen.dart:700–708`~~ ✅ | `findChildIndexCallback` fa `indexWhere` O(n) per key → O(n²) scroll | Risolto: mappa `cardIndexMap` [id→indice] precomputata O(1) |

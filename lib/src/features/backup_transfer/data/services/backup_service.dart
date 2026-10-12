@@ -144,103 +144,370 @@ class BackupService {
         await db.delete(db.reviewLogs).go();
         await db.delete(db.cards).go();
         await db.delete(db.decks).go();
+
+        final validDeckIds = payload.decks.map((d) => d.id).toSet();
+        final deckCompanions = <DecksCompanion>[
+          for (final d in payload.decks)
+            DecksCompanion.insert(
+              id: Value(d.id),
+              name: d.name,
+              description: Value(d.description),
+              createdAt: Value(d.createdAt),
+              updatedAt: Value(d.updatedAt),
+            ),
+        ];
+
+        final validCards = payload.cards
+            .where((c) => validDeckIds.contains(c.deckId))
+            .toList();
+        final validCardIds = validCards.map((c) => c.id).toSet();
+        final cardCompanions = <CardsCompanion>[
+          for (final c in validCards)
+            CardsCompanion.insert(
+              id: Value(c.id),
+              deckId: c.deckId,
+              front: c.front,
+              back: c.back,
+              state: Value(c.state),
+              stability: Value(c.stability),
+              difficulty: Value(c.difficulty),
+              due: c.due,
+              lastReview: Value(c.lastReview),
+              reps: Value(c.reps),
+              lapses: Value(c.lapses),
+              createdAt: Value(c.createdAt),
+              isSuspended: Value(c.isSuspended),
+              buriedUntil: Value(c.buriedUntil),
+              clozeIndex: Value(c.clozeIndex),
+            ),
+        ];
+
+        final validLogs = payload.reviewLogs
+            .where((l) => validCardIds.contains(l.cardId))
+            .toList();
+        final logCompanions = <ReviewLogsCompanion>[
+          for (final l in validLogs)
+            ReviewLogsCompanion.insert(
+              id: Value(l.id),
+              cardId: l.cardId,
+              rating: l.rating,
+              state: l.state,
+              due: l.due,
+              stability: l.stability,
+              difficulty: l.difficulty,
+              elapsedDays: l.elapsedDays,
+              lastElapsedDays: l.lastElapsedDays,
+              scheduledDays: l.scheduledDays,
+              reviewedAt: l.reviewedAt,
+            ),
+        ];
+
+        final validTagIds = payload.tags.map((t) => t.id).toSet();
+        final tagCompanions = <TagsCompanion>[
+          for (final t in payload.tags)
+            TagsCompanion.insert(
+              id: Value(t.id),
+              name: t.name,
+              color: Value(t.color),
+              createdAt: Value(t.createdAt),
+            ),
+        ];
+
+        final cardTagCompanions = <CardTagsCompanion>[
+          for (final ct in payload.cardTags)
+            if (validCardIds.contains(ct.cardId) &&
+                validTagIds.contains(ct.tagId))
+              CardTagsCompanion.insert(cardId: ct.cardId, tagId: ct.tagId),
+        ];
+
+        await db.batch((batch) {
+          if (deckCompanions.isNotEmpty) {
+            batch.insertAll(db.decks, deckCompanions);
+          }
+          if (cardCompanions.isNotEmpty) {
+            batch.insertAll(db.cards, cardCompanions);
+          }
+          if (logCompanions.isNotEmpty) {
+            batch.insertAll(db.reviewLogs, logCompanions);
+          }
+          if (tagCompanions.isNotEmpty) {
+            batch.insertAll(db.tags, tagCompanions);
+          }
+          if (cardTagCompanions.isNotEmpty) {
+            batch.insertAll(
+              db.cardTags,
+              cardTagCompanions,
+              mode: InsertMode.insertOrIgnore,
+            );
+          }
+        });
+        return;
       }
+
+      // Merge mode: match existing rows for idempotency and batch inserts
+      final existingDecks = await db.select(db.decks).get();
+      final existingCards = await db.select(db.cards).get();
+      final existingLogs = await db.select(db.reviewLogs).get();
+      final existingTags = await db.select(db.tags).get();
+      final existingCardTags = await db.select(db.cardTags).get();
+
+      final existingDecksById = {for (final d in existingDecks) d.id: d};
+      final existingDecksByName = {for (final d in existingDecks) d.name: d};
+      int nextDeckId =
+          existingDecks.fold(0, (max, d) => d.id > max ? d.id : max) + 1;
 
       final deckIdMap = <int, int>{};
+      final newDeckCompanions = <DecksCompanion>[];
+
       for (final deck in payload.decks) {
-        final newDeckId = await db
-            .into(db.decks)
-            .insert(
-              DecksCompanion.insert(
-                name: deck.name,
-                description: Value(deck.description),
-                createdAt: Value(deck.createdAt),
-                updatedAt: Value(deck.updatedAt),
-              ),
-            );
-        deckIdMap[deck.id] = newDeckId;
+        if (existingDecksById.containsKey(deck.id) &&
+            existingDecksById[deck.id]!.name == deck.name) {
+          deckIdMap[deck.id] = deck.id;
+        } else if (existingDecksByName.containsKey(deck.name)) {
+          deckIdMap[deck.id] = existingDecksByName[deck.name]!.id;
+        } else {
+          final int assignedId;
+          if (!existingDecksById.containsKey(deck.id)) {
+            assignedId = deck.id;
+            if (assignedId >= nextDeckId) nextDeckId = assignedId + 1;
+          } else {
+            assignedId = nextDeckId++;
+          }
+          deckIdMap[deck.id] = assignedId;
+          newDeckCompanions.add(
+            DecksCompanion.insert(
+              id: Value(assignedId),
+              name: deck.name,
+              description: Value(deck.description),
+              createdAt: Value(deck.createdAt),
+              updatedAt: Value(deck.updatedAt),
+            ),
+          );
+          existingDecksById[assignedId] = Deck(
+            id: assignedId,
+            name: deck.name,
+            description: deck.description,
+            createdAt: deck.createdAt,
+            updatedAt: deck.updatedAt,
+          );
+        }
       }
+
+      final existingCardsById = {for (final c in existingCards) c.id: c};
+      final existingCardsByContent = {
+        for (final c in existingCards)
+          '${c.deckId}__${c.front}__${c.back}__${c.clozeIndex}': c,
+      };
+      int nextCardId =
+          existingCards.fold(0, (max, c) => c.id > max ? c.id : max) + 1;
 
       final cardIdMap = <int, int>{};
+      final newCardCompanions = <CardsCompanion>[];
+
       for (final card in payload.cards) {
-        final targetDeckId = deckIdMap[card.deckId] ?? card.deckId;
-        final newCardId = await db
-            .into(db.cards)
-            .insert(
-              CardsCompanion.insert(
-                deckId: targetDeckId,
-                front: card.front,
-                back: card.back,
-                state: Value(card.state),
-                stability: Value(card.stability),
-                difficulty: Value(card.difficulty),
-                due: card.due,
-                lastReview: Value(card.lastReview),
-                reps: Value(card.reps),
-                lapses: Value(card.lapses),
-                createdAt: Value(card.createdAt),
-                isSuspended: Value(card.isSuspended),
-                buriedUntil: Value(card.buriedUntil),
-                clozeIndex: Value(card.clozeIndex),
-              ),
-            );
-        cardIdMap[card.id] = newCardId;
+        final targetDeckId = deckIdMap[card.deckId];
+        if (targetDeckId == null) {
+          // Reject cards referencing unknown deckIds: never attach by raw numeric id!
+          continue;
+        }
+
+        final contentKey =
+            '${targetDeckId}__${card.front}__${card.back}__${card.clozeIndex}';
+        Card? existingCard;
+        if (existingCardsById.containsKey(card.id) &&
+            existingCardsById[card.id]!.deckId == targetDeckId) {
+          existingCard = existingCardsById[card.id];
+        } else if (existingCardsByContent.containsKey(contentKey)) {
+          existingCard = existingCardsByContent[contentKey];
+        }
+
+        if (existingCard != null) {
+          cardIdMap[card.id] = existingCard.id;
+        } else {
+          final int assignedId;
+          if (!existingCardsById.containsKey(card.id)) {
+            assignedId = card.id;
+            if (assignedId >= nextCardId) nextCardId = assignedId + 1;
+          } else {
+            assignedId = nextCardId++;
+          }
+          cardIdMap[card.id] = assignedId;
+          newCardCompanions.add(
+            CardsCompanion.insert(
+              id: Value(assignedId),
+              deckId: targetDeckId,
+              front: card.front,
+              back: card.back,
+              state: Value(card.state),
+              stability: Value(card.stability),
+              difficulty: Value(card.difficulty),
+              due: card.due,
+              lastReview: Value(card.lastReview),
+              reps: Value(card.reps),
+              lapses: Value(card.lapses),
+              createdAt: Value(card.createdAt),
+              isSuspended: Value(card.isSuspended),
+              buriedUntil: Value(card.buriedUntil),
+              clozeIndex: Value(card.clozeIndex),
+            ),
+          );
+          final addedCard = Card(
+            id: assignedId,
+            deckId: targetDeckId,
+            front: card.front,
+            back: card.back,
+            state: card.state,
+            stability: card.stability,
+            difficulty: card.difficulty,
+            due: card.due,
+            lastReview: card.lastReview,
+            reps: card.reps,
+            lapses: card.lapses,
+            createdAt: card.createdAt,
+            isSuspended: card.isSuspended,
+            buriedUntil: card.buriedUntil,
+            clozeIndex: card.clozeIndex,
+          );
+          existingCardsById[assignedId] = addedCard;
+          existingCardsByContent[contentKey] = addedCard;
+        }
       }
+
+      final existingLogsByKey = {
+        for (final l in existingLogs)
+          '${l.cardId}__${l.reviewedAt.toUtc().millisecondsSinceEpoch}': l,
+      };
+      int nextLogId =
+          existingLogs.fold(0, (max, l) => l.id > max ? l.id : max) + 1;
+      final newLogCompanions = <ReviewLogsCompanion>[];
 
       for (final log in payload.reviewLogs) {
-        final targetCardId = cardIdMap[log.cardId] ?? log.cardId;
-        await db
-            .into(db.reviewLogs)
-            .insert(
-              ReviewLogsCompanion.insert(
-                cardId: targetCardId,
-                rating: log.rating,
-                state: log.state,
-                due: log.due,
-                stability: log.stability,
-                difficulty: log.difficulty,
-                elapsedDays: log.elapsedDays,
-                lastElapsedDays: log.lastElapsedDays,
-                scheduledDays: log.scheduledDays,
-                reviewedAt: log.reviewedAt,
-              ),
-            );
+        final targetCardId = cardIdMap[log.cardId];
+        if (targetCardId == null) {
+          continue;
+        }
+
+        final logKey =
+            '${targetCardId}__${log.reviewedAt.toUtc().millisecondsSinceEpoch}';
+        if (existingLogsByKey.containsKey(logKey)) {
+          continue;
+        }
+
+        final int assignedId;
+        if (nextLogId <= log.id) nextLogId = log.id + 1;
+        assignedId = nextLogId++;
+
+        newLogCompanions.add(
+          ReviewLogsCompanion.insert(
+            id: Value(assignedId),
+            cardId: targetCardId,
+            rating: log.rating,
+            state: log.state,
+            due: log.due,
+            stability: log.stability,
+            difficulty: log.difficulty,
+            elapsedDays: log.elapsedDays,
+            lastElapsedDays: log.lastElapsedDays,
+            scheduledDays: log.scheduledDays,
+            reviewedAt: log.reviewedAt,
+          ),
+        );
+        existingLogsByKey[logKey] = ReviewLog(
+          id: assignedId,
+          cardId: targetCardId,
+          rating: log.rating,
+          state: log.state,
+          due: log.due,
+          stability: log.stability,
+          difficulty: log.difficulty,
+          elapsedDays: log.elapsedDays,
+          lastElapsedDays: log.lastElapsedDays,
+          scheduledDays: log.scheduledDays,
+          reviewedAt: log.reviewedAt,
+        );
       }
 
+      final existingTagsByName = {for (final t in existingTags) t.name: t};
+      final existingTagsById = {for (final t in existingTags) t.id: t};
+      int nextTagId =
+          existingTags.fold(0, (max, t) => t.id > max ? t.id : max) + 1;
       final tagIdMap = <int, int>{};
+      final newTagCompanions = <TagsCompanion>[];
+
       for (final tag in payload.tags) {
-        final existingTag = await (db.select(
-          db.tags,
-        )..where((t) => t.name.equals(tag.name))).getSingleOrNull();
-        final int targetTagId;
-        if (existingTag != null) {
-          targetTagId = existingTag.id;
+        if (existingTagsByName.containsKey(tag.name)) {
+          tagIdMap[tag.id] = existingTagsByName[tag.name]!.id;
         } else {
-          targetTagId = await db
-              .into(db.tags)
-              .insert(
-                TagsCompanion.insert(
-                  name: tag.name,
-                  color: Value(tag.color),
-                  createdAt: Value(tag.createdAt),
-                ),
-              );
+          final int assignedId;
+          if (!existingTagsById.containsKey(tag.id)) {
+            assignedId = tag.id;
+            if (assignedId >= nextTagId) nextTagId = assignedId + 1;
+          } else {
+            assignedId = nextTagId++;
+          }
+          tagIdMap[tag.id] = assignedId;
+          newTagCompanions.add(
+            TagsCompanion.insert(
+              id: Value(assignedId),
+              name: tag.name,
+              color: Value(tag.color),
+              createdAt: Value(tag.createdAt),
+            ),
+          );
+          final addedTag = Tag(
+            id: assignedId,
+            name: tag.name,
+            color: tag.color,
+            createdAt: tag.createdAt,
+          );
+          existingTagsByName[tag.name] = addedTag;
+          existingTagsById[assignedId] = addedTag;
         }
-        tagIdMap[tag.id] = targetTagId;
       }
+
+      final existingCardTagKeys = {
+        for (final ct in existingCardTags) '${ct.cardId}__${ct.tagId}',
+      };
+      final newCardTagCompanions = <CardTagsCompanion>[];
 
       for (final ct in payload.cardTags) {
-        final newCardId = cardIdMap[ct.cardId];
-        final newTagId = tagIdMap[ct.tagId];
-        if (newCardId != null && newTagId != null) {
-          await db
-              .into(db.cardTags)
-              .insert(
-                CardTagsCompanion.insert(cardId: newCardId, tagId: newTagId),
-                mode: InsertMode.insertOrIgnore,
-              );
+        final targetCardId = cardIdMap[ct.cardId];
+        final targetTagId = tagIdMap[ct.tagId];
+        if (targetCardId != null && targetTagId != null) {
+          final key = '${targetCardId}__$targetTagId';
+          if (!existingCardTagKeys.contains(key)) {
+            existingCardTagKeys.add(key);
+            newCardTagCompanions.add(
+              CardTagsCompanion.insert(
+                cardId: targetCardId,
+                tagId: targetTagId,
+              ),
+            );
+          }
         }
       }
+
+      await db.batch((batch) {
+        if (newDeckCompanions.isNotEmpty) {
+          batch.insertAll(db.decks, newDeckCompanions);
+        }
+        if (newCardCompanions.isNotEmpty) {
+          batch.insertAll(db.cards, newCardCompanions);
+        }
+        if (newLogCompanions.isNotEmpty) {
+          batch.insertAll(db.reviewLogs, newLogCompanions);
+        }
+        if (newTagCompanions.isNotEmpty) {
+          batch.insertAll(db.tags, newTagCompanions);
+        }
+        if (newCardTagCompanions.isNotEmpty) {
+          batch.insertAll(
+            db.cardTags,
+            newCardTagCompanions,
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      });
     });
   }
 

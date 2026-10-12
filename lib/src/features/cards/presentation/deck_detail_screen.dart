@@ -104,9 +104,9 @@ class _CardTile extends StatelessWidget {
   final CardEntity card;
   final List<TagEntity> tags;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onToggleSuspend;
-  final VoidCallback onToggleBury;
+  final Future<void> Function() onDelete;
+  final Future<void> Function() onToggleSuspend;
+  final Future<void> Function() onToggleBury;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +146,7 @@ class _CardTile extends StatelessWidget {
             ) ??
             false;
       },
-      onDismissed: (_) => onDelete(),
+      onDismissed: (_) async => await onDelete(),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         elevation: 0,
@@ -271,11 +271,11 @@ class _CardTile extends StatelessWidget {
                         size: 20,
                         color: scheme.onSurfaceVariant,
                       ),
-                      onSelected: (value) {
+                      onSelected: (value) async {
                         if (value == 'edit') onEdit();
-                        if (value == 'suspend') onToggleSuspend();
-                        if (value == 'bury') onToggleBury();
-                        if (value == 'delete') onDelete();
+                        if (value == 'suspend') await onToggleSuspend();
+                        if (value == 'bury') await onToggleBury();
+                        if (value == 'delete') await onDelete();
                       },
                       itemBuilder: (context) {
                         final itemL10n = AppLocalizations.of(context);

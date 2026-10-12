@@ -272,5 +272,131 @@ Valid Front 3,Valid Back 3''';
       expect(decks.any((d) => d.name == 'Pre-existing Deck'), isTrue);
       expect(decks.any((d) => d.name == 'Imported Deck'), isTrue);
     });
+
+    test('importJsonPayload double-import with replaceExisting: false is strictly idempotent', () async {
+      final existingDeckId = await db.decksDao.createDeck(
+        name: 'Pre-existing Deck',
+      );
+      await db.cardsDao.createCard(
+        deckId: existingDeckId,
+        front: 'Pre Card',
+        back: 'Pre Back',
+      );
+
+      final tempDb = AppDatabase.forTesting(NativeDatabase.memory());
+      final tempService = BackupService(tempDb);
+      final importDeckId = await tempDb.decksDao.createDeck(
+        name: 'Unique Imported Deck',
+      );
+      final importedCardId = await tempDb.cardsDao.createCard(
+        deckId: importDeckId,
+        front: 'Imported Front',
+        back: 'Imported Back',
+      );
+      final tag = await tempDb.tagsDao.getOrCreateTag('TestTag');
+      await tempDb.tagsDao.setCardTags(importedCardId, [tag]);
+
+      final jsonPayload = await tempService.exportJsonPayload();
+      await tempDb.close();
+
+      // First import
+      await backupService.importJsonPayload(
+        jsonPayload,
+        replaceExisting: false,
+      );
+
+      final decksCountAfterFirst = (await db.select(db.decks).get()).length;
+      final cardsCountAfterFirst = (await db.select(db.cards).get()).length;
+      final tagsCountAfterFirst = (await db.select(db.tags).get()).length;
+      final cardTagsCountAfterFirst = (await db.select(db.cardTags).get()).length;
+
+      expect(decksCountAfterFirst, equals(2));
+      expect(cardsCountAfterFirst, equals(2));
+      expect(tagsCountAfterFirst, equals(1));
+      expect(cardTagsCountAfterFirst, equals(1));
+
+      // Second import of the EXACT same payload in merge mode
+      await backupService.importJsonPayload(
+        jsonPayload,
+        replaceExisting: false,
+      );
+
+      final decksAfterSecond = await db.select(db.decks).get();
+      final cardsAfterSecond = await db.select(db.cards).get();
+      final tagsAfterSecond = await db.select(db.tags).get();
+      final cardTagsAfterSecond = await db.select(db.cardTags).get();
+
+      // Idempotency check: counts must remain exactly identical, no duplicate rows
+      expect(decksAfterSecond, hasLength(decksCountAfterFirst));
+      expect(cardsAfterSecond, hasLength(cardsCountAfterFirst));
+      expect(tagsAfterSecond, hasLength(tagsCountAfterFirst));
+      expect(cardTagsAfterSecond, hasLength(cardTagsCountAfterFirst));
+    });
+
+    test('importJsonPayload rejects cards referencing unknown deckIds and does not attach to unrelated decks', () async {
+      final existingDeckId = await db.decksDao.createDeck(name: 'Local Deck');
+      expect(existingDeckId, equals(1));
+
+      // Payload containing card pointing to deckId 9999 (not in payload)
+      const orphanCardPayload = '''{
+        "version": 1,
+        "exportedAt": "2026-10-12T00:00:00.000Z",
+        "decks": [
+          {
+            "id": 42,
+            "name": "Payload Deck",
+            "description": null,
+            "createdAt": "2026-10-12T00:00:00.000Z",
+            "updatedAt": "2026-10-12T00:00:00.000Z"
+          }
+        ],
+        "cards": [
+          {
+            "id": 101,
+            "deckId": 42,
+            "front": "Valid Card",
+            "back": "Valid Back",
+            "state": 0,
+            "stability": 0.0,
+            "difficulty": 0.0,
+            "due": "2026-10-12T00:00:00.000Z",
+            "lastReview": null,
+            "reps": 0,
+            "lapses": 0,
+            "createdAt": "2026-10-12T00:00:00.000Z",
+            "isSuspended": false
+          },
+          {
+            "id": 102,
+            "deckId": 9999,
+            "front": "Orphan Card",
+            "back": "Orphan Back",
+            "state": 0,
+            "stability": 0.0,
+            "difficulty": 0.0,
+            "due": "2026-10-12T00:00:00.000Z",
+            "lastReview": null,
+            "reps": 0,
+            "lapses": 0,
+            "createdAt": "2026-10-12T00:00:00.000Z",
+            "isSuspended": false
+          }
+        ],
+        "reviewLogs": [],
+        "tags": [],
+        "cardTags": []
+      }''';
+
+      await backupService.importJsonPayload(
+        orphanCardPayload,
+        replaceExisting: false,
+      );
+
+      final cards = await db.select(db.cards).get();
+      // Only the valid card for deck 42 should be imported, orphan card must be rejected
+      expect(cards, hasLength(1));
+      expect(cards.first.front, equals('Valid Card'));
+      expect(cards.any((c) => c.front == 'Orphan Card'), isFalse);
+    });
   });
 }

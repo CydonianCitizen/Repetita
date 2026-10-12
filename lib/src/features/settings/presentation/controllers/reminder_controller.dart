@@ -61,7 +61,10 @@ class ReminderController extends _$ReminderController {
         throw Exception('Failed to schedule daily reminder');
       }
     } else {
-      await service.cancelReminder();
+      final success = await service.cancelReminder();
+      if (!success) {
+        throw Exception('Failed to cancel reminder');
+      }
     }
     state = state.copyWith(enabled: enabled);
     final db = ref.read(databaseProvider);
@@ -90,16 +93,6 @@ class ReminderController extends _$ReminderController {
     final db = ref.read(databaseProvider);
     await db.setSetting(_keyHour, hour.toString());
     await db.setSetting(_keyMinute, minute.toString());
-
-    if (state.enabled) {
-      final service = ref.read(notificationServiceProvider);
-      await service.scheduleDailyReminder(
-        hour: hour,
-        minute: minute,
-        title: title,
-        body: body,
-      );
-    }
   }
 
   Future<void> sendTestNotification({
@@ -111,6 +104,10 @@ class ReminderController extends _$ReminderController {
     if (!granted) {
       throw Exception('Notification permission denied');
     }
-    await service.showTestNotification(title: title, body: body);
+    final success =
+        await service.showTestNotification(title: title, body: body);
+    if (!success) {
+      throw Exception('Failed to send test notification');
+    }
   }
 }

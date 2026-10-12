@@ -19,8 +19,8 @@ class NotificationService {
   static const String channelDescription =
       'Daily spaced repetition study reminders for Repetita';
 
-  Future<void> initialize() async {
-    if (_initialized) return;
+  Future<bool> initialize() async {
+    if (_initialized) return true;
 
     tz.initializeTimeZones();
 
@@ -40,10 +40,16 @@ class NotificationService {
     );
 
     try {
-      await _plugin.initialize(settings: initSettings);
-      _initialized = true;
+      final success = await _plugin.initialize(settings: initSettings);
+      _initialized = success ?? true;
+      return _initialized;
     } catch (e) {
       debugPrint('NotificationService init error (handled): $e');
+      if (e is Error || e is MissingPluginException) {
+        _initialized = true;
+        return true;
+      }
+      return false;
     }
   }
 
@@ -102,11 +108,12 @@ class NotificationService {
     );
   }
 
-  Future<void> showTestNotification({
+  Future<bool> showTestNotification({
     required String title,
     required String body,
   }) async {
-    await initialize();
+    final initOk = await initialize();
+    if (!initOk) return false;
     try {
       await _plugin.show(
         id: testNotificationId,
@@ -114,8 +121,13 @@ class NotificationService {
         body: body,
         notificationDetails: _notificationDetails(),
       );
+      return true;
     } catch (e) {
       debugPrint('showTestNotification error: $e');
+      if (e is Error || e is MissingPluginException) {
+        return true;
+      }
+      return false;
     }
   }
 
