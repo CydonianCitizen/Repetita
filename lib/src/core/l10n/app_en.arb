@@ -153,6 +153,13 @@
   "notificationBody": "You have spaced repetition flashcards due for review today.",
   "notificationSent": "Test notification dispatched!",
   "reminderDesc": "Receive a gentle reminder each day to keep your review streak active and retain flashcards.",
+  "desktopNotifications": "Desktop Notifications",
+  "desktopNotificationsSubtitle": "System notifications and review alerts",
+  "desktopNotificationsActive": "System notifications enabled",
+  "desktopNotificationsDisabled": "System notifications disabled",
+  "desktopNotificationsExplanation": "On Windows and macOS, notifications are active while the application is running. Fixed-time daily alarms cannot trigger when the application is closed.",
+  "loadSampleDeck": "Load Sample Deck",
+  "sampleDeckLoaded": "Sample deck loaded successfully!",
 
   "sectionDataBackup": "DATA & BACKUP",
   "backupSubtitle": "Export and import decks via JSON or CSV",

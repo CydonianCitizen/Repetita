@@ -1,11 +1,12 @@
 import 'dart:math';
 
+import '../srs/srs_scheduler.dart';
 import 'models/fsrs_card.dart';
 import 'models/fsrs_models.dart';
 import 'models/fsrs_parameters.dart';
 import 'models/record_log.dart';
 
-class FsrsEngine {
+class FsrsEngine implements SrsScheduler {
   const FsrsEngine([this.parameters = const FsrsParameters()]);
 
   final FsrsParameters parameters;
@@ -66,6 +67,7 @@ class FsrsEngine {
     return interval.clamp(1, parameters.maximumInterval);
   }
 
+  @override
   RecordLog schedule(FsrsCard card, Rating rating, DateTime reviewTime) {
     final reviewTimeUtc = reviewTime.toUtc();
     final int elapsedDays;
@@ -170,6 +172,7 @@ class FsrsEngine {
     return RecordLog(card: updatedCard, log: log);
   }
 
+  @override
   Map<Rating, RecordLog> repeat(FsrsCard card, DateTime reviewTime) {
     return <Rating, RecordLog>{
       Rating.again: schedule(card, Rating.again, reviewTime),

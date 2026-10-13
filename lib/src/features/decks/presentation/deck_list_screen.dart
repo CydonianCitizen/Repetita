@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../cards/presentation/deck_detail_screen.dart';
+import '../data/sample_deck_seeder.dart';
 import 'controllers/deck_list_controller.dart';
 import 'widgets/deck_form_dialog.dart';
 import 'widgets/deck_list_tile.dart';
@@ -11,13 +14,85 @@ import 'widgets/deck_list_tile.dart';
 class DeckListScreen extends ConsumerWidget {
   const DeckListScreen({super.key});
 
+  Future<void> _handleCreateDeck(BuildContext context, WidgetRef ref) async {
+    final result = await DeckFormDialog.show(context);
+    if (result != null) {
+      try {
+        await ref
+            .read(deckListControllerProvider.notifier)
+            .createDeck(name: result.name, description: result.description);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create deck: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _seedSampleDeck(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final db = ref.read(databaseProvider);
+      await SampleDeckSeeder.seed(db);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.sampleDeckLoaded ?? 'Sample deck loaded successfully!',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load sample deck: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final decksAsync = ref.watch(deckListControllerProvider);
     final l10n = AppLocalizations.of(context);
+    final isDesktop =
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n?.appTitle ?? 'repetita')),
+      appBar: AppBar(
+        title: Text(l10n?.appTitle ?? 'repetita'),
+        actions: [
+          if (isDesktop) ...[
+            IconButton(
+              key: const Key('load_sample_deck_appbar_button'),
+              tooltip: l10n?.loadSampleDeck ?? 'Load Sample Deck',
+              icon: const Icon(Icons.school_outlined),
+              onPressed: () => _seedSampleDeck(context, ref),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: FilledButton.icon(
+                key: const Key('create_deck_desktop_button'),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(l10n?.newDeck ?? 'New Deck'),
+                onPressed: () => _handleCreateDeck(context, ref),
+              ),
+            ),
+          ],
+        ],
+      ),
       body: SafeArea(
         child: decksAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -71,19 +146,16 @@ class DeckListScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 24),
                       FilledButton.icon(
-                        onPressed: () async {
-                          final result = await DeckFormDialog.show(context);
-                          if (result != null) {
-                            await ref
-                                .read(deckListControllerProvider.notifier)
-                                .createDeck(
-                                  name: result.name,
-                                  description: result.description,
-                                );
-                          }
-                        },
+                        onPressed: () => _handleCreateDeck(context, ref),
                         icon: const Icon(Icons.add),
                         label: Text(l10n?.newDeck ?? 'New Deck'),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        key: const Key('seed_sample_deck_button'),
+                        onPressed: () => _seedSampleDeck(context, ref),
+                        icon: const Icon(Icons.school_outlined),
+                        label: Text(l10n?.loadSampleDeck ?? 'Load Sample Deck'),
                       ),
                     ],
                   ),
@@ -153,33 +225,14 @@ class DeckListScreen extends ConsumerWidget {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        key: const Key('create_deck_fab'),
-        tooltip: l10n?.createDeck ?? 'Create Deck',
-        onPressed: () async {
-          final result = await DeckFormDialog.show(context);
-          if (result != null) {
-            try {
-              await ref
-                  .read(deckListControllerProvider.notifier)
-                  .createDeck(
-                    name: result.name,
-                    description: result.description,
-                  );
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Failed to create deck: $e'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
-              }
-            }
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: isDesktop
+          ? null
+          : FloatingActionButton(
+              key: const Key('create_deck_fab'),
+              tooltip: l10n?.createDeck ?? 'Create Deck',
+              onPressed: () => _handleCreateDeck(context, ref),
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }

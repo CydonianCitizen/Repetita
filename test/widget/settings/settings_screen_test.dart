@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -449,6 +450,49 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('FSRS Scheduling Parameters'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'desktop hides haptic slider and shows desktop notifications without time picker',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 4000);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+        try {
+          await tester.pumpWidget(buildSubject());
+          await tester.pumpAndSettle();
+
+          // Haptic slider is hidden on desktop
+          expect(find.byKey(const Key('setting_haptic_slider')), findsNothing);
+          expect(find.byKey(const Key('test_haptic_button')), findsNothing);
+
+          // Notifications tile shows Desktop Notifications
+          expect(find.text('Desktop Notifications'), findsOneWidget);
+
+          // Open dialog
+          await tester.tap(find.byKey(const Key('setting_notifications_tile')));
+          await tester.pumpAndSettle();
+
+          // In desktop dialog, reminder time picker is hidden
+          expect(find.byKey(const Key('reminder_time_tile')), findsNothing);
+          expect(find.byKey(const Key('reminder_switch')), findsOneWidget);
+          expect(
+            find.byKey(const Key('send_test_notification_button')),
+            findsOneWidget,
+          );
+
+          // Close dialog
+          await tester.tap(find.text('Close'));
+          await tester.pumpAndSettle();
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
       },
     );
   });

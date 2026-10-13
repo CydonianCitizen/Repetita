@@ -43,43 +43,105 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          const DeckListScreen(),
-          _activatedIndices.contains(1)
-              ? const StatsScreen(isEmbedded: true)
-              : const SizedBox.shrink(),
-          _activatedIndices.contains(2)
-              ? const SettingsScreen(isEmbedded: true)
-              : const SizedBox.shrink(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: [
-          NavigationDestination(
-            key: const Key('nav_decks'),
-            icon: const Icon(Icons.style_outlined),
-            selectedIcon: const Icon(Icons.style),
-            label: l10n?.navHome ?? 'Decks',
+    final bodyStack = IndexedStack(
+      index: _currentIndex,
+      children: [
+        const DeckListScreen(),
+        _activatedIndices.contains(1)
+            ? const StatsScreen(isEmbedded: true)
+            : const SizedBox.shrink(),
+        _activatedIndices.contains(2)
+            ? const SettingsScreen(isEmbedded: true)
+            : const SizedBox.shrink(),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth >= 640;
+
+        if (isWideScreen) {
+          return Scaffold(
+            body: Row(
+              children: [
+                NavigationRail(
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: _onDestinationSelected,
+                  labelType: NavigationRailLabelType.all,
+                  leading: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer,
+                      child: Icon(
+                        Icons.school_rounded,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: const Icon(
+                        Icons.style_outlined,
+                        key: Key('nav_decks'),
+                      ),
+                      selectedIcon: const Icon(Icons.style),
+                      label: Text(l10n?.navHome ?? 'Decks'),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(
+                        Icons.bar_chart_outlined,
+                        key: Key('nav_stats'),
+                      ),
+                      selectedIcon: const Icon(Icons.bar_chart),
+                      label: Text(l10n?.navStats ?? 'Stats'),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(
+                        Icons.settings_outlined,
+                        key: Key('nav_settings'),
+                      ),
+                      selectedIcon: const Icon(Icons.settings),
+                      label: Text(l10n?.navSettings ?? 'Settings'),
+                    ),
+                  ],
+                ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: bodyStack),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: bodyStack,
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: _onDestinationSelected,
+            destinations: [
+              NavigationDestination(
+                key: const Key('nav_decks'),
+                icon: const Icon(Icons.style_outlined),
+                selectedIcon: const Icon(Icons.style),
+                label: l10n?.navHome ?? 'Decks',
+              ),
+              NavigationDestination(
+                key: const Key('nav_stats'),
+                icon: const Icon(Icons.bar_chart_outlined),
+                selectedIcon: const Icon(Icons.bar_chart),
+                label: l10n?.navStats ?? 'Stats',
+              ),
+              NavigationDestination(
+                key: const Key('nav_settings'),
+                icon: const Icon(Icons.settings_outlined),
+                selectedIcon: const Icon(Icons.settings),
+                label: l10n?.navSettings ?? 'Settings',
+              ),
+            ],
           ),
-          NavigationDestination(
-            key: const Key('nav_stats'),
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart),
-            label: l10n?.navStats ?? 'Stats',
-          ),
-          NavigationDestination(
-            key: const Key('nav_settings'),
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: l10n?.navSettings ?? 'Settings',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

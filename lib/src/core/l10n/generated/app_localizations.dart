@@ -812,6 +812,48 @@ abstract class AppLocalizations {
   /// **'Receive a gentle reminder each day to keep your review streak active and retain flashcards.'**
   String get reminderDesc;
 
+  /// No description provided for @desktopNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop Notifications'**
+  String get desktopNotifications;
+
+  /// No description provided for @desktopNotificationsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System notifications and review alerts'**
+  String get desktopNotificationsSubtitle;
+
+  /// No description provided for @desktopNotificationsActive.
+  ///
+  /// In en, this message translates to:
+  /// **'System notifications enabled'**
+  String get desktopNotificationsActive;
+
+  /// No description provided for @desktopNotificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'System notifications disabled'**
+  String get desktopNotificationsDisabled;
+
+  /// No description provided for @desktopNotificationsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'On Windows and macOS, notifications are active while the application is running. Fixed-time daily alarms cannot trigger when the application is closed.'**
+  String get desktopNotificationsExplanation;
+
+  /// No description provided for @loadSampleDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Sample Deck'**
+  String get loadSampleDeck;
+
+  /// No description provided for @sampleDeckLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample deck loaded successfully!'**
+  String get sampleDeckLoaded;
+
   /// No description provided for @sectionDataBackup.
   ///
   /// In en, this message translates to:

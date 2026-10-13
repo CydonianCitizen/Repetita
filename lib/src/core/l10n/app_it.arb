@@ -129,6 +129,13 @@
   "notificationBody": "Hai delle flashcard in scadenza da ripassare oggi.",
   "notificationSent": "Notifica di prova inviata!",
   "reminderDesc": "Ricevi un promemoria ogni giorno all'orario stabilito per mantenere costante la tua memoria.",
+  "desktopNotifications": "Notifiche desktop",
+  "desktopNotificationsSubtitle": "Notifiche di sistema e avvisi di ripasso",
+  "desktopNotificationsActive": "Notifiche di sistema attive",
+  "desktopNotificationsDisabled": "Notifiche di sistema disattivate",
+  "desktopNotificationsExplanation": "Su Windows e macOS, le notifiche sono attive durante l'esecuzione dell'applicazione. I promemoria giornalieri ad orario fisso non possono attivarsi se il programma è chiuso.",
+  "loadSampleDeck": "Carica mazzo di esempio",
+  "sampleDeckLoaded": "Mazzo di esempio caricato con successo!",
 
   "sectionDataBackup": "DATI E BACKUP",
   "backupSubtitle": "Esporta e importa mazzi tramite JSON o CSV",

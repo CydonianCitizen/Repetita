@@ -396,6 +396,29 @@ class AppLocalizationsIt extends AppLocalizations {
       'Ricevi un promemoria ogni giorno all\'orario stabilito per mantenere costante la tua memoria.';
 
   @override
+  String get desktopNotifications => 'Notifiche desktop';
+
+  @override
+  String get desktopNotificationsSubtitle =>
+      'Notifiche di sistema e avvisi di ripasso';
+
+  @override
+  String get desktopNotificationsActive => 'Notifiche di sistema attive';
+
+  @override
+  String get desktopNotificationsDisabled => 'Notifiche di sistema disattivate';
+
+  @override
+  String get desktopNotificationsExplanation =>
+      'Su Windows e macOS, le notifiche sono attive durante l\'esecuzione dell\'applicazione. I promemoria giornalieri ad orario fisso non possono attivarsi se il programma è chiuso.';
+
+  @override
+  String get loadSampleDeck => 'Carica mazzo di esempio';
+
+  @override
+  String get sampleDeckLoaded => 'Mazzo di esempio caricato con successo!';
+
+  @override
   String get sectionDataBackup => 'DATI E BACKUP';
 
   @override

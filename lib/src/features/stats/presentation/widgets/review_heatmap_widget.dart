@@ -10,12 +10,14 @@ class ReviewHeatmapWidget extends StatelessWidget {
     this.currentStreak = 0,
     this.weeks = 15,
     this.referenceDate,
+    this.isDesktop = false,
   });
 
   final Map<DateTime, int> dailyCounts;
   final int currentStreak;
   final int weeks;
   final DateTime? referenceDate;
+  final bool isDesktop;
 
   Color _cellColor(int count, ColorScheme scheme) {
     if (count == 0) {
@@ -58,29 +60,35 @@ class ReviewHeatmapWidget extends StatelessWidget {
         side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isDesktop ? 14 : 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_month_outlined,
-                      size: 20,
-                      color: scheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n?.reviewHeatmap ?? 'Review Heatmap',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month_outlined,
+                        size: 20,
+                        color: scheme.primary,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n?.reviewHeatmap ?? 'Review Heatmap',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -118,7 +126,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isDesktop ? 12 : 16),
             RepaintBoundary(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -133,9 +141,9 @@ class ReviewHeatmapWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           _WeekdayLabel(text: 'M', theme: theme),
-                          const SizedBox(height: 18),
+                          SizedBox(height: isDesktop ? 15 : 18),
                           _WeekdayLabel(text: 'W', theme: theme),
-                          const SizedBox(height: 18),
+                          SizedBox(height: isDesktop ? 15 : 18),
                           _WeekdayLabel(text: 'F', theme: theme),
                         ],
                       ),
@@ -155,12 +163,15 @@ class ReviewHeatmapWidget extends StatelessWidget {
                                   ? 0
                                   : (dailyCounts[cellDate] ?? 0);
 
+                              final cellSize = isDesktop ? 12.5 : 14.0;
+                              final cellMargin = isDesktop ? 1.5 : 2.0;
+
                               if (isFuture) {
                                 return Container(
-                                  width: 14,
-                                  height: 14,
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 2,
+                                  width: cellSize,
+                                  height: cellSize,
+                                  margin: EdgeInsets.symmetric(
+                                    vertical: cellMargin,
                                   ),
                                   decoration: BoxDecoration(
                                     color: Colors.transparent,
@@ -183,10 +194,10 @@ class ReviewHeatmapWidget extends StatelessWidget {
                                     milliseconds: 300,
                                   ),
                                   child: Container(
-                                    width: 14,
-                                    height: 14,
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 2,
+                                    width: cellSize,
+                                    height: cellSize,
+                                    margin: EdgeInsets.symmetric(
+                                      vertical: cellMargin,
                                     ),
                                     decoration: BoxDecoration(
                                       color: _cellColor(count, scheme),
@@ -204,7 +215,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: isDesktop ? 10 : 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -13,6 +13,8 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 | **v0.3.0** <br>*(Completato)* | Formati Carte & Organizzazione | • Cloze Deletion (`{{c1::...}}`) [x]<br>• Sistema Tag & Filtri per Carta [x] | Media |
 | **v0.4.0** <br>*(Completato)* | Flessibilità Studio | • Custom Study (Cram Mode / Ripasso Libero) [x] | Media |
 | **v0.6.0** <br>*(Completato)* | Ecosistema & File Transfer | • Importazione Anki Package (`.apkg`) [x]<br>• File Picker & Save nativo (.apkg, .json, .csv) [x]<br>• Ricerca Flashcard per Mazzo [x] | Alta |
+| **v0.7.0** <br>*(Completato)* | Desktop Edition (Windows & macOS) | • Supporto nativo desktop Windows (x64) & macOS [x]<br>• Layout adattivo Material 3 (`NavigationRail` vs `NavigationBar`) [x]<br>• Scorciatoie da tastiera (Space, 1-4, Ctrl+Z, Ctrl+Enter) [x]<br>• Dimensioni minime finestra e vincoli ergonomici maxWidth [x] | Media |
+| **v0.8.0** <br>*(Pianificato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [ ]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [ ]<br>• Selettore algoritmo nelle Impostazioni [ ]<br>• Migrazione schema Drift e gestione transizioni carte [ ] | Media |
 | **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate<br>• Zero bug, zero warning, 100% test coverage | Bassa |
 | **v1.5.0+** | Feature Complesse Deferred | • Ricerca Globale Flashcard (Card Browser)<br>• Markdown avanzato & formattazione ricca | Media |
 
@@ -114,7 +116,54 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 4. Funzionalità Differite (Post v1.0.0 / v1.5.0)
+### 5. v0.7.0: Desktop Edition (Windows & macOS) [COMPLETATO]
+
+#### 5.1 Runner Nativi & Toolchain Multipiattaforma [COMPLETATO]
+* **Obiettivo**: Esecuzione e compilazione deterministica offline su Windows (Win32/x64) e macOS (Apple Silicon / Intel).
+* **Specifiche**:
+  * Scaffolding completo `windows/` e `macos/` generato ed integrato in `analysis_options.yaml`.
+  * Generazione asset icone desktop (.ico per Windows, asset catalog per macOS) da `repetita-circle-icon-1024.png`.
+  * Introduzione `atl_shim` (`windows/atl_shim/atlbase.h`) per abilitare compilazione C++ MSVC istantanea senza dipendere dal componente opzionale ATL nei Build Tools di Visual Studio.
+  * Persistenza database SQLite e archiviazione locale su directory documenti di sistema (`path_provider`).
+
+#### 5.2 Layout Adattivo Material 3 [COMPLETATO]
+* **Obiettivo**: Esperienza visiva di primo livello adatta alle proporzioni di monitor widescreen (FHD, QHD, 4K).
+* **Specifiche**:
+  * `NavigationRail` laterale attivo automaticamente quando la larghezza della finestra è >= 640px.
+  * `NavigationBar` inferiore preservata per viewport compatti e schermi verticali.
+  * Contenitori con vincoli `BoxConstraints(maxWidth: 800)` e centratura automatica in `StudyScreen` e `CardEditorScreen`.
+  * Dimensioni minime della finestra fissate nativamente a 640x500px (`WM_GETMINMAXINFO` su Windows, `NSWindow.minSize` su macOS) per impedire clipping dell'interfaccia.
+
+#### 5.3 Ergonomia Desktop & Scorciatoie da Tastiera [COMPLETATO]
+* **Obiettivo**: Velocità di revisione e inserimento rapido paragonabile alle migliori desktop app per ripetizione spaziata (Anki).
+* **Specifiche**:
+  * **Sessione di Studio**:
+    * `Spazio` o `Invio`: Mostra risposta (gira la flashcard).
+    * `1`, `2`, `3`, `4`: Seleziona rispettivamente `Again`, `Hard`, `Good`, `Easy`.
+    * `Ctrl+Z` / `Cmd+Z`: Annulla l'ultima revisione.
+    * Badge visivi con scorciatoia (`1`, `2`, `3`, `4` e `[Space]`) renderizzati sui pulsanti quando in ambiente desktop.
+  * **Editor Carte**:
+    * `Ctrl+Invio` / `Cmd+Invio` e `Ctrl+S` / `Cmd+S`: Salvataggio immediato della flashcard.
+
+---
+
+### 5.4 v0.8.0: Motore Multi-Algoritmo (FSRS & SM-2) [PIANIFICATO]
+* **Obiettivo**: Rendere Repetita un benchmark harness agnostico rispetto all'algoritmo SRS, supportando sia il moderno FSRS sia il classico SuperMemo SM-2 con selettore utente.
+* **Specifiche**:
+  * **Modulo SM-2 Puro** (`lib/src/core/algorithms/sm2/`):
+    * Modello matematico a zero dipendenze per calcolo di $EF$ (Easiness Factor), intervalli $I(n)$, e gestione lapse con rating 1..4 (Again, Hard, Good, Easy).
+    * Test unitari con 100% di copertura.
+  * **SrsScheduler Strategy Pattern**:
+    * Astrazione comune che disaccoppia `StudySessionController` e `StudySessionDao` dal tipo concreto di motore.
+  * **Impostazioni & Selezione**:
+    * Opzione di selezione motore in `SettingsScreen` (FSRS vs SM-2) salvata in `AppSettings`.
+  * **Gestione Transizione & Persistenza**:
+    * Migrazione Drift per accogliere i metadati SM-2 senza perdita di coerenza per le carte preesistenti.
+    * Miglioramento dell'import Anki (`.apkg`) per preservare il fattore $EF$ originario.
+
+---
+
+### 6. Funzionalità Differite (Post v1.0.0 / v1.5.0)
 
 Le seguenti feature sono escluse dal percorso critico verso la v1.0.0 e pianificate per la v1.5.0:
 

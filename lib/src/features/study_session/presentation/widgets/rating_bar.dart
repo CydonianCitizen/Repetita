@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,10 @@ class RatingBar extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final animLevel = ref.watch(animationLevelControllerProvider);
     final isReduced = animLevel.isReduced;
+    final isDesktop =
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
 
     final configs = [
       _RatingConfig(
@@ -94,13 +99,41 @@ class RatingBar extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      cfg.label,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: cfg.foregroundColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: compact ? 13 : null,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          cfg.label,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: cfg.foregroundColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: compact ? 13 : null,
+                          ),
+                        ),
+                        if (isDesktop && !compact) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cfg.foregroundColor.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${index + 1}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: cfg.foregroundColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 3),
                     Text(

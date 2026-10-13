@@ -10,11 +10,13 @@ class ForecastListTile extends StatelessWidget {
     required this.forecast,
     required this.index,
     required this.maxCount,
+    this.isDense = false,
   });
 
   final ForecastDay forecast;
   final int index;
   final int maxCount;
+  final bool isDense;
 
   static final Map<String, DateFormat> _formatters = {};
 
@@ -38,17 +40,25 @@ class ForecastListTile extends StatelessWidget {
         : 0.0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: isDense ? 3 : 6),
       child: Row(
         children: [
           SizedBox(
-            width: 110,
+            width: isDense ? 95 : 110,
             child: Text(
               _formatDate(context, forecast.date, index),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: index == 0 ? FontWeight.bold : FontWeight.normal,
-                color: index == 0 ? colorScheme.primary : colorScheme.onSurface,
-              ),
+              style:
+                  (isDense
+                          ? theme.textTheme.bodySmall
+                          : theme.textTheme.bodyMedium)
+                      ?.copyWith(
+                        fontWeight: index == 0
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: index == 0
+                            ? colorScheme.primary
+                            : colorScheme.onSurface,
+                      ),
             ),
           ),
           const SizedBox(width: 8),
@@ -57,7 +67,7 @@ class ForecastListTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: ratio,
-                minHeight: 10,
+                minHeight: isDense ? 7 : 10,
                 semanticsLabel: 'Due forecast count',
                 semanticsValue: '${(ratio * 100).round()}%',
                 backgroundColor: colorScheme.surfaceContainerHighest,
@@ -67,9 +77,9 @@ class ForecastListTile extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           SizedBox(
-            width: 36,
+            width: 32,
             child: Text(
               '${forecast.count}',
               textAlign: TextAlign.end,

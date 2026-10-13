@@ -4,14 +4,15 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  build_release:
-    name: Build & Release APKs
+  build_android:
+    name: Build Android APKs
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,8 +35,98 @@ jobs:
       - name: Build split-per-abi release APKs
         run: flutter build apk --release --split-per-abi
 
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apks
+          path: build/app/outputs/flutter-apk/*.apk
+
+  build_macos:
+    name: Build macOS Universal App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS Universal Release
+        run: flutter build macos --release
+
+      - name: Verify Universal 2 Binary (arm64 + x86_64)
+        run: |
+          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -n 1)
+          BINARY_NAME=$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleExecutable)
+          echo "Checking architectures for $APP_PATH/Contents/MacOS/$BINARY_NAME:"
+          lipo -info "$APP_PATH/Contents/MacOS/$BINARY_NAME"
+
+      - name: Package macOS App (.zip)
+        run: |
+          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -n 1)
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" repetita-macos-universal.zip
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal
+          path: repetita-macos-universal.zip
+
+  build_windows:
+    name: Build Windows x64 App
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows Release
+        run: flutter build windows --release
+
+      - name: Package Windows App (.zip)
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "repetita-windows-x64.zip"
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: repetita-windows-x64.zip
+
+  publish_release:
+    name: Publish GitHub Release
+    needs: [build_android, build_macos, build_windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Organize release files
+        run: |
+          mkdir -p release-dist
+          find release-artifacts -type f \( -name "*.apk" -o -name "*.zip" \) -exec cp {} release-dist/ \;
+          ls -la release-dist
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/app/outputs/flutter-apk/*.apk
+          files: release-dist/*
           generate_release_notes: true

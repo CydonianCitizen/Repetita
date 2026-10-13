@@ -396,6 +396,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Receive a gentle reminder each day to keep your review streak active and retain flashcards.';
 
   @override
+  String get desktopNotifications => 'Desktop Notifications';
+
+  @override
+  String get desktopNotificationsSubtitle =>
+      'System notifications and review alerts';
+
+  @override
+  String get desktopNotificationsActive => 'System notifications enabled';
+
+  @override
+  String get desktopNotificationsDisabled => 'System notifications disabled';
+
+  @override
+  String get desktopNotificationsExplanation =>
+      'On Windows and macOS, notifications are active while the application is running. Fixed-time daily alarms cannot trigger when the application is closed.';
+
+  @override
+  String get loadSampleDeck => 'Load Sample Deck';
+
+  @override
+  String get sampleDeckLoaded => 'Sample deck loaded successfully!';
+
+  @override
   String get sectionDataBackup => 'DATA & BACKUP';
 
   @override

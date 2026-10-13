@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/algorithms/cloze/cloze_parser.dart';
@@ -308,178 +309,206 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         ? (l10n?.editCard ?? 'Edit Card')
         : (l10n?.newCard ?? 'New Card');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          if (!widget.isEditing)
-            TextButton(
-              key: const Key('save_and_add_another_button'),
-              onPressed: _isSaving ? null : () => _save(addAnother: true),
-              child: Text(l10n?.saveAndAddAnother ?? 'Save & Add Another'),
-            ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilledButton(
-              key: const Key('save_card_button'),
-              onPressed: _isSaving ? null : () => _save(addAnother: false),
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n?.save ?? 'Save'),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              16,
-              16,
-              32 + MediaQuery.viewPaddingOf(context).bottom,
-            ),
-            children: [
-              TextFormField(
-                key: const Key('card_front_field'),
-                controller: _frontController,
-                autofocus: !widget.isEditing,
-                maxLines: 5,
-                minLines: 3,
-                decoration: InputDecoration(
-                  labelText: l10n?.cardFront ?? 'Front (Prompt)',
-                  hintText: l10n?.promptHint ?? 'Enter question or prompt...',
-                  alignLabelWithHint: true,
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return l10n?.frontPromptCannotBeEmpty ??
-                        'Front prompt cannot be empty';
-                  }
-                  return null;
-                },
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
+          if (!_isSaving) _save(addAnother: false);
+        },
+        const SingleActivator(LogicalKeyboardKey.enter, meta: true): () {
+          if (!_isSaving) _save(addAnother: false);
+        },
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true): () {
+          if (!_isSaving) _save(addAnother: false);
+        },
+        const SingleActivator(LogicalKeyboardKey.keyS, meta: true): () {
+          if (!_isSaving) _save(addAnother: false);
+        },
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          actions: [
+            if (!widget.isEditing)
+              TextButton(
+                key: const Key('save_and_add_another_button'),
+                onPressed: _isSaving ? null : () => _save(addAnother: true),
+                child: Text(l10n?.saveAndAddAnother ?? 'Save & Add Another'),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  ActionChip(
-                    key: const Key('insert_cloze_button'),
-                    avatar: const Icon(Icons.data_array_rounded, size: 16),
-                    label: Text(l10n?.insertCloze ?? 'Cloze [...]'),
-                    tooltip:
-                        l10n?.insertClozeTooltip ??
-                        'Wrap selection with Cloze deletion',
-                    onPressed: _insertCloze,
-                  ),
-                  ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: _frontController,
-                    builder: (context, value, _) {
-                      final isCloze = ClozeParser.isCloze(value.text);
-                      if (!isCloze) return const SizedBox.shrink();
-                      final count = ClozeParser.extractClozeIndices(value.text)
-                          .length;
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Chip(
-                          visualDensity: VisualDensity.compact,
-                          backgroundColor: colorScheme.primaryContainer,
-                          label: Text(
-                            '$count Cloze',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton(
+                key: const Key('save_card_button'),
+                onPressed: _isSaving ? null : () => _save(addAnother: false),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n?.save ?? 'Save'),
               ),
-              const SizedBox(height: 16),
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _frontController,
-                builder: (context, value, _) {
-                  final isCloze = ClozeParser.isCloze(value.text);
-                  return TextFormField(
-                    key: const Key('card_back_field'),
-                    controller: _backController,
-                    maxLines: 5,
-                    minLines: 3,
-                    decoration: InputDecoration(
-                      labelText: isCloze
-                          ? (l10n?.cardBackNotes ??
-                                'Back (Extra Notes, Optional)')
-                          : (l10n?.cardBack ?? 'Back (Answer)'),
-                      hintText: isCloze
-                          ? (l10n?.cardBackNotes ??
-                                'Optional notes or explanation...')
-                          : (l10n?.answerHint ?? 'Enter answer...'),
-                      alignLabelWithHint: true,
-                      border: const OutlineInputBorder(),
-                    ),
-                    validator: (val) {
-                      if (!isCloze) {
-                        if (val == null || val.trim().isEmpty) {
-                          return l10n?.backAnswerCannotBeEmpty ??
-                              'Back answer cannot be empty';
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    16,
+                    16,
+                    32 + MediaQuery.viewPaddingOf(context).bottom,
+                  ),
+                  children: [
+                    TextFormField(
+                      key: const Key('card_front_field'),
+                      controller: _frontController,
+                      autofocus: !widget.isEditing,
+                      maxLines: 5,
+                      minLines: 3,
+                      decoration: InputDecoration(
+                        labelText: l10n?.cardFront ?? 'Front (Prompt)',
+                        hintText:
+                            l10n?.promptHint ?? 'Enter question or prompt...',
+                        alignLabelWithHint: true,
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n?.frontPromptCannotBeEmpty ??
+                              'Front prompt cannot be empty';
                         }
-                      }
-                      return null;
-                    },
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Icon(
-                    Icons.label_outline_rounded,
-                    size: 20,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n?.tags ?? 'Tags',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  ..._selectedTags.map(
-                    (tag) => InputChip(
-                      key: Key('tag_chip_${tag.id}'),
-                      label: Text(tag.name),
-                      onDeleted: () {
-                        setState(() {
-                          _selectedTags.removeWhere((t) => t.id == tag.id);
-                        });
+                        return null;
                       },
                     ),
-                  ),
-                  ActionChip(
-                    key: const Key('add_tag_button'),
-                    avatar: const Icon(Icons.add, size: 16),
-                    label: Text(l10n?.addTag ?? 'Add Tag'),
-                    onPressed: () => _showAddTagDialog(context),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        ActionChip(
+                          key: const Key('insert_cloze_button'),
+                          avatar: const Icon(
+                            Icons.data_array_rounded,
+                            size: 16,
+                          ),
+                          label: Text(l10n?.insertCloze ?? 'Cloze [...]'),
+                          tooltip:
+                              l10n?.insertClozeTooltip ??
+                              'Wrap selection with Cloze deletion',
+                          onPressed: _insertCloze,
+                        ),
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _frontController,
+                          builder: (context, value, _) {
+                            final isCloze = ClozeParser.isCloze(value.text);
+                            if (!isCloze) return const SizedBox.shrink();
+                            final count = ClozeParser.extractClozeIndices(
+                              value.text,
+                            ).length;
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Chip(
+                                visualDensity: VisualDensity.compact,
+                                backgroundColor: colorScheme.primaryContainer,
+                                label: Text(
+                                  '$count Cloze',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _frontController,
+                      builder: (context, value, _) {
+                        final isCloze = ClozeParser.isCloze(value.text);
+                        return TextFormField(
+                          key: const Key('card_back_field'),
+                          controller: _backController,
+                          maxLines: 5,
+                          minLines: 3,
+                          decoration: InputDecoration(
+                            labelText: isCloze
+                                ? (l10n?.cardBackNotes ??
+                                      'Back (Extra Notes, Optional)')
+                                : (l10n?.cardBack ?? 'Back (Answer)'),
+                            hintText: isCloze
+                                ? (l10n?.cardBackNotes ??
+                                      'Optional notes or explanation...')
+                                : (l10n?.answerHint ?? 'Enter answer...'),
+                            alignLabelWithHint: true,
+                            border: const OutlineInputBorder(),
+                          ),
+                          validator: (val) {
+                            if (!isCloze) {
+                              if (val == null || val.trim().isEmpty) {
+                                return l10n?.backAnswerCannotBeEmpty ??
+                                    'Back answer cannot be empty';
+                              }
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.label_outline_rounded,
+                          size: 20,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n?.tags ?? 'Tags',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        ..._selectedTags.map(
+                          (tag) => InputChip(
+                            key: Key('tag_chip_${tag.id}'),
+                            label: Text(tag.name),
+                            onDeleted: () {
+                              setState(() {
+                                _selectedTags.removeWhere(
+                                  (t) => t.id == tag.id,
+                                );
+                              });
+                            },
+                          ),
+                        ),
+                        ActionChip(
+                          key: const Key('add_tag_button'),
+                          avatar: const Icon(Icons.add, size: 16),
+                          label: Text(l10n?.addTag ?? 'Add Tag'),
+                          onPressed: () => _showAddTagDialog(context),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),

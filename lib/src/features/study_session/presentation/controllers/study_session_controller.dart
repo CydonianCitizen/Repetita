@@ -2,7 +2,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/utils/clock_provider.dart';
 
-import '../../../../core/algorithms/fsrs/fsrs_engine.dart';
 import '../../../../core/algorithms/fsrs/models/fsrs_models.dart';
 import '../../../../core/database/app_database.dart' show Card;
 import '../../../../core/database/database_provider.dart';
@@ -11,6 +10,7 @@ import '../../../cards/domain/card_entity.dart';
 import '../../../settings/presentation/controllers/fsrs_parameters_controller.dart';
 import '../../../stats/presentation/controllers/stats_controller.dart';
 import '../../domain/models/custom_study_config.dart';
+import 'srs_scheduler_provider.dart';
 
 part 'study_session_controller.g.dart';
 
@@ -186,9 +186,8 @@ class StudySessionController extends _$StudySessionController {
       }
 
       final fsrsCard = currentCard.toFsrsCard();
-      final fsrsParams = ref.read(fsrsParametersControllerProvider);
-      final engine = FsrsEngine(fsrsParams);
-      final recordLog = engine.schedule(fsrsCard, rating, now);
+      final scheduler = ref.read(srsSchedulerProvider);
+      final recordLog = scheduler.schedule(fsrsCard, rating, now);
 
       final dao = ref.read(studySessionDaoProvider);
       final reviewLogId = await dao.recordReview(
@@ -278,36 +277,37 @@ class StudySessionController extends _$StudySessionController {
     }
   }
 
+  void _advanceQueueWithoutCurrentCard(StudySessionState current) {
+    final updatedQueue = List<CardEntity>.from(current.queue)
+      ..removeAt(current.currentIndex);
+    final isCompleted =
+        updatedQueue.isEmpty || current.currentIndex >= updatedQueue.length;
+    final nextCard = !isCompleted && current.currentIndex < updatedQueue.length
+        ? updatedQueue[current.currentIndex]
+        : null;
+
+    state = AsyncData(
+      current.copyWith(
+        queue: updatedQueue,
+        isAnswerRevealed: false,
+        isCompleted: isCompleted,
+        undoStack: const [],
+        intervalPreviews: _calculateIntervalPreviews(
+          nextCard,
+          !current.recordReviews,
+        ),
+      ),
+    );
+  }
+
   Future<void> suspendCurrentCard() async {
     final current = state.value;
     if (current == null || current.currentCard == null) return;
     final card = current.currentCard!;
 
     try {
-      final dao = ref.read(cardsDaoProvider);
-      await dao.setCardSuspended(card.id, true);
-
-      final updatedQueue = List<CardEntity>.from(current.queue)
-        ..removeAt(current.currentIndex);
-      final isCompleted =
-          updatedQueue.isEmpty || current.currentIndex >= updatedQueue.length;
-      final nextCard =
-          !isCompleted && current.currentIndex < updatedQueue.length
-          ? updatedQueue[current.currentIndex]
-          : null;
-
-      state = AsyncData(
-        current.copyWith(
-          queue: updatedQueue,
-          isAnswerRevealed: false,
-          isCompleted: isCompleted,
-          undoStack: const [],
-          intervalPreviews: _calculateIntervalPreviews(
-            nextCard,
-            !current.recordReviews,
-          ),
-        ),
-      );
+      await ref.read(cardsDaoProvider).setCardSuspended(card.id, true);
+      _advanceQueueWithoutCurrentCard(current);
     } catch (e) {
       state = AsyncData(current);
       rethrow;
@@ -320,30 +320,8 @@ class StudySessionController extends _$StudySessionController {
     final card = current.currentCard!;
 
     try {
-      final dao = ref.read(cardsDaoProvider);
-      await dao.buryCardUntilTomorrow(card.id);
-
-      final updatedQueue = List<CardEntity>.from(current.queue)
-        ..removeAt(current.currentIndex);
-      final isCompleted =
-          updatedQueue.isEmpty || current.currentIndex >= updatedQueue.length;
-      final nextCard =
-          !isCompleted && current.currentIndex < updatedQueue.length
-          ? updatedQueue[current.currentIndex]
-          : null;
-
-      state = AsyncData(
-        current.copyWith(
-          queue: updatedQueue,
-          isAnswerRevealed: false,
-          isCompleted: isCompleted,
-          undoStack: const [],
-          intervalPreviews: _calculateIntervalPreviews(
-            nextCard,
-            !current.recordReviews,
-          ),
-        ),
-      );
+      await ref.read(cardsDaoProvider).buryCardUntilTomorrow(card.id);
+      _advanceQueueWithoutCurrentCard(current);
     } catch (e) {
       state = AsyncData(current);
       rethrow;
@@ -367,9 +345,8 @@ class StudySessionController extends _$StudySessionController {
 
     final now = ref.read(clockProvider)();
     final fsrsCard = card.toFsrsCard();
-    final fsrsParams = ref.read(fsrsParametersControllerProvider);
-    final engine = FsrsEngine(fsrsParams);
-    final repeats = engine.repeat(fsrsCard, now);
+    final scheduler = ref.read(srsSchedulerProvider);
+    final repeats = scheduler.repeat(fsrsCard, now);
 
     return repeats.map((rating, recordLog) {
       final days = recordLog.log.scheduledDays;

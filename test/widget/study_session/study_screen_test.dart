@@ -1,5 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/database/app_database.dart';
@@ -332,6 +333,48 @@ void main() {
 
         expect(find.text('CRAM'), findsOneWidget);
         expect(find.text('Cram Session'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'supports desktop keyboard shortcuts (Space to reveal, 1-4 to rate)',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Keyboard Question',
+          back: 'Keyboard Answer',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.text('Keyboard Question'), findsOneWidget);
+        expect(find.text('Keyboard Answer'), findsNothing);
+
+        // 1. Press Space to reveal answer
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(find.text('Keyboard Answer'), findsOneWidget);
+        expect(find.byKey(const Key('rating_button_good')), findsOneWidget);
+
+        // 2. Press digit 3 to select Good
+        await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
+        for (int i = 0; i < 10; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        expect(
+          find.byKey(const Key('session_completion_stats')),
+          findsOneWidget,
+        );
 
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(milliseconds: 50));

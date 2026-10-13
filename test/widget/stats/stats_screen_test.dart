@@ -157,5 +157,30 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 50));
     });
+
+    testWidgets('renders desktop wide layout with side-by-side cards', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(buildSubject());
+      for (int i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+
+      expect(find.text('Statistics'), findsOneWidget);
+      expect(find.byType(ReviewHeatmapWidget), findsOneWidget);
+      expect(find.text('Review Heatmap'), findsOneWidget);
+      expect(find.text('7-Day Review Forecast'), findsOneWidget);
+      expect(find.text('Card State Breakdown'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
   });
 }

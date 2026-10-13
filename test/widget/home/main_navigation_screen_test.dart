@@ -93,5 +93,42 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
       },
     );
+
+    testWidgets(
+      'renders NavigationRail on wide desktop displays and switches tabs',
+      (tester) async {
+        tester.view.physicalSize = const Size(1920, 1080);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        // 1. NavigationRail is shown on desktop displays
+        expect(find.byType(NavigationRail), findsOneWidget);
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(find.byType(DeckListScreen), findsOneWidget);
+
+        // 2. Switch to Stats via rail
+        await tester.tap(find.byKey(const Key('nav_stats')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+        expect(find.byType(StatsScreen), findsOneWidget);
+
+        // 3. Switch to Settings via rail
+        await tester.tap(find.byKey(const Key('nav_settings')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+        expect(find.byType(SettingsScreen), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -172,6 +173,49 @@ void main() {
 
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
+
+    testWidgets(
+      'desktop hides FAB, shows desktop AppBar button and sample deck button',
+      (tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+        try {
+          await tester.pumpWidget(buildSubject());
+          await tester.pumpAndSettle();
+
+          // FAB is removed on desktop
+          expect(find.byKey(const Key('create_deck_fab')), findsNothing);
+
+          // Desktop action buttons are rendered
+          expect(
+            find.byKey(const Key('create_deck_desktop_button')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('load_sample_deck_appbar_button')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('seed_sample_deck_button')),
+            findsOneWidget,
+          );
+
+          // Tapping load sample deck button seeds demo cards
+          await tester.tap(find.byKey(const Key('seed_sample_deck_button')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text('Mazzo Dimostrativo • FSRS & Spaced Repetition'),
+            findsOneWidget,
+          );
+          expect(find.text('Total: 8'), findsOneWidget);
+
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump(const Duration(milliseconds: 50));
+        } finally {
+          debugDefaultTargetPlatformOverride = null;
+        }
       },
     );
   });
