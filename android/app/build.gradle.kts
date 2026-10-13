@@ -37,10 +37,6 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
-        }
     }
 
     signingConfigs {
@@ -59,15 +55,6 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
-        }
-    }
-
-    packaging {
-        jniLibs {
-            excludes += listOf(
-                "lib/armeabi-v7a/**",
-                "lib/x86/**"
-            )
         }
     }
 }

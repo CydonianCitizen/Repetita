@@ -62,14 +62,13 @@ jobs:
 
       - name: Verify Universal 2 Binary (arm64 + x86_64)
         run: |
-          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -n 1)
-          BINARY_NAME=$(defaults read "$APP_PATH/Contents/Info.plist" CFBundleExecutable)
-          echo "Checking architectures for $APP_PATH/Contents/MacOS/$BINARY_NAME:"
-          lipo -info "$APP_PATH/Contents/MacOS/$BINARY_NAME"
+          APP_PATH=$(find "$PWD/build/macos/Build/Products/Release" -maxdepth 1 -name "*.app" | head -n 1)
+          echo "Inspecting binary architectures at: $APP_PATH"
+          lipo -info "$APP_PATH/Contents/MacOS/"*
 
       - name: Package macOS App (.zip)
         run: |
-          APP_PATH=$(find build/macos/Build/Products/Release -maxdepth 1 -name "*.app" | head -n 1)
+          APP_PATH=$(find "$PWD/build/macos/Build/Products/Release" -maxdepth 1 -name "*.app" | head -n 1)
           ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" repetita-macos-universal.zip
 
       - name: Upload macOS Artifact
