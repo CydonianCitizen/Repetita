@@ -14,7 +14,8 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 | **v0.4.0** <br>*(Completato)* | Flessibilità Studio | • Custom Study (Cram Mode / Ripasso Libero) [x] | Media |
 | **v0.6.0** <br>*(Completato)* | Ecosistema & File Transfer | • Importazione Anki Package (`.apkg`) [x]<br>• File Picker & Save nativo (.apkg, .json, .csv) [x]<br>• Ricerca Flashcard per Mazzo [x] | Alta |
 | **v0.7.0** <br>*(Completato)* | Desktop Edition (Windows & macOS) | • Supporto nativo desktop Windows (x64) & macOS [x]<br>• Layout adattivo Material 3 (`NavigationRail` vs `NavigationBar`) [x]<br>• Scorciatoie da tastiera (Space, 1-4, Ctrl+Z, Ctrl+Enter) [x]<br>• Dimensioni minime finestra e vincoli ergonomici maxWidth [x] | Media |
-| **v0.8.0** <br>*(Pianificato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [ ]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [ ]<br>• Selettore algoritmo nelle Impostazioni [ ]<br>• Migrazione schema Drift e gestione transizioni carte [ ] | Media |
+| **v0.7.5** <br>*(Completato)* | Astrazione Motore SRS & CI/CD Release | • Interfaccia universale `SrsScheduler` & Riverpod provider [x]<br>• Seeder onboarding mazzo iniziale (`SampleDeckSeeder`) [x]<br>• Fix release pipeline CI/CD (macOS Universal, Windows x64, Android split) [x]<br>• Audit Ponytail & Impeccable (deduplicazione coda studio e dead code) [x] | Bassa |
+| **v0.8.0** <br>*(Pianificato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [x (v0.7.5)]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [ ]<br>• Selettore algoritmo nelle Impostazioni [ ]<br>• Migrazione schema Drift e gestione transizioni carte [ ] | Media |
 | **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate<br>• Zero bug, zero warning, 100% test coverage | Bassa |
 | **v1.5.0+** | Feature Complesse Deferred | • Ricerca Globale Flashcard (Card Browser)<br>• Markdown avanzato & formattazione ricca | Media |
 
@@ -147,13 +148,37 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 5.4 v0.8.0: Motore Multi-Algoritmo (FSRS & SM-2) [PIANIFICATO]
+### 5.4 v0.7.5: Astrazione Motore SRS & CI/CD Release [COMPLETATO]
+
+#### 5.4.1 Interfaccia SrsScheduler & Decoupling Motore [COMPLETATO]
+* **Obiettivo**: Generalizzare il motore di scheduling per preparare l'integrazione di SM-2 senza rompere i contratti esistenti.
+* **Specifiche**:
+  * Creazione interfaccia pura `SrsScheduler` (`lib/src/core/algorithms/srs/srs_scheduler.dart`).
+  * Implementazione di `SrsScheduler` da parte di `FsrsEngine`.
+  * Introduzione del provider Riverpod `srsSchedulerProvider` e refactoring di `StudySessionController`.
+
+#### 5.4.2 Mazzo Dimostrativo Onboarding (`SampleDeckSeeder`) [COMPLETATO]
+* **Obiettivo**: Fornire mazzo e carte di benvenuto (Basic e Cloze) al primo avvio offline dell'applicazione.
+* **Specifiche**:
+  * Modulo `SampleDeckSeeder` idempotente attivato se il database non contiene mazzi.
+  * Mazzo "Benvenuto su Repetita" con 3 carte didattiche esplicative di FSRS e Cloze Deletion.
+
+#### 5.4.3 Stabilizzazione CI/CD & GitHub Actions Release [COMPLETATO]
+* **Obiettivo**: Pipeline di compilazione e rilascio automatica per Android (split APKs), macOS (Universal arm64 + x86_64) e Windows (x64).
+* **Specifiche**:
+  * Risoluzione conflitto NDK ABI filters in Gradle (`android/app/build.gradle.kts`) per abilitare `--split-per-abi`.
+  * Configurazione firma ad-hoc in `Release.xcconfig` e `project.pbxproj` per consentire a Xcode di compilare su GitHub Actions senza account Apple Developer a pagamento.
+  * Verifica e packaging via percorso assoluto `$PWD` e `lipo -info` nel workflow di rilascio.
+
+---
+
+### 5.5 v0.8.0: Motore Multi-Algoritmo (FSRS & SM-2) [PIANIFICATO]
 * **Obiettivo**: Rendere Repetita un benchmark harness agnostico rispetto all'algoritmo SRS, supportando sia il moderno FSRS sia il classico SuperMemo SM-2 con selettore utente.
 * **Specifiche**:
   * **Modulo SM-2 Puro** (`lib/src/core/algorithms/sm2/`):
     * Modello matematico a zero dipendenze per calcolo di $EF$ (Easiness Factor), intervalli $I(n)$, e gestione lapse con rating 1..4 (Again, Hard, Good, Easy).
     * Test unitari con 100% di copertura.
-  * **SrsScheduler Strategy Pattern**:
+  * **SrsScheduler Strategy Pattern**: [COMPLETATO in v0.7.5]
     * Astrazione comune che disaccoppia `StudySessionController` e `StudySessionDao` dal tipo concreto di motore.
   * **Impostazioni & Selezione**:
     * Opzione di selezione motore in `SettingsScreen` (FSRS vs SM-2) salvata in `AppSettings`.

@@ -146,3 +146,22 @@ Stima netto: **−400/−500 righe, −4 file codegen, −2 asset, −1 dipenden
 12. `EnumSettingController<T>` generico al posto di 4 controller identici (−8 file).
 13. `RepaintBoundary` su flip card e shimmer (§2.16).
 14. LIMIT study queue + paginazione lista (riusare l'API paginata già esistente).
+
+---
+
+## 7. Audit v0.7.5 — Ponytail & Impeccable (Decoupling SRS, Ottimizzazione & CI/CD)
+
+Data: 2026-10-13. Scope: `StudySessionController`, algoritmi SRS, configurazioni build Android/macOS, workflow di rilascio.
+
+### 7.1 Astrazione Motore SRS (Strategy Pattern) ✅
+- **Problema:** `StudySessionController` istanziava direttamente `FsrsEngine`, impedendo l'introduzione di motori alternativi (SM-2) senza refactoring invasivo dello stato della sessione.
+- **Fix:** Introdotta interfaccia pura `SrsScheduler` (`lib/src/core/algorithms/srs/srs_scheduler.dart`) implementata da `FsrsEngine`. Creata dipendenza reattiva `srsSchedulerProvider` in Riverpod. `StudySessionController` consuma lo scheduler astratto via dependency injection.
+
+### 7.2 Ponytail Code Cut: Deduplicazione Coda di Studio ✅
+- **Problema:** `suspendCurrentCard` e `buryCurrentCard` duplicavano circa 25 righe di logica per l'avanzamento della coda di studio, la gestione del flag `_isFlipped` e la notifica di completamento.
+- **Fix:** Estratto helper privato unificato `_advanceQueueWithoutCurrentCard()`, riducendo boilerplate e allineando la transizione di stato. Puliti gli import non utilizzati.
+
+### 7.3 Risoluzione Conflitti Build Android & macOS CI/CD ✅
+- **Problema:** La pipeline GitHub Actions falliva su Android per conflitto Gradle (`ndk.abiFilters` incompatibile con `splits` di `--split-per-abi`) e su macOS per firma Xcode automatica senza credenziali e percorso relativo in `defaults read`.
+- **Fix:** Rimossi filtri NDK conflittuali in `build.gradle.kts`. Impostata firma ad-hoc (`CODE_SIGN_STYLE = Manual`, `CODE_SIGN_IDENTITY = -`) per i target macOS di Release e reso assoluto il percorso `$PWD` nello script di packaging della release.
+
