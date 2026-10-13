@@ -16,26 +16,85 @@ import '../domain/card_entity.dart';
 import 'card_editor_screen.dart';
 import 'controllers/card_list_controller.dart';
 
-class DeckDetailScreen extends ConsumerWidget {
+class DeckDetailScreen extends ConsumerStatefulWidget {
   const DeckDetailScreen({super.key, required this.deck});
 
   final Deck deck;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DeckDetailScreen> createState() => _DeckDetailScreenState();
+}
+
+class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
+  bool _isSearching = false;
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _closeSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+    });
+    ref.read(deckCardSearchQueryProvider.notifier).clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final cardsAsync = ref.watch(cardListControllerProvider(deck.id));
-    final deckTagsAsync = ref.watch(deckTagsProvider(deck.id));
+    final cardsAsync = ref.watch(cardListControllerProvider(widget.deck.id));
+    final deckTagsAsync = ref.watch(deckTagsProvider(widget.deck.id));
 
     return Scaffold(
-      appBar: AppBar(title: Text(deck.name)),
+      appBar: AppBar(
+        title: _isSearching
+            ? TextField(
+                key: const Key('deck_search_field'),
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: l10n?.searchCards ?? 'Search cards...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (val) => ref
+                    .read(deckCardSearchQueryProvider.notifier)
+                    .setQuery(val),
+              )
+            : Text(widget.deck.name),
+        actions: [
+          if (_isSearching)
+            IconButton(
+              key: const Key('clear_search_button'),
+              icon: const Icon(Icons.close),
+              onPressed: _closeSearch,
+            )
+          else
+            IconButton(
+              key: const Key('search_cards_button'),
+              icon: const Icon(Icons.search),
+              tooltip: l10n?.search ?? 'Search',
+              onPressed: () => setState(() => _isSearching = true),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: cardsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => ErrorView(
             title: 'Error loading cards',
             error: error,
-            onRetry: () => ref.invalidate(cardListControllerProvider(deck.id)),
+            onRetry: () =>
+                ref.invalidate(cardListControllerProvider(widget.deck.id)),
           ),
           data: (cards) {
             final cardTagsMap = deckTagsAsync.value ?? <int, List<TagEntity>>{};
@@ -56,14 +115,14 @@ class DeckDetailScreen extends ConsumerWidget {
             return Column(
               children: [
                 _DeckStudyHeader(
-                  deck: deck,
+                  deck: widget.deck,
                   cards: cards,
                   dueCount: dueCount,
                   allDeckTags: allDeckTags,
                 ),
                 Expanded(
                   child: _DeckCardsSection(
-                    deck: deck,
+                    deck: widget.deck,
                     cards: cards,
                     allDeckTags: allDeckTags,
                     cardTagsMap: cardTagsMap,
@@ -80,7 +139,7 @@ class DeckDetailScreen extends ConsumerWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => CardEditorScreen(deckId: deck.id),
+              builder: (_) => CardEditorScreen(deckId: widget.deck.id),
             ),
           );
         },
@@ -95,6 +154,7 @@ class _CardTile extends StatelessWidget {
     super.key,
     required this.card,
     this.tags = const [],
+    required this.now,
     required this.onEdit,
     required this.onDelete,
     required this.onToggleSuspend,
@@ -103,6 +163,7 @@ class _CardTile extends StatelessWidget {
 
   final CardEntity card;
   final List<TagEntity> tags;
+  final DateTime now;
   final VoidCallback onEdit;
   final Future<void> Function() onDelete;
   final Future<void> Function() onToggleSuspend;
@@ -226,7 +287,7 @@ class _CardTile extends StatelessWidget {
                               ),
                             ),
                           ),
-                        if (card.isBuried(DateTime.now().toUtc()))
+                        if (card.isBuried(now))
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
@@ -279,7 +340,7 @@ class _CardTile extends StatelessWidget {
                       },
                       itemBuilder: (context) {
                         final itemL10n = AppLocalizations.of(context);
-                        final isBuried = card.isBuried(DateTime.now().toUtc());
+                        final isBuried = card.isBuried(now);
                         return [
                           PopupMenuItem(
                             value: 'edit',
@@ -527,6 +588,7 @@ class _DeckCardsSection extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final selectedTagId = ref.watch(deckTagFilterProvider);
     final displayedCards = ref.watch(filteredDeckCardsProvider(deck.id));
+    final now = ref.watch(clockProvider)();
 
     final cardIndexMap = <int, int>{
       for (int i = 0; i < displayedCards.length; i++) displayedCards[i].id: i,
@@ -641,22 +703,28 @@ class _DeckCardsSection extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.label_off_outlined,
+                        Icons.search_off_outlined,
                         size: 48,
                         color: colorScheme.outline,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'No cards match this tag.',
+                        l10n?.noCardsMatchingSearch ??
+                            'No cards match your search.',
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () => ref
-                            .read(deckTagFilterProvider.notifier)
-                            .selectTag(null),
+                        onPressed: () {
+                          ref
+                              .read(deckTagFilterProvider.notifier)
+                              .selectTag(null);
+                          ref
+                              .read(deckCardSearchQueryProvider.notifier)
+                              .clear();
+                        },
                         child: Text(l10n?.filterAll ?? 'Show all cards'),
                       ),
                     ],
@@ -680,6 +748,7 @@ class _DeckCardsSection extends ConsumerWidget {
                       key: ValueKey(card.id),
                       card: card,
                       tags: cardTags,
+                      now: now,
                       onEdit: () {
                         Navigator.of(context).push(
                           MaterialPageRoute<void>(

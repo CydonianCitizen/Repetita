@@ -10,21 +10,46 @@ part 'card_list_controller.g.dart';
 /// Page size for the rendered card list; further rows load in chunks.
 const int kCardListPageSize = 100;
 
-/// Cards of [deckId] filtered by the currently selected tag.
-/// Recomputed only when the card list, the tag map or the filter change.
+@riverpod
+class DeckCardSearchQuery extends _$DeckCardSearchQuery {
+  @override
+  String build() => '';
+
+  void setQuery(String query) => state = query.trim();
+  void clear() => state = '';
+}
+
+/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 @riverpod
 List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
   final cards =
       ref.watch(cardListControllerProvider(deckId)).value ??
       const <CardEntity>[];
   final selectedTagId = ref.watch(deckTagFilterProvider);
-  if (selectedTagId == null) return cards;
-  final tagsMap = ref.watch(deckTagsProvider(deckId)).value;
-  return cards
-      .where(
-        (c) => (tagsMap?[c.id] ?? const []).any((t) => t.id == selectedTagId),
-      )
-      .toList();
+  final searchQuery = ref.watch(deckCardSearchQueryProvider).toLowerCase();
+
+  var result = cards;
+  if (selectedTagId != null) {
+    final tagsMap = ref.watch(deckTagsProvider(deckId)).value;
+    result = result
+        .where(
+          (c) => (tagsMap?[c.id] ?? const []).any((t) => t.id == selectedTagId),
+        )
+        .toList();
+  }
+
+  if (searchQuery.isNotEmpty) {
+    result = result
+        .where(
+          (c) =>
+              c.front.toLowerCase().contains(searchQuery) ||
+              c.back.toLowerCase().contains(searchQuery),
+        )
+        .toList();
+  }
+
+  return result;
 }
 
 @riverpod

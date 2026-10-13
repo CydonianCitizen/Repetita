@@ -433,7 +433,36 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ankiImportTitle": "Anki Package (.apkg)",
+  "ankiImportDescription": "Import decks and flashcards directly from Anki packages, including Basic notes, Cloze deletions, and tags.",
+  "importAnki": "Import Anki (.apkg)",
+  "ankiImportSuccess": "Imported {cards} cards across {decks} decks ({tags} tags created, {skipped} skipped).",
+  "@ankiImportSuccess": {
+    "placeholders": {
+      "cards": {
+        "type": "int"
+      },
+      "decks": {
+        "type": "int"
+      },
+      "tags": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "pickFile": "Select File",
+  "saveToFile": "Save to File",
+  "pasteText": "Paste Text",
+  "selectAnkiDestination": "Anki Import Destination",
+  "keepAnkiDecks": "Preserve original deck names",
+  "chooseTargetDeck": "Import into an existing deck",
+  "searchCards": "Search cards...",
+  "noCardsMatchingSearch": "No cards match your search query.",
+  "fileSavedSuccess": "File saved successfully!"
 }
 
 

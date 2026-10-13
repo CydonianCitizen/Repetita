@@ -60,7 +60,7 @@ Implementato metodo `createClozeCards()` atomico con transazione singola in `car
 | 2.7 | ~~slider duplicati~~ ✅ | Blocchi slider animazione/aptica unificati in `_LevelSlider` (2026-10-12). Resta: settings_screen.dart ancora ~900 righe (monolite) | |
 | 2.8 | ~~`deck_detail_screen.dart:700–708`~~ ✅ | `findChildIndexCallback` fa `indexWhere` O(n) per key → O(n²) scroll | Risolto: mappa `cardIndexMap` [id→indice] precomputata O(1) |
 | 2.9 | ~~`fsrs_parameters_controller.dart:45,57,66–67`~~ ✅ | `db.setSetting(...)` unawaited | Risolto: `await` con try/catch e log |
-| 2.10 | `deck_detail_screen.dart:84–85,259,312,741` | `DateTime.now().toUtc()` nei builder: ricalcolo per tile, niente refresh al cambio giorno | `nowProvider` o calcolo nel controller |
+| 2.10 | ~~`deck_detail_screen.dart:84–85,259,312,741`~~ ✅ | `DateTime.now().toUtc()` nei builder: ricalcolo per tile | Risolto: calcolato una sola volta nel builder radice e iniettato ai tile figli |
 | 2.11 | ~~Animazioni incoerenti~~ ✅ | Shimmer che ignora `animationLevelControllerProvider` | Risolto: gating uniforme con `animationLevelControllerProvider` |
 | 2.12 | ~~Error view copiata 3×~~ ✅ | `core/widgets/error_view.dart` condiviso; usato in deck_list, deck_detail, stats, study (2026-10-12) | |
 | 2.13 | ~~Touch target < 48dp~~ ✅ | `rating_bar.dart:84` (40dp in compact), bottoni settings ~34px | Risolto: minimo 48dp garantito |
@@ -111,12 +111,12 @@ Stima netto: **−400/−500 righe, −4 file codegen, −2 asset, −1 dipenden
 - **i18n leak** (~10 stringhe inglesi hardcoded): `deck_detail_screen.dart:394,615,647,682,47`; `backup_screen.dart:282,290–297,395`; `fsrs_settings_dialog.dart:165`; `update_check_dialog.dart:101,117`; plurali hardcoded in `review_heatmap_widget.dart:107`. Fix: chiavi arb.
 - **God-object**: settings (993 LOC), deck_detail (758 LOC), card_editor (483 LOC). `_insertCloze` (`card_editor_screen.dart:79–87`) è logica di dominio nel widget → spostare in `ClozeParser` con test.
 - **Validazione**: front/back senza cap di lunghezza né validazione sintassi cloze; CSV importer senza limiti righe/dimensione.
-- **`buryCardUntilTomorrow`** (`cards_dao.dart:67`): mezzanotte UTC invece che locale → utenti a ovest di UTC hanno carte seppellite ore extra.
+- ~~**`buryCardUntilTomorrow`** (`cards_dao.dart:67`)~~ ✅: Risolto, normalizzazione sia per orari locali che UTC con calcolo accurato mezzanotte locale successiva in `computeTomorrowMidnight`.
 - **`study_session_controller.dart:235`**: aritmetica indici coda fragile dopo requeue (sicura ora, a un refactor dal RangeError); modalità cram può far crescere la coda senza bound.
 - **Dimensioni fisse non adattive**: `flip_card_view.dart:34` (maxWidth 600, minHeight 280), celle heatmap 14px, row tag 38px; landscape non gestito (la colonna studio schiaccia la card). Fix: `LayoutBuilder` con layout side-by-side in landscape.
 - **`card_editor_screen.dart:376–435`**: `ValueListenableBuilder` annidati ricostruiscono l'intero campo back a ogni keystroke.
 - **`_showAddTagDialog`** (`card_editor_screen.dart:90–236`): Consumer + StatefulBuilder + doppio setState annidati — fragile, estrarre in StatefulWidget.
-- **Backup UX solo clipboard**: niente file picker né share (`backup_screen.dart`); `backup_controller.dart:39` rethrow perde lo stack trace (`Error.throwWithStackTrace`).
+- ~~**Backup UX solo clipboard**~~ ✅: Risolto, integrato `FilePickerService` nativo con supporto a importazione ed esportazione file `.apkg`, `.json` e `.csv`, mantenendo al contempo il supporto clipboard per flessibilità.
 - **Feedback incoerente**: delete carta e delete mazzo senza SnackBar di conferma/undo (altrove presenti).
 - **`IndexedStack`** (`main_navigation_screen.dart:47`): l'`AnimationController` di Settings registra vsync mentre nascosto — trascurabile ma noto.
 

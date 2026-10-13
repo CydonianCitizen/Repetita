@@ -8,14 +8,68 @@ part of 'card_list_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Cards of [deckId] filtered by the currently selected tag.
-/// Recomputed only when the card list, the tag map or the filter change.
+
+@ProviderFor(DeckCardSearchQuery)
+final deckCardSearchQueryProvider = DeckCardSearchQueryProvider._();
+
+final class DeckCardSearchQueryProvider
+    extends $NotifierProvider<DeckCardSearchQuery, String> {
+  DeckCardSearchQueryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'deckCardSearchQueryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$deckCardSearchQueryHash();
+
+  @$internal
+  @override
+  DeckCardSearchQuery create() => DeckCardSearchQuery();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+}
+
+String _$deckCardSearchQueryHash() =>
+    r'6d772951e1375c4aff407b6cc0f6f62ef6e9d96a';
+
+abstract class _$DeckCardSearchQuery extends $Notifier<String> {
+  String build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String, String>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String, String>,
+              String,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 @ProviderFor(filteredDeckCards)
 final filteredDeckCardsProvider = FilteredDeckCardsFamily._();
 
-/// Cards of [deckId] filtered by the currently selected tag.
-/// Recomputed only when the card list, the tag map or the filter change.
+/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 final class FilteredDeckCardsProvider
     extends
@@ -25,8 +79,8 @@ final class FilteredDeckCardsProvider
           List<CardEntity>
         >
     with $Provider<List<CardEntity>> {
-  /// Cards of [deckId] filtered by the currently selected tag.
-  /// Recomputed only when the card list, the tag map or the filter change.
+  /// Cards of [deckId] filtered by the currently selected tag and search query.
+  /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
   FilteredDeckCardsProvider._({
     required FilteredDeckCardsFamily super.from,
     required int super.argument,
@@ -78,10 +132,10 @@ final class FilteredDeckCardsProvider
   }
 }
 
-String _$filteredDeckCardsHash() => r'7fd54e2638d14267d26b2f3f8b6362ad02cdf6f6';
+String _$filteredDeckCardsHash() => r'23e8efdfa14221116c1038c85e5cc0000b78c72c';
 
-/// Cards of [deckId] filtered by the currently selected tag.
-/// Recomputed only when the card list, the tag map or the filter change.
+/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 final class FilteredDeckCardsFamily extends $Family
     with $FunctionalFamilyOverride<List<CardEntity>, int> {
@@ -94,8 +148,8 @@ final class FilteredDeckCardsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Cards of [deckId] filtered by the currently selected tag.
-  /// Recomputed only when the card list, the tag map or the filter change.
+  /// Cards of [deckId] filtered by the currently selected tag and search query.
+  /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
   FilteredDeckCardsProvider call(int deckId) =>
       FilteredDeckCardsProvider._(argument: deckId, from: this);

@@ -228,5 +228,53 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 50));
     });
+
+    testWidgets(
+      'searching cards filters the list and clearing search resets it',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeck.id,
+          front: 'What is Mitochondria?',
+          back: 'Powerhouse of the cell',
+        );
+        await db.cardsDao.createCard(
+          deckId: testDeck.id,
+          front: 'What is Chloroplast?',
+          back: 'Site of photosynthesis',
+        );
+
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.text('What is Mitochondria?'), findsOneWidget);
+        expect(find.text('What is Chloroplast?'), findsOneWidget);
+
+        // Tap search icon button in AppBar
+        await tester.tap(find.byKey(const Key('search_cards_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('deck_search_field')), findsOneWidget);
+
+        // Search for "Mito"
+        await tester.enterText(
+          find.byKey(const Key('deck_search_field')),
+          'Mito',
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('What is Mitochondria?'), findsOneWidget);
+        expect(find.text('What is Chloroplast?'), findsNothing);
+
+        // Clear search
+        await tester.tap(find.byKey(const Key('clear_search_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('What is Mitochondria?'), findsOneWidget);
+        expect(find.text('What is Chloroplast?'), findsOneWidget);
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

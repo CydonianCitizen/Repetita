@@ -10,8 +10,9 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 | :--- | :--- | :--- | :--- |
 | **v0.2.0** <br>*(Completato)* | Core Study Flow & Visual Analytics | • Undo Review (1-step) [x]<br>• Sospensione & Rinvio (Suspend/Bury) [x]<br>• Heatmap Calendario & Streak [x] | Media |
 | **v0.2.1** <br>*(Completato)* | Audit, Polish & Consolidamento | • Ponytail dead code cuts & dep purge [x]<br>• Drift due count fix & Backup consistency [x]<br>• Impeccable i18n & batch card creation UX [x] | Bassa |
-| **v0.3.0** | Formati Carte & Organizzazione | • Cloze Deletion (`{{c1::...}}`)<br>• Sistema Tag & Filtri per Carta | Media |
-| **v0.4.0** | Flessibilità Studio & Ecosistema | • Custom Study (Cram Mode / Ripasso Libero)<br>• Importazione Anki Package (`.apkg`) | Alta |
+| **v0.3.0** <br>*(Completato)* | Formati Carte & Organizzazione | • Cloze Deletion (`{{c1::...}}`) [x]<br>• Sistema Tag & Filtri per Carta [x] | Media |
+| **v0.4.0** <br>*(Completato)* | Flessibilità Studio | • Custom Study (Cram Mode / Ripasso Libero) [x] | Media |
+| **v0.6.0** <br>*(Completato)* | Ecosistema & File Transfer | • Importazione Anki Package (`.apkg`) [x]<br>• File Picker & Save nativo (.apkg, .json, .csv) [x]<br>• Ricerca Flashcard per Mazzo [x] | Alta |
 | **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate<br>• Zero bug, zero warning, 100% test coverage | Bassa |
 | **v1.5.0+** | Feature Complesse Deferred | • Ricerca Globale Flashcard (Card Browser)<br>• Markdown avanzato & formattazione ricca | Media |
 
@@ -78,21 +79,38 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 3. v0.4.0: Flessibilità Studio & Ecosistema
+### 3. v0.4.0: Flessibilità Studio [COMPLETATO]
 
-#### 3.1 Custom Study (Cram Mode / Ripasso Libero)
+#### 3.1 Custom Study (Cram Mode / Ripasso Libero) [COMPLETATO]
 * **Obiettivo**: Consentire sessioni di studio straordinario prima di un esame, anche quando il conteggio "due" è zero.
 * **Specifiche**:
   * Opzioni avvio: "Ripassa tutte le carte", "Ripassa solo carte con Tag X", "Ripassa in anticipo di N giorni".
   * Modalità non distruttiva: possibilità di studiare senza registrare penalità FSRS, oppure registrare anticipi secondo la corretta equazione FSRS per intervalli anticipati.
 
-#### 3.2 Importazione Anki Package (`.apkg`)
+---
+
+### 4. v0.6.0: Ecosistema & File Transfer [COMPLETATO]
+
+#### 4.1 Importazione Anki Package (`.apkg`) [COMPLETATO]
 * **Obiettivo**: Permettere l'importazione diretta di mazzi dalla vasta libreria della community Anki.
 * **Specifiche**:
-  * Formato `.apkg`: archivio zip contenente un database SQLite (`collection.anki2` o `collection.anki21`).
-  * Decompressione offline tramite package standard `archive`.
-  * Parser SQLite per estrarre modelli di note (Basic, Cloze), campi front/back e importare nel database Drift di Repetita.
-  * Validazione riga per riga senza crash in caso di formati non riconosciuti.
+  * Formato `.apkg`: archivio zip decompresso offline tramite package standard `archive`.
+  * Estrazione SQLite `collection.anki2` con package `sqlite3`.
+  * Sanitizzazione HTML e conversione markdown con parsing Cloze (`{{c1::...}}`), formattazione e liste pulite.
+  * Mappatura modelli Basic, Cloze e Reverse con gestione tag e opzioni di destinazione (nuovo mazzo o mazzo esistente).
+  * Inserimento transazionale batch e report statistico (`AnkiImportResult`).
+
+#### 4.2 File Picker & Saver Nativo [COMPLETATO]
+* **Obiettivo**: Importazione ed esportazione file direttamente da filesystem/storage senza dipendere unicamente da copia/incolla negli appunti.
+* **Specifiche**:
+  * Integrazione con `file_picker` incapsulata in `FilePickerService`.
+  * Supporto selezione ed esportazione per file `.apkg`, `.json` e `.csv`.
+
+#### 4.3 Ricerca Flashcard per Mazzo [COMPLETATO]
+* **Obiettivo**: Trovare rapidamente flashcard per testo (fronte o retro) all'interno di un mazzo.
+* **Specifiche**:
+  * Barra di ricerca integrata nell'AppBar di `DeckDetailScreen`.
+  * Filtraggio combinato dinamico con tag selezionati tramite `filteredDeckCardsProvider`.
 
 ---
 

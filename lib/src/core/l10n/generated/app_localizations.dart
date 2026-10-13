@@ -1675,6 +1675,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Card Answer: {content}'**
   String cardAnswerSemantics(String content);
+
+  /// No description provided for @ankiImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Anki Package (.apkg)'**
+  String get ankiImportTitle;
+
+  /// No description provided for @ankiImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Import decks and flashcards directly from Anki packages, including Basic notes, Cloze deletions, and tags.'**
+  String get ankiImportDescription;
+
+  /// No description provided for @importAnki.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Anki (.apkg)'**
+  String get importAnki;
+
+  /// No description provided for @ankiImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {cards} cards across {decks} decks ({tags} tags created, {skipped} skipped).'**
+  String ankiImportSuccess(int cards, int decks, int tags, int skipped);
+
+  /// No description provided for @pickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get pickFile;
+
+  /// No description provided for @saveToFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to File'**
+  String get saveToFile;
+
+  /// No description provided for @pasteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Text'**
+  String get pasteText;
+
+  /// No description provided for @selectAnkiDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Anki Import Destination'**
+  String get selectAnkiDestination;
+
+  /// No description provided for @keepAnkiDecks.
+  ///
+  /// In en, this message translates to:
+  /// **'Preserve original deck names'**
+  String get keepAnkiDecks;
+
+  /// No description provided for @chooseTargetDeck.
+  ///
+  /// In en, this message translates to:
+  /// **'Import into an existing deck'**
+  String get chooseTargetDeck;
+
+  /// No description provided for @searchCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Search cards...'**
+  String get searchCards;
+
+  /// No description provided for @noCardsMatchingSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards match your search query.'**
+  String get noCardsMatchingSearch;
+
+  /// No description provided for @fileSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved successfully!'**
+  String get fileSavedSuccess;
 }
 
 class _AppLocalizationsDelegate

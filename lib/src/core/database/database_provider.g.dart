@@ -296,3 +296,51 @@ final class BackupServiceProvider
 }
 
 String _$backupServiceHash() => r'0c0fa92bf66179c32f39f95b2278dbdcd18408a3';
+
+@ProviderFor(ankiPackageService)
+final ankiPackageServiceProvider = AnkiPackageServiceProvider._();
+
+final class AnkiPackageServiceProvider
+    extends
+        $FunctionalProvider<
+          AnkiPackageService,
+          AnkiPackageService,
+          AnkiPackageService
+        >
+    with $Provider<AnkiPackageService> {
+  AnkiPackageServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'ankiPackageServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$ankiPackageServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<AnkiPackageService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AnkiPackageService create(Ref ref) {
+    return ankiPackageService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AnkiPackageService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AnkiPackageService>(value),
+    );
+  }
+}
+
+String _$ankiPackageServiceHash() =>
+    r'203f0f42ba1880a70865e0282f1b44778805808f';

@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../../../core/services/file_picker_service.dart';
+import '../../domain/models/anki_models.dart';
 import '../../domain/models/backup_payload.dart';
 
 part 'backup_controller.g.dart';
@@ -70,5 +75,73 @@ class BackupController extends _$BackupController {
       state = AsyncError(e, st);
       rethrow;
     }
+  }
+
+  Future<AnkiImportResult> importAnkiPackage(
+    List<int> bytes, {
+    int? targetDeckId,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final service = ref.read(ankiPackageServiceProvider);
+      final result = await service.importApkgBytes(
+        bytes,
+        targetDeckId: targetDeckId,
+      );
+      state = const AsyncData(null);
+      return result;
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+
+  Future<AnkiImportResult?> pickAndImportAnkiPackage({
+    int? targetDeckId,
+  }) async {
+    final picker = ref.read(filePickerServiceProvider);
+    final file = await picker.pickFile(allowedExtensions: ['apkg']);
+    if (file == null) return null;
+    final bytes = await file.readBytes();
+    return importAnkiPackage(bytes, targetDeckId: targetDeckId);
+  }
+
+  Future<bool> pickAndImportJson({bool replaceExisting = false}) async {
+    final picker = ref.read(filePickerServiceProvider);
+    final file = await picker.pickFile(allowedExtensions: ['json']);
+    if (file == null) return false;
+    final jsonString = await file.readAsString();
+    await importJson(jsonString, replaceExisting: replaceExisting);
+    return true;
+  }
+
+  Future<CsvImportResult?> pickAndImportCsv({required int targetDeckId}) async {
+    final picker = ref.read(filePickerServiceProvider);
+    final file = await picker.pickFile(allowedExtensions: ['csv']);
+    if (file == null) return null;
+    final csvString = await file.readAsString();
+    return importCsv(csvString, targetDeckId: targetDeckId);
+  }
+
+  Future<String?> exportJsonToFile() async {
+    final jsonStr = await exportJson();
+    final picker = ref.read(filePickerServiceProvider);
+    final dateStr = DateTime.now().toIso8601String().split('T').first;
+    return picker.saveFile(
+      dialogTitle: 'Save Backup JSON',
+      fileName: 'repetita_backup_$dateStr.json',
+      bytes: Uint8List.fromList(utf8.encode(jsonStr)),
+    );
+  }
+
+  Future<String?> exportCsvToFile({int? deckId}) async {
+    final csvStr = await exportCsv(deckId: deckId);
+    final picker = ref.read(filePickerServiceProvider);
+    final dateStr = DateTime.now().toIso8601String().split('T').first;
+    return picker.saveFile(
+      dialogTitle: 'Save Flashcards CSV',
+      fileName: 'repetita_cards_$dateStr.csv',
+      bytes: Uint8List.fromList(utf8.encode(csvStr)),
+    );
   }
 }

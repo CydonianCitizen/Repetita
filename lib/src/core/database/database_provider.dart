@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../features/backup_transfer/data/services/anki_package_service.dart';
 import '../../features/backup_transfer/data/services/backup_service.dart';
 import '../../features/cards/data/cards_dao.dart';
 import '../../features/decks/data/decks_dao.dart';
@@ -36,3 +37,7 @@ TagsDao tagsDao(Ref ref) => ref.watch(databaseProvider).tagsDao;
 @Riverpod(keepAlive: true)
 BackupService backupService(Ref ref) =>
     BackupService(ref.watch(databaseProvider));
+
+@Riverpod(keepAlive: true)
+AnkiPackageService ankiPackageService(Ref ref) =>
+    AnkiPackageService(ref.watch(databaseProvider));

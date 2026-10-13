@@ -57,8 +57,14 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
   }
 
   static DateTime computeTomorrowMidnight([DateTime? now]) {
-    final base = (now ?? DateTime.now()).toUtc().add(const Duration(days: 1));
-    return DateTime.utc(base.year, base.month, base.day);
+    final effective = now ?? DateTime.now();
+    if (effective.isUtc) {
+      final base = effective.add(const Duration(days: 1));
+      return DateTime.utc(base.year, base.month, base.day);
+    }
+    final local = effective.toLocal();
+    final tomorrowLocal = DateTime(local.year, local.month, local.day + 1);
+    return tomorrowLocal.toUtc();
   }
 
   Future<int> createCard({

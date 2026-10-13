@@ -40,6 +40,12 @@ void main() {
       expect(find.byKey(const Key('export_csv_button')), findsOneWidget);
       expect(find.byKey(const Key('import_csv_button')), findsOneWidget);
 
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('import_anki_button')),
+        200,
+      );
+      expect(find.byKey(const Key('import_anki_button')), findsOneWidget);
+
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 50));
     });
@@ -139,5 +145,25 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 50));
     });
+
+    testWidgets(
+      'tapping import Anki button interacts cleanly with file picker',
+      (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('import_anki_button')),
+          200,
+        );
+        await tester.tap(find.byKey(const Key('import_anki_button')));
+        for (int i = 0; i < 5; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+        }
+
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

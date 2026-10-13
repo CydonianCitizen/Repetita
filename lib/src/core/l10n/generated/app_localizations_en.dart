@@ -892,4 +892,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String cardAnswerSemantics(String content) {
     return 'Card Answer: $content';
   }
+
+  @override
+  String get ankiImportTitle => 'Anki Package (.apkg)';
+
+  @override
+  String get ankiImportDescription =>
+      'Import decks and flashcards directly from Anki packages, including Basic notes, Cloze deletions, and tags.';
+
+  @override
+  String get importAnki => 'Import Anki (.apkg)';
+
+  @override
+  String ankiImportSuccess(int cards, int decks, int tags, int skipped) {
+    return 'Imported $cards cards across $decks decks ($tags tags created, $skipped skipped).';
+  }
+
+  @override
+  String get pickFile => 'Select File';
+
+  @override
+  String get saveToFile => 'Save to File';
+
+  @override
+  String get pasteText => 'Paste Text';
+
+  @override
+  String get selectAnkiDestination => 'Anki Import Destination';
+
+  @override
+  String get keepAnkiDecks => 'Preserve original deck names';
+
+  @override
+  String get chooseTargetDeck => 'Import into an existing deck';
+
+  @override
+  String get searchCards => 'Search cards...';
+
+  @override
+  String get noCardsMatchingSearch => 'No cards match your search query.';
+
+  @override
+  String get fileSavedSuccess => 'File saved successfully!';
 }

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/services/file_picker_service.dart';
 import '../../decks/data/decks_dao.dart';
 import '../../decks/presentation/controllers/deck_list_controller.dart';
 import 'controllers/backup_controller.dart';
@@ -165,6 +168,52 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     }
   }
 
+  Future<void> _handleImportAnki() async {
+    final l10n = AppLocalizations.of(context);
+    final decks =
+        ref.read(deckListControllerProvider).value ?? <DeckWithCounts>[];
+
+    int? targetDeckId;
+    if (decks.isNotEmpty) {
+      final choice = await showDialog<int?>(
+        context: context,
+        builder: (ctx) => _AnkiDestinationDialog(decks: decks),
+      );
+      if (choice == -1) return; // user canceled
+      targetDeckId = choice;
+    }
+
+    try {
+      final result = await ref
+          .read(backupControllerProvider.notifier)
+          .pickAndImportAnkiPackage(targetDeckId: targetDeckId);
+
+      if (result == null) return;
+
+      if (mounted) {
+        final successMsg =
+            l10n?.ankiImportSuccess(
+              result.cardsImported,
+              result.decksCreated,
+              result.tagsCreated,
+              result.skippedCount,
+            ) ??
+            'Imported ${result.cardsImported} cards across ${result.decksCreated} decks (${result.tagsCreated} tags created, ${result.skippedCount} skipped).';
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(successMsg),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('${l10n?.importFailed ?? "Import failed"}: $e');
+      }
+    }
+  }
+
   void _showResultDialog({
     required String title,
     required String content,
@@ -249,6 +298,20 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                _SectionCard(
+                  icon: Icons.style_outlined,
+                  title: l10n?.ankiImportTitle ?? 'Anki Package (.apkg)',
+                  description: l10n?.ankiImportDescription ?? 'Import decks and flashcards directly from Anki packages, including Basic notes, Cloze deletions, and tags.',
+                  actions: [
+                    FilledButton.icon(
+                      key: const Key('import_anki_button'),
+                      onPressed: isLoading ? null : _handleImportAnki,
+                      icon: const Icon(Icons.file_download_outlined),
+                      label: Text(l10n?.importAnki ?? 'Import Anki (.apkg)'),
+                    ),
+                  ],
+                ),
               ],
             ),
             if (isLoading)
@@ -263,14 +326,105 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 }
 
-class _JsonRestoreDialog extends StatefulWidget {
+class _AnkiDestinationDialog extends StatefulWidget {
+  const _AnkiDestinationDialog({required this.decks});
+
+  final List<DeckWithCounts> decks;
+
+  @override
+  State<_AnkiDestinationDialog> createState() => _AnkiDestinationDialogState();
+}
+
+class _AnkiDestinationDialogState extends State<_AnkiDestinationDialog> {
+  bool _importIntoExisting = false;
+  late int _selectedDeckId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDeckId = widget.decks.first.deck.id;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      title: Text(l10n?.selectAnkiDestination ?? 'Anki Import Destination'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RadioGroup<bool>(
+              groupValue: _importIntoExisting,
+              onChanged: (val) {
+                if (val != null) setState(() => _importIntoExisting = val);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<bool>(
+                    value: false,
+                    title: Text(
+                      l10n?.keepAnkiDecks ?? 'Preserve original deck names',
+                    ),
+                  ),
+                  RadioListTile<bool>(
+                    value: true,
+                    title: Text(
+                      l10n?.chooseTargetDeck ?? 'Import into an existing deck',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_importIntoExisting) ...[
+              const SizedBox(height: 8),
+              DropdownButtonFormField<int>(
+                initialValue: _selectedDeckId,
+                items: widget.decks.map((d) {
+                  return DropdownMenuItem<int>(
+                    value: d.deck.id,
+                    child: Text(d.deck.name),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedDeckId = val);
+                },
+                decoration: InputDecoration(
+                  labelText: l10n?.targetDeck ?? 'Target Deck',
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(-1),
+          child: Text(l10n?.cancel ?? 'Cancel'),
+        ),
+        FilledButton(
+          onPressed: () =>
+              Navigator.of(context)
+                  .pop(_importIntoExisting ? _selectedDeckId : null),
+          child: Text(l10n?.ok ?? 'OK'),
+        ),
+      ],
+    );
+  }
+}
+
+class _JsonRestoreDialog extends ConsumerStatefulWidget {
   const _JsonRestoreDialog();
 
   @override
-  State<_JsonRestoreDialog> createState() => _JsonRestoreDialogState();
+  ConsumerState<_JsonRestoreDialog> createState() => _JsonRestoreDialogState();
 }
 
-class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
+class _JsonRestoreDialogState extends ConsumerState<_JsonRestoreDialog> {
   late final TextEditingController _controller;
   bool _replaceExisting = false;
 
@@ -284,6 +438,24 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _handlePickFile() async {
+    try {
+      final picker = ref.read(filePickerServiceProvider);
+      final picked = await picker.pickFile(allowedExtensions: ['json']);
+      if (picked != null) {
+        final text = await picked.readAsString();
+        setState(() {
+          _controller.text = text;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error reading file: $e')));
+      }
+    }
   }
 
   @override
@@ -331,6 +503,23 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
               onChanged: (val) => setState(() => _replaceExisting = val),
             ),
             const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'JSON Payload',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _handlePickFile,
+                  icon: const Icon(Icons.file_open_outlined, size: 18),
+                  label: Text(l10n?.pickFile ?? 'Select File'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
             TextField(
               key: const Key('json_input_field'),
               controller: _controller,
@@ -360,16 +549,16 @@ class _JsonRestoreDialogState extends State<_JsonRestoreDialog> {
   }
 }
 
-class _CsvImportDialog extends StatefulWidget {
+class _CsvImportDialog extends ConsumerStatefulWidget {
   const _CsvImportDialog({required this.decks});
 
   final List<DeckWithCounts> decks;
 
   @override
-  State<_CsvImportDialog> createState() => _CsvImportDialogState();
+  ConsumerState<_CsvImportDialog> createState() => _CsvImportDialogState();
 }
 
-class _CsvImportDialogState extends State<_CsvImportDialog> {
+class _CsvImportDialogState extends ConsumerState<_CsvImportDialog> {
   late int _selectedDeckId;
   late final TextEditingController _controller;
 
@@ -386,8 +575,27 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
     super.dispose();
   }
 
+  Future<void> _handlePickFile() async {
+    try {
+      final picker = ref.read(filePickerServiceProvider);
+      final picked = await picker.pickFile(allowedExtensions: ['csv']);
+      if (picked != null) {
+        final text = await picked.readAsString();
+        setState(() {
+          _controller.text = text;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error reading file: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
@@ -417,6 +625,23 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
               },
             ),
             const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'CSV Content',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _handlePickFile,
+                  icon: const Icon(Icons.file_open_outlined, size: 18),
+                  label: Text(l10n?.pickFile ?? 'Select File'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
             TextField(
               key: const Key('csv_input_field'),
               controller: _controller,
@@ -446,14 +671,14 @@ class _CsvImportDialogState extends State<_CsvImportDialog> {
   }
 }
 
-class _DisplayResultDialog extends StatelessWidget {
+class _DisplayResultDialog extends ConsumerWidget {
   const _DisplayResultDialog({required this.title, required this.content});
 
   final String title;
   final String content;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isTruncated = content.length > 4000;
@@ -478,6 +703,30 @@ class _DisplayResultDialog extends StatelessWidget {
         ),
       ),
       actions: [
+        OutlinedButton.icon(
+          icon: const Icon(Icons.save_alt),
+          label: Text(l10n?.saveToFile ?? 'Save to File'),
+          onPressed: () async {
+            final isJson = title.toLowerCase().contains('json');
+            final ext = isJson ? 'json' : 'csv';
+            final picker = ref.read(filePickerServiceProvider);
+            final dateStr = DateTime.now().toIso8601String().split('T').first;
+            final path = await picker.saveFile(
+              dialogTitle: title,
+              fileName: 'repetita_export_$dateStr.$ext',
+              bytes: Uint8List.fromList(utf8.encode(content)),
+            );
+            if (path != null && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    l10n?.fileSavedSuccess ?? 'File saved successfully!',
+                  ),
+                ),
+              );
+            }
+          },
+        ),
         TextButton.icon(
           icon: const Icon(Icons.copy),
           label: Text(l10n?.copyToClipboard ?? 'Copy to Clipboard'),
@@ -521,21 +770,18 @@ class _SectionCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                Icon(icon, color: colorScheme.primary),
+                Icon(icon, color: colorScheme.primary, size: 28),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -554,7 +800,7 @@ class _SectionCard extends StatelessWidget {
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             ...actions,
           ],
         ),

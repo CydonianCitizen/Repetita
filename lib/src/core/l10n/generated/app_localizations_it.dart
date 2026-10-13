@@ -901,4 +901,46 @@ class AppLocalizationsIt extends AppLocalizations {
   String cardAnswerSemantics(String content) {
     return 'Risposta della carta: $content';
   }
+
+  @override
+  String get ankiImportTitle => 'Pacchetto Anki (.apkg)';
+
+  @override
+  String get ankiImportDescription =>
+      'Importa mazzi e carte direttamente da pacchetti Anki (.apkg), inclusi modelli Base, Cloze e tag.';
+
+  @override
+  String get importAnki => 'Importa Anki (.apkg)';
+
+  @override
+  String ankiImportSuccess(int cards, int decks, int tags, int skipped) {
+    return 'Importate $cards carte in $decks mazzi ($tags tag creati, $skipped ignorate).';
+  }
+
+  @override
+  String get pickFile => 'Seleziona File';
+
+  @override
+  String get saveToFile => 'Salva su File';
+
+  @override
+  String get pasteText => 'Incolla Testo';
+
+  @override
+  String get selectAnkiDestination => 'Destinazione Importazione Anki';
+
+  @override
+  String get keepAnkiDecks => 'Mantieni i nomi originali dei mazzi';
+
+  @override
+  String get chooseTargetDeck => 'Importa in un mazzo esistente';
+
+  @override
+  String get searchCards => 'Cerca carte...';
+
+  @override
+  String get noCardsMatchingSearch => 'Nessuna carta corrisponde alla ricerca.';
+
+  @override
+  String get fileSavedSuccess => 'File salvato con successo!';
 }
