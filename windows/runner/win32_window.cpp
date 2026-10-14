@@ -219,8 +219,13 @@ Win32Window::MessageHandler(HWND hwnd,
 
     case WM_GETMINMAXINFO: {
       auto info = reinterpret_cast<MINMAXINFO*>(lparam);
-      info->ptMinTrackSize.x = 640;
-      info->ptMinTrackSize.y = 500;
+      UINT dpi = FlutterDesktopGetDpiForHWND(hwnd);
+      double scale_factor = dpi > 0 ? (static_cast<double>(dpi) / 96.0) : 1.0;
+      RECT client_rect = {0, 0, static_cast<LONG>(640 * scale_factor),
+                                static_cast<LONG>(500 * scale_factor)};
+      AdjustWindowRectEx(&client_rect, WS_OVERLAPPEDWINDOW, FALSE, 0);
+      info->ptMinTrackSize.x = client_rect.right - client_rect.left;
+      info->ptMinTrackSize.y = client_rect.bottom - client_rect.top;
       return 0;
     }
   }

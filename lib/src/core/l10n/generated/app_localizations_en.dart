@@ -957,4 +957,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fileSavedSuccess => 'File saved successfully!';
+
+  @override
+  String get discardChangesTitle => 'Discard changes?';
+
+  @override
+  String get discardChangesMessage =>
+      'You have unsaved changes. Are you sure you want to discard them?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String totalCount(int count) {
+    return '$count total';
+  }
+
+  @override
+  String systemIntegration(String platform) {
+    return 'System integration: $platform';
+  }
+
+  @override
+  String heatmapReviewTooltip(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reviews on $date',
+      one: '1 review on $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdayMon => 'M';
+
+  @override
+  String get weekdayWed => 'W';
+
+  @override
+  String get weekdayFri => 'F';
+
+  @override
+  String get copyReleaseLink => 'Copy Release Link';
+
+  @override
+  String linkCopiedToClipboard(String url) {
+    return 'Release URL copied to clipboard: $url';
+  }
+
+  @override
+  String errorSavingCard(String error) {
+    return 'Failed to save card: $error';
+  }
 }

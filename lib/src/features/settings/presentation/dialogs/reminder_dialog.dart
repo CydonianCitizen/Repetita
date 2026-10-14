@@ -101,15 +101,26 @@ class ReminderDialog extends ConsumerWidget {
                   ),
                   value: reminder.enabled,
                   onChanged: (enabled) async {
-                    await ref
-                        .read(reminderControllerProvider.notifier)
-                        .setEnabled(
-                          enabled,
-                          title:
-                              l10n?.notificationTitle ??
-                              'Time to review with repetita!',
-                          body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
+                    try {
+                      await ref
+                          .read(reminderControllerProvider.notifier)
+                          .setEnabled(
+                            enabled,
+                            title:
+                                l10n?.notificationTitle ??
+                                'Time to review with repetita!',
+                            body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
+                          );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                            behavior: SnackBarBehavior.floating,
+                          ),
                         );
+                      }
+                    }
                   },
                 ),
                 const SizedBox(height: 8),
@@ -130,16 +141,23 @@ class ReminderDialog extends ConsumerWidget {
                       Icon(
                         defaultTargetPlatform == TargetPlatform.windows
                             ? Icons.laptop_windows_rounded
-                            : Icons.laptop_mac_rounded,
+                            : (defaultTargetPlatform == TargetPlatform.macOS
+                                ? Icons.laptop_mac_rounded
+                                : Icons.laptop_chromebook_rounded),
                         size: 16,
                         color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          defaultTargetPlatform == TargetPlatform.windows
-                              ? 'Integrazione di sistema: Windows'
-                              : 'Integrazione di sistema: macOS',
+                          l10n?.systemIntegration(
+                                defaultTargetPlatform == TargetPlatform.windows
+                                    ? 'Windows'
+                                    : (defaultTargetPlatform == TargetPlatform.macOS
+                                        ? 'macOS'
+                                        : 'Linux'),
+                              ) ??
+                              'System integration: ${defaultTargetPlatform.name}',
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
@@ -184,15 +202,26 @@ class ReminderDialog extends ConsumerWidget {
                   ),
                   value: reminder.enabled,
                   onChanged: (enabled) async {
-                    await ref
-                        .read(reminderControllerProvider.notifier)
-                        .setEnabled(
-                          enabled,
-                          title:
-                              l10n?.notificationTitle ??
-                              'Time to review with repetita!',
-                          body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
+                    try {
+                      await ref
+                          .read(reminderControllerProvider.notifier)
+                          .setEnabled(
+                            enabled,
+                            title:
+                                l10n?.notificationTitle ??
+                                'Time to review with repetita!',
+                            body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
+                          );
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                            behavior: SnackBarBehavior.floating,
+                          ),
                         );
+                      }
+                    }
                   },
                 ),
                 if (reminder.enabled) ...[
@@ -264,24 +293,35 @@ class ReminderDialog extends ConsumerWidget {
                 icon: const Icon(Icons.send_rounded, size: 16),
                 label: Text(l10n?.testNotification ?? 'Send Test Notification'),
                 onPressed: () async {
-                  await ref
-                      .read(reminderControllerProvider.notifier)
-                      .sendTestNotification(
-                        title:
-                            l10n?.notificationTitle ??
-                            'Time to review with repetita!',
-                        body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
-                      );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          l10n?.notificationSent ??
-                              'Test notification dispatched!',
+                  try {
+                    await ref
+                        .read(reminderControllerProvider.notifier)
+                        .sendTestNotification(
+                          title:
+                              l10n?.notificationTitle ??
+                              'Time to review with repetita!',
+                          body: l10n?.notificationBody ?? 'You have spaced repetition flashcards due for review today.',
+                        );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            l10n?.notificationSent ??
+                                'Test notification dispatched!',
+                          ),
+                          behavior: SnackBarBehavior.floating,
                         ),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   }
                 },
               ),

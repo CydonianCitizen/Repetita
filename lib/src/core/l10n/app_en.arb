@@ -469,7 +469,59 @@
   "chooseTargetDeck": "Import into an existing deck",
   "searchCards": "Search cards...",
   "noCardsMatchingSearch": "No cards match your search query.",
-  "fileSavedSuccess": "File saved successfully!"
+  "fileSavedSuccess": "File saved successfully!",
+  "discardChangesTitle": "Discard changes?",
+  "discardChangesMessage": "You have unsaved changes. Are you sure you want to discard them?",
+  "discard": "Discard",
+  "addTag": "Add Tag",
+  "clearSearch": "Clear search",
+  "totalCount": "{count} total",
+  "@totalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "systemIntegration": "System integration: {platform}",
+  "@systemIntegration": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "heatmapReviewTooltip": "{count, plural, =1{1 review on {date}} other{{count} reviews on {date}}}",
+  "@heatmapReviewTooltip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayMon": "M",
+  "weekdayWed": "W",
+  "weekdayFri": "F",
+  "copyReleaseLink": "Copy Release Link",
+  "linkCopiedToClipboard": "Release URL copied to clipboard: {url}",
+  "@linkCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingCard": "Failed to save card: {error}",
+  "@errorSavingCard": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
 
 

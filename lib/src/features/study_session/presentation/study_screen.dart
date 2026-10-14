@@ -185,19 +185,123 @@ class StudyScreen extends ConsumerWidget {
               ),
             ),
             data: (sessionState) {
+              final controller = ref.read(provider.notifier);
+
+              Future<void> undoReview() async {
+                try {
+                  await controller.undoReview();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                }
+              }
+
+              final animLevel = ref.watch(animationLevelControllerProvider);
+              final isReduced =
+                  animLevel.isReduced || MediaQuery.of(context).disableAnimations;
+
+              Widget bodyWidget;
               if (sessionState.isCompleted ||
                   sessionState.currentCard == null) {
-                return Center(
-                  child: Padding(
+                Widget titleWidget = Text(
+                  sessionState.isCram
+                      ? (l10n?.cramCompletedTitle ??
+                            'Cram session completed!')
+                      : (l10n?.allCardsReviewedTitle ??
+                            'All cards reviewed for today!'),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+                Widget descWidget = Text(
+                  sessionState.isCram
+                      ? (l10n?.cramCompletedDesc ??
+                            'You finished your practice run.')
+                      : (l10n?.greatJobUpcomingReviews ??
+                            'Great job! Check back later for upcoming reviews.'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+                Widget backButton = FilledButton.icon(
+                  key: const Key('back_to_deck_button'),
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: Text(l10n?.backToDeck ?? 'Back to Deck'),
+                );
+
+                if (!isReduced) {
+                  titleWidget = titleWidget
+                      .animate()
+                      .fadeIn(delay: 150.ms, duration: 300.ms)
+                      .slideY(
+                        begin: 0.15,
+                        end: 0,
+                        curve: Curves.easeOutCubic,
+                      );
+                  descWidget = descWidget
+                      .animate()
+                      .fadeIn(delay: 250.ms, duration: 300.ms);
+                  backButton = backButton
+                      .animate()
+                      .fadeIn(delay: 350.ms, duration: 300.ms)
+                      .scale(
+                        begin: const Offset(0.9, 0.9),
+                        curve: Curves.easeOutBack,
+                      );
+                }
+
+                Widget? statsBox;
+                if (sessionState.reviewedCount > 0) {
+                  Widget box = Container(
+                    key: const Key('session_completion_stats'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 20,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${l10n?.totalReviews ?? 'Total Reviews'}: ${sessionState.reviewedCount}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (!isReduced) {
+                    box = box.animate().fadeIn(delay: 300.ms, duration: 300.ms);
+                  }
+                  statsBox = box;
+                }
+
+                bodyWidget = Center(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(32),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Builder(
                           builder: (context) {
-                            final animLevel = ref.watch(
-                              animationLevelControllerProvider,
-                            );
                             Widget trophy = Container(
                               width: 96,
                               height: 96,
@@ -214,7 +318,7 @@ class StudyScreen extends ConsumerWidget {
                               ),
                             );
 
-                            if (!animLevel.isReduced) {
+                            if (!isReduced) {
                               var animatedTrophy = trophy
                                   .animate()
                                   .scale(
@@ -237,274 +341,175 @@ class StudyScreen extends ConsumerWidget {
                           },
                         ),
                         const SizedBox(height: 28),
-                        Text(
-                              sessionState.isCram
-                                  ? (l10n?.cramCompletedTitle ??
-                                        'Cram session completed!')
-                                  : (l10n?.allCardsReviewedTitle ??
-                                        'All cards reviewed for today!'),
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colorScheme.onSurface,
-                              ),
-                              textAlign: TextAlign.center,
-                            )
-                            .animate()
-                            .fadeIn(delay: 150.ms, duration: 300.ms)
-                            .slideY(
-                              begin: 0.15,
-                              end: 0,
-                              curve: Curves.easeOutCubic,
-                            ),
+                        titleWidget,
                         const SizedBox(height: 12),
-                        Text(
-                          sessionState.isCram
-                              ? (l10n?.cramCompletedDesc ??
-                                    'You finished your practice run.')
-                              : (l10n?.greatJobUpcomingReviews ??
-                                    'Great job! Check back later for upcoming reviews.'),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ).animate().fadeIn(delay: 250.ms, duration: 300.ms),
-                        if (sessionState.reviewedCount > 0) ...[
+                        descWidget,
+                        if (statsBox != null) ...[
                           const SizedBox(height: 20),
-                          Container(
-                            key: const Key('session_completion_stats'),
+                          statsBox,
+                        ],
+                        const SizedBox(height: 36),
+                        backButton,
+                      ],
+                    ),
+                  ),
+                );
+              } else {
+                final currentCard = sessionState.currentCard!;
+                final total = sessionState.totalCards;
+                final currentNum = sessionState.currentIndex + 1;
+                final progress = total > 0 ? currentNum / total : 0.0;
+
+                Future<void> submitRating(Rating rating) async {
+                  final haptic = ref.read(hapticServiceProvider);
+                  final intensity = ref.read(hapticFeedbackControllerProvider);
+                  unawaited(haptic.triggerRatingFeedback(rating, intensity));
+                  try {
+                    await controller.submitRating(rating);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
+                  }
+                }
+
+                void revealAnswer() {
+                  final intensity = ref.read(hapticFeedbackControllerProvider);
+                  ref.read(hapticServiceProvider).triggerSelection(intensity);
+                  controller.revealAnswer();
+                }
+
+                final isDesktop =
+                    defaultTargetPlatform == TargetPlatform.windows ||
+                    defaultTargetPlatform == TargetPlatform.macOS ||
+                    defaultTargetPlatform == TargetPlatform.linux;
+
+                bodyWidget = SafeArea(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: Column(
+                        children: [
+                          Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
-                              vertical: 10,
+                              vertical: 8,
                             ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Column(
                               children: [
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 20,
-                                  color: colorScheme.primary,
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      l10n?.cardProgress(currentNum, total) ??
+                                          'Card $currentNum of $total',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      l10n?.cardsRemaining(
+                                            sessionState.remainingCards,
+                                          ) ??
+                                          '${sessionState.remainingCards} remaining',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${l10n?.totalReviews ?? 'Total Reviews'}: ${sessionState.reviewedCount}',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: colorScheme.onSurfaceVariant,
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: TweenAnimationBuilder<double>(
+                                    tween: Tween<double>(end: progress),
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeInOut,
+                                    builder: (context, animatedProgress, _) {
+                                      return LinearProgressIndicator(
+                                        key: const Key('study_progress_bar'),
+                                        value: animatedProgress,
+                                        minHeight: 6,
+                                        semanticsLabel:
+                                            l10n?.cardProgress(
+                                              currentNum,
+                                              total,
+                                            ) ??
+                                            'Session progress',
+                                        semanticsValue:
+                                            '${(progress * 100).round()}%',
+                                        backgroundColor:
+                                            colorScheme.surfaceContainerHighest,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          colorScheme.primary,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
                             ),
-                          ).animate().fadeIn(delay: 300.ms, duration: 300.ms),
-                        ],
-                        const SizedBox(height: 36),
-                        FilledButton.icon(
-                              key: const Key('back_to_deck_button'),
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(Icons.arrow_back),
-                              label: Text(l10n?.backToDeck ?? 'Back to Deck'),
-                            )
-                            .animate()
-                            .fadeIn(delay: 350.ms, duration: 300.ms)
-                            .scale(
-                              begin: const Offset(0.9, 0.9),
-                              curve: Curves.easeOutBack,
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: FlipCardView(
+                                card: currentCard,
+                                isAnswerRevealed: sessionState.isAnswerRevealed,
+                                onCardTap: !sessionState.isAnswerRevealed
+                                    ? revealAnswer
+                                    : null,
+                              ),
                             ),
-                      ],
+                          ),
+                          if (!sessionState.isAnswerRevealed)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 16,
+                              ),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: FilledButton.icon(
+                                  key: const Key('show_answer_button'),
+                                  onPressed: revealAnswer,
+                                  icon: const Icon(Icons.flip_rounded),
+                                  label: Text(
+                                    isDesktop
+                                        ? '${l10n?.showAnswer ?? 'Show Answer'}  [Space]'
+                                        : (l10n?.showAnswer ?? 'Show Answer'),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ).animate().fadeIn(duration: 150.ms),
+                            )
+                          else
+                            RatingBar(
+                              intervals: sessionState.intervalPreviews,
+                              onRatingSelected: submitRating,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 );
               }
 
-              final currentCard = sessionState.currentCard!;
-              final total = sessionState.totalCards;
-              final currentNum = sessionState.currentIndex + 1;
-              final progress = total > 0 ? currentNum / total : 0.0;
-              final controller = ref.read(provider.notifier);
-
-              Future<void> submitRating(Rating rating) async {
-                final haptic = ref.read(hapticServiceProvider);
-                final intensity = ref.read(hapticFeedbackControllerProvider);
-                unawaited(haptic.triggerRatingFeedback(rating, intensity));
-                try {
-                  await controller.submitRating(rating);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text(e.toString())));
-                  }
-                }
-              }
-
-              void revealAnswer() {
-                final intensity = ref.read(hapticFeedbackControllerProvider);
-                ref.read(hapticServiceProvider).triggerSelection(intensity);
-                controller.revealAnswer();
-              }
-
-              final isDesktop =
-                  defaultTargetPlatform == TargetPlatform.windows ||
-                  defaultTargetPlatform == TargetPlatform.macOS ||
-                  defaultTargetPlatform == TargetPlatform.linux;
-
-              final studyContent = SafeArea(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    l10n?.cardProgress(currentNum, total) ??
-                                        'Card $currentNum of $total',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    l10n?.cardsRemaining(
-                                          sessionState.remainingCards,
-                                        ) ??
-                                        '${sessionState.remainingCards} remaining',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: TweenAnimationBuilder<double>(
-                                  tween: Tween<double>(end: progress),
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.easeInOut,
-                                  builder: (context, animatedProgress, _) {
-                                    return LinearProgressIndicator(
-                                      key: const Key('study_progress_bar'),
-                                      value: animatedProgress,
-                                      minHeight: 6,
-                                      semanticsLabel:
-                                          l10n?.cardProgress(
-                                            currentNum,
-                                            total,
-                                          ) ??
-                                          'Session progress',
-                                      semanticsValue:
-                                          '${(progress * 100).round()}%',
-                                      backgroundColor:
-                                          colorScheme.surfaceContainerHighest,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        colorScheme.primary,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: FlipCardView(
-                              card: currentCard,
-                              isAnswerRevealed: sessionState.isAnswerRevealed,
-                              onCardTap: !sessionState.isAnswerRevealed
-                                  ? revealAnswer
-                                  : null,
-                            ),
-                          ),
-                        ),
-                        if (!sessionState.isAnswerRevealed)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: FilledButton.icon(
-                                key: const Key('show_answer_button'),
-                                onPressed: revealAnswer,
-                                icon: const Icon(Icons.flip_rounded),
-                                label: Text(
-                                  isDesktop
-                                      ? '${l10n?.showAnswer ?? 'Show Answer'}  [Space]'
-                                      : (l10n?.showAnswer ?? 'Show Answer'),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ).animate().fadeIn(duration: 150.ms),
-                          )
-                        else
-                          RatingBar(
-                            intervals: sessionState.intervalPreviews,
-                            onRatingSelected: submitRating,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-
               return CallbackShortcuts(
                 bindings: {
-                  const SingleActivator(LogicalKeyboardKey.space): () {
-                    if (!sessionState.isAnswerRevealed) {
-                      revealAnswer();
-                    }
-                  },
-                  const SingleActivator(LogicalKeyboardKey.enter): () {
-                    if (!sessionState.isAnswerRevealed) {
-                      revealAnswer();
-                    }
-                  },
-                  const SingleActivator(LogicalKeyboardKey.digit1): () {
-                    if (sessionState.isAnswerRevealed) {
-                      submitRating(Rating.again);
-                    }
-                  },
-                  const SingleActivator(LogicalKeyboardKey.digit2): () {
-                    if (sessionState.isAnswerRevealed) {
-                      submitRating(Rating.hard);
-                    }
-                  },
-                  const SingleActivator(LogicalKeyboardKey.digit3): () {
-                    if (sessionState.isAnswerRevealed) {
-                      submitRating(Rating.good);
-                    }
-                  },
-                  const SingleActivator(LogicalKeyboardKey.digit4): () {
-                    if (sessionState.isAnswerRevealed) {
-                      submitRating(Rating.easy);
-                    }
-                  },
                   const SingleActivator(
                     LogicalKeyboardKey.keyZ,
                     control: true,
                   ): () {
                     if (sessionState.canUndo) {
-                      controller.undoReview();
+                      undoReview();
                     }
                   },
                   const SingleActivator(
@@ -512,11 +517,78 @@ class StudyScreen extends ConsumerWidget {
                     meta: true,
                   ): () {
                     if (sessionState.canUndo) {
-                      controller.undoReview();
+                      undoReview();
                     }
                   },
+                  if (!sessionState.isCompleted &&
+                      sessionState.currentCard != null) ...{
+                    const SingleActivator(LogicalKeyboardKey.space): () {
+                      if (!sessionState.isAnswerRevealed) {
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        ref
+                            .read(hapticServiceProvider)
+                            .triggerSelection(intensity);
+                        controller.revealAnswer();
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.enter): () {
+                      if (!sessionState.isAnswerRevealed) {
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        ref
+                            .read(hapticServiceProvider)
+                            .triggerSelection(intensity);
+                        controller.revealAnswer();
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.digit1): () {
+                      if (sessionState.isAnswerRevealed) {
+                        final haptic = ref.read(hapticServiceProvider);
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        unawaited(
+                          haptic.triggerRatingFeedback(Rating.again, intensity),
+                        );
+                        controller.submitRating(Rating.again);
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.digit2): () {
+                      if (sessionState.isAnswerRevealed) {
+                        final haptic = ref.read(hapticServiceProvider);
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        unawaited(
+                          haptic.triggerRatingFeedback(Rating.hard, intensity),
+                        );
+                        controller.submitRating(Rating.hard);
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.digit3): () {
+                      if (sessionState.isAnswerRevealed) {
+                        final haptic = ref.read(hapticServiceProvider);
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        unawaited(
+                          haptic.triggerRatingFeedback(Rating.good, intensity),
+                        );
+                        controller.submitRating(Rating.good);
+                      }
+                    },
+                    const SingleActivator(LogicalKeyboardKey.digit4): () {
+                      if (sessionState.isAnswerRevealed) {
+                        final haptic = ref.read(hapticServiceProvider);
+                        final intensity =
+                            ref.read(hapticFeedbackControllerProvider);
+                        unawaited(
+                          haptic.triggerRatingFeedback(Rating.easy, intensity),
+                        );
+                        controller.submitRating(Rating.easy);
+                      }
+                    },
+                  },
                 },
-                child: Focus(autofocus: true, child: studyContent),
+                child: Focus(autofocus: true, child: bodyWidget),
               );
             },
           );

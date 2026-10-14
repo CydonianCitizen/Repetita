@@ -70,7 +70,7 @@ class MetricSummaryCard extends StatelessWidget {
               Text(
                 subtitle!,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.outline,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

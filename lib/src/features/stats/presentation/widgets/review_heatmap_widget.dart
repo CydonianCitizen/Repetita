@@ -140,11 +140,20 @@ class ReviewHeatmapWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _WeekdayLabel(text: 'M', theme: theme),
+                          _WeekdayLabel(
+                            text: l10n?.weekdayMon ?? 'M',
+                            theme: theme,
+                          ),
                           SizedBox(height: isDesktop ? 15 : 18),
-                          _WeekdayLabel(text: 'W', theme: theme),
+                          _WeekdayLabel(
+                            text: l10n?.weekdayWed ?? 'W',
+                            theme: theme,
+                          ),
                           SizedBox(height: isDesktop ? 15 : 18),
-                          _WeekdayLabel(text: 'F', theme: theme),
+                          _WeekdayLabel(
+                            text: l10n?.weekdayFri ?? 'F',
+                            theme: theme,
+                          ),
                         ],
                       ),
                     ),
@@ -182,9 +191,11 @@ class ReviewHeatmapWidget extends StatelessWidget {
 
                               final dateStr = DateFormat('yyyy-MM-dd')
                                   .format(cellDate);
-                              final tooltip = count == 1
-                                  ? '1 review on $dateStr'
-                                  : '$count reviews on $dateStr';
+                              final tooltip =
+                                  l10n?.heatmapReviewTooltip(count, dateStr) ??
+                                  (count == 1
+                                      ? '1 review on $dateStr'
+                                      : '$count reviews on $dateStr');
 
                               return Semantics(
                                 label: tooltip,
@@ -232,7 +243,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                     Text(
                       l10n?.heatmapLess ?? 'Less',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.outline,
+                        color: scheme.onSurfaceVariant,
                         fontSize: 10,
                       ),
                     ),
@@ -245,7 +256,7 @@ class ReviewHeatmapWidget extends StatelessWidget {
                     Text(
                       l10n?.heatmapMore ?? 'More',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: scheme.outline,
+                        color: scheme.onSurfaceVariant,
                         fontSize: 10,
                       ),
                     ),

@@ -3,12 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../../core/algorithms/cloze/cloze_segment.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../cards/domain/card_entity.dart';
+import '../../../settings/presentation/controllers/animation_level_controller.dart';
 
-class FlipCardView extends StatefulWidget {
+class FlipCardView extends ConsumerStatefulWidget {
   const FlipCardView({
     super.key,
     required this.card,
@@ -21,10 +24,10 @@ class FlipCardView extends StatefulWidget {
   final VoidCallback? onCardTap;
 
   @override
-  State<FlipCardView> createState() => _FlipCardViewState();
+  ConsumerState<FlipCardView> createState() => _FlipCardViewState();
 }
 
-class _FlipCardViewState extends State<FlipCardView> {
+class _FlipCardViewState extends ConsumerState<FlipCardView> {
   late bool _isCloze;
   late String _promptText;
   late String _answerText;
@@ -72,56 +75,88 @@ class _FlipCardViewState extends State<FlipCardView> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final animLevel = ref.watch(animationLevelControllerProvider);
+    final isReduced =
+        animLevel.isReduced || MediaQuery.of(context).disableAnimations;
 
-    return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600, minHeight: 280),
-            child: TweenAnimationBuilder<double>(
-              key: ValueKey(widget.card.id),
-              tween: Tween<double>(
-                begin: 0.0,
-                end: widget.isAnswerRevealed ? 1.0 : 0.0,
+    Widget cardBody;
+    if (isReduced) {
+      cardBody = widget.isAnswerRevealed
+          ? RepaintBoundary(
+              child: _buildBackCard(
+                context,
+                colorScheme,
+                theme,
+                l10n,
               ),
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOutCubic,
-              builder: (context, value, child) {
-                final isBack = value >= 0.5;
-                final angle = value * math.pi;
+            )
+          : RepaintBoundary(
+              child: _buildFrontCard(
+                context,
+                colorScheme,
+                theme,
+                l10n,
+              ),
+            );
+    } else {
+      cardBody = TweenAnimationBuilder<double>(
+        key: ValueKey(widget.card.id),
+        tween: Tween<double>(
+          begin: 0.0,
+          end: widget.isAnswerRevealed ? 1.0 : 0.0,
+        ),
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOutCubic,
+        builder: (context, value, child) {
+          final isBack = value >= 0.5;
+          final angle = value * math.pi;
 
-                return Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001) // 3D depth perspective
-                    ..rotateY(angle),
-                  child: isBack
-                      ? Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()..rotateY(math.pi),
-                          child: RepaintBoundary(
-                            child: _buildBackCard(
-                              context,
-                              colorScheme,
-                              theme,
-                              l10n,
-                            ),
-                          ),
-                        )
-                      : RepaintBoundary(
-                          child: _buildFrontCard(
-                            context,
-                            colorScheme,
-                            theme,
-                            l10n,
-                          ),
-                        ),
-                );
-              },
-            ),
-          ),
-        )
-        .animate(key: ValueKey(widget.card.id))
-        .fadeIn(duration: 200.ms)
-        .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic);
+          return Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // 3D depth perspective
+              ..rotateY(angle),
+            child: isBack
+                ? Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()..rotateY(math.pi),
+                    child: RepaintBoundary(
+                      child: _buildBackCard(
+                        context,
+                        colorScheme,
+                        theme,
+                        l10n,
+                      ),
+                    ),
+                  )
+                : RepaintBoundary(
+                    child: _buildFrontCard(
+                      context,
+                      colorScheme,
+                      theme,
+                      l10n,
+                    ),
+                  ),
+          );
+        },
+      );
+    }
+
+    Widget result = Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600, minHeight: 280),
+        child: cardBody,
+      ),
+    );
+
+    if (!isReduced) {
+      result = result
+          .animate(key: ValueKey(widget.card.id))
+          .fadeIn(duration: 200.ms)
+          .slideY(begin: 0.04, end: 0, curve: Curves.easeOutCubic);
+    }
+
+    return result;
   }
 
   Widget _buildFrontCard(
@@ -193,7 +228,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                   Icon(
                     Icons.flip_rounded,
                     size: 18,
-                    color: colorScheme.outline.withValues(alpha: 0.6),
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
                 ],
               ),
@@ -250,13 +285,13 @@ class _FlipCardViewState extends State<FlipCardView> {
                   Icon(
                     Icons.touch_app_outlined,
                     size: 16,
-                    color: colorScheme.outline,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     l10n?.tapToFlipHint ?? 'Tap or press Show Answer to flip',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.outline,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -410,7 +445,7 @@ class _FlipCardViewState extends State<FlipCardView> {
                     Icon(
                       Icons.notes_rounded,
                       size: 16,
-                      color: colorScheme.outline,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
                     Expanded(

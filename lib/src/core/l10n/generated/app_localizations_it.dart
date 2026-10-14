@@ -656,7 +656,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get tags => 'Tag';
 
   @override
-  String get addTag => 'Aggiungi Tag';
+  String get addTag => 'Aggiungi tag';
 
   @override
   String get manageTags => 'Gestisci Tag';
@@ -966,4 +966,60 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get fileSavedSuccess => 'File salvato con successo!';
+
+  @override
+  String get discardChangesTitle => 'Scartare le modifiche?';
+
+  @override
+  String get discardChangesMessage =>
+      'Ci sono modifiche non salvate. Sei sicuro di volerle scartare?';
+
+  @override
+  String get discard => 'Scarta';
+
+  @override
+  String get clearSearch => 'Cancella ricerca';
+
+  @override
+  String totalCount(int count) {
+    return '$count totale';
+  }
+
+  @override
+  String systemIntegration(String platform) {
+    return 'Integrazione di sistema: $platform';
+  }
+
+  @override
+  String heatmapReviewTooltip(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ripassi il $date',
+      one: '1 ripasso il $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weekdayMon => 'L';
+
+  @override
+  String get weekdayWed => 'M';
+
+  @override
+  String get weekdayFri => 'V';
+
+  @override
+  String get copyReleaseLink => 'Copia link release';
+
+  @override
+  String linkCopiedToClipboard(String url) {
+    return 'URL della release copiato negli appunti: $url';
+  }
+
+  @override
+  String errorSavingCard(String error) {
+    return 'Errore durante il salvataggio della carta: $error';
+  }
 }

@@ -75,6 +75,7 @@ class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
           if (_isSearching)
             IconButton(
               key: const Key('clear_search_button'),
+              tooltip: l10n?.clearSearch ?? 'Clear search',
               icon: const Icon(Icons.close),
               onPressed: _closeSearch,
             )

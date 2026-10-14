@@ -32,11 +32,21 @@ class NotificationService {
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
+    const linuxSettings = LinuxInitializationSettings(
+      defaultActionName: 'Open Repetita',
+    );
+    const windowsSettings = WindowsInitializationSettings(
+      appName: 'Repetita',
+      appUserModelId: 'com.repetita.app',
+      guid: '8b555c78-4941-4daa-877f-24f8aa1a6bee',
+    );
 
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: darwinSettings,
       macOS: darwinSettings,
+      linux: linuxSettings,
+      windows: windowsSettings,
     );
 
     try {
@@ -45,7 +55,7 @@ class NotificationService {
       return _initialized;
     } catch (e) {
       debugPrint('NotificationService init error (handled): $e');
-      if (e is Error || e is MissingPluginException) {
+      if (e is MissingPluginException || (e is Error && e is! ArgumentError)) {
         _initialized = true;
         return true;
       }
@@ -80,10 +90,25 @@ class NotificationService {
         );
         return granted ?? false;
       }
+
+      // macOS permissions
+      final macosImpl = _plugin
+          .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin
+          >();
+      if (macosImpl != null) {
+        final granted = await macosImpl.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        return granted ?? false;
+      }
+
       return true;
     } catch (e) {
       debugPrint('Permission request exception: $e');
-      if (e is Error || e is MissingPluginException) {
+      if (e is MissingPluginException || (e is Error && e is! ArgumentError)) {
         return true;
       }
       return false;
@@ -91,6 +116,12 @@ class NotificationService {
   }
 
   NotificationDetails _notificationDetails() {
+    const darwin = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    const linux = LinuxNotificationDetails();
     return const NotificationDetails(
       android: AndroidNotificationDetails(
         channelId,
@@ -100,11 +131,9 @@ class NotificationService {
         priority: Priority.high,
         showWhen: true,
       ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
+      iOS: darwin,
+      macOS: darwin,
+      linux: linux,
     );
   }
 
@@ -124,7 +153,7 @@ class NotificationService {
       return true;
     } catch (e) {
       debugPrint('showTestNotification error: $e');
-      if (e is Error || e is MissingPluginException) {
+      if (e is MissingPluginException || (e is Error && e is! ArgumentError)) {
         return true;
       }
       return false;
@@ -137,7 +166,8 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    await initialize();
+    final initOk = await initialize();
+    if (!initOk) return false;
     try {
       final now = tz.TZDateTime.now(tz.local);
       var scheduledDate = tz.TZDateTime(
@@ -164,7 +194,7 @@ class NotificationService {
       return true;
     } catch (e) {
       debugPrint('scheduleDailyReminder error: $e');
-      if (e is Error || e is MissingPluginException) {
+      if (e is MissingPluginException || (e is Error && e is! ArgumentError)) {
         return true;
       }
       return false;
@@ -177,7 +207,7 @@ class NotificationService {
       return true;
     } catch (e) {
       debugPrint('cancelReminder error: $e');
-      if (e is Error || e is MissingPluginException) {
+      if (e is MissingPluginException || (e is Error && e is! ArgumentError)) {
         return true;
       }
       return false;

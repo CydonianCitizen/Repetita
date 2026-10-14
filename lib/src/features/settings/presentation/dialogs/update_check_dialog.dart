@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -134,6 +135,38 @@ class UpdateCheckDialog extends ConsumerWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.link_rounded,
+                        size: 18,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SelectableText(
+                          info.releaseUrl,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -141,17 +174,25 @@ class UpdateCheckDialog extends ConsumerWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(l10n?.close ?? 'Close'),
               ),
-              FilledButton(
+              FilledButton.icon(
+                icon: const Icon(Icons.copy_rounded, size: 16),
                 onPressed: () {
+                  Clipboard.setData(
+                    ClipboardData(text: info.releaseUrl),
+                  );
+                  final messenger = ScaffoldMessenger.of(context);
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(
-                      content: Text('Release URL: ${info.releaseUrl}'),
+                      content: Text(
+                        l10n?.linkCopiedToClipboard(info.releaseUrl) ??
+                            'Release URL copied to clipboard: ${info.releaseUrl}',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
-                child: Text(l10n?.viewOnGitHub ?? 'View on GitHub'),
+                label: Text(l10n?.viewOnGitHub ?? 'View on GitHub'),
               ),
             ],
           );

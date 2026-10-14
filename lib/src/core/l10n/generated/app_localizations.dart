@@ -1795,6 +1795,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File saved successfully!'**
   String get fileSavedSuccess;
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Are you sure you want to discard them?'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @totalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String totalCount(int count);
+
+  /// No description provided for @systemIntegration.
+  ///
+  /// In en, this message translates to:
+  /// **'System integration: {platform}'**
+  String systemIntegration(String platform);
+
+  /// No description provided for @heatmapReviewTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 review on {date}} other{{count} reviews on {date}}}'**
+  String heatmapReviewTooltip(int count, String date);
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In en, this message translates to:
+  /// **'F'**
+  String get weekdayFri;
+
+  /// No description provided for @copyReleaseLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Release Link'**
+  String get copyReleaseLink;
+
+  /// No description provided for @linkCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Release URL copied to clipboard: {url}'**
+  String linkCopiedToClipboard(String url);
+
+  /// No description provided for @errorSavingCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save card: {error}'**
+  String errorSavingCard(String error);
 }
 
 class _AppLocalizationsDelegate

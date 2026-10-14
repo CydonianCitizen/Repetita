@@ -35,6 +35,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
   late final TextEditingController _frontController;
   late final TextEditingController _backController;
   final List<TagEntity> _selectedTags = [];
+  final Set<int> _initialTagIds = {};
+  bool _tagsLoaded = false;
   bool _isSaving = false;
 
   @override
@@ -52,9 +54,56 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
     final tags = await tagsDao.getTagsForCard(widget.cardId!);
     if (mounted) {
       setState(() {
-        _selectedTags.addAll(tags.map((t) => t.toEntity()));
+        final entities = tags.map((t) => t.toEntity()).toList();
+        _selectedTags.addAll(entities);
+        _initialTagIds.addAll(entities.map((t) => t.id));
+        _tagsLoaded = true;
       });
     }
+  }
+
+  bool get _hasChanges {
+    final frontInitial = widget.initialFront ?? '';
+    final backInitial = widget.initialBack ?? '';
+    if (_frontController.text != frontInitial) return true;
+    if (_backController.text != backInitial) return true;
+    if (widget.isEditing) {
+      if (!_tagsLoaded) return false;
+      final currentTagIds = _selectedTags.map((t) => t.id).toSet();
+      if (currentTagIds.length != _initialTagIds.length ||
+          !currentTagIds.containsAll(_initialTagIds)) {
+        return true;
+      }
+    } else {
+      if (_selectedTags.isNotEmpty) return true;
+    }
+    return false;
+  }
+
+  Future<bool> _showDiscardConfirmation(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n?.discardChangesTitle ?? 'Discard changes?'),
+        content: Text(
+          l10n?.discardChangesMessage ??
+              'You have unsaved changes. Are you sure you want to discard them?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirm_discard_button'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n?.discard ?? 'Discard'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override
@@ -149,6 +198,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                             const SizedBox(width: 8),
                             IconButton.filledTonal(
                               key: const Key('confirm_add_tag_button'),
+                              tooltip: l10n?.addTag ?? 'Add Tag',
                               icon: const Icon(Icons.add),
                               onPressed: () async {
                                 final name = textController.text.trim();
@@ -281,6 +331,8 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         if (addAnother) {
           _frontController.clear();
           _backController.clear();
+          _selectedTags.clear();
+          _initialTagIds.clear();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -292,6 +344,18 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
         } else {
           Navigator.of(context).pop();
         }
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.errorSavingCard(e.toString()) ?? 'Failed to save card: $e',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -324,7 +388,16 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           if (!_isSaving) _save(addAnother: false);
         },
       },
-      child: Scaffold(
+      child: PopScope(
+        canPop: !_hasChanges || _isSaving,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          final shouldDiscard = await _showDiscardConfirmation(context);
+          if (shouldDiscard && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Scaffold(
         appBar: AppBar(
           title: Text(title),
           actions: [
@@ -512,6 +585,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

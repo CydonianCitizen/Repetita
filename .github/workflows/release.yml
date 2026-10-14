@@ -107,9 +107,43 @@ jobs:
           name: windows-x64
           path: repetita-windows-x64.zip
 
+  build_linux:
+    name: Build Linux x64 App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux Release
+        run: flutter build linux --release
+
+      - name: Package Linux App (.tar.gz)
+        run: |
+          tar -czf repetita-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: repetita-linux-x64.tar.gz
+
   publish_release:
     name: Publish GitHub Release
-    needs: [build_android, build_macos, build_windows]
+    needs: [build_android, build_macos, build_windows, build_linux]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
@@ -121,7 +155,7 @@ jobs:
       - name: Organize release files
         run: |
           mkdir -p release-dist
-          find release-artifacts -type f \( -name "*.apk" -o -name "*.zip" \) -exec cp {} release-dist/ \;
+          find release-artifacts -type f \( -name "*.apk" -o -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release-dist/ \;
           ls -la release-dist
 
       - name: Create GitHub Release
@@ -129,3 +163,4 @@ jobs:
         with:
           files: release-dist/*
           generate_release_notes: true
+

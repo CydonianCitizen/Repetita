@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
@@ -27,6 +29,12 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _activatedIndices.add(_currentIndex);
+
+    const MethodChannel('com.repetita.app/menu').setMethodCallHandler((call) async {
+      if (call.method == 'openPreferences') {
+        _onDestinationSelected(2);
+      }
+    });
   }
 
   void _onDestinationSelected(int index) {
@@ -56,92 +64,146 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
       ],
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWideScreen = constraints.maxWidth >= 640;
+    Widget screen = CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.comma, meta: true): () {
+          _onDestinationSelected(2);
+        },
+        const SingleActivator(LogicalKeyboardKey.comma, control: true): () {
+          _onDestinationSelected(2);
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWideScreen = constraints.maxWidth >= 640;
 
-        if (isWideScreen) {
-          return Scaffold(
-            body: Row(
-              children: [
-                NavigationRail(
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: _onDestinationSelected,
-                  labelType: NavigationRailLabelType.all,
-                  leading: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: CircleAvatar(
-                      backgroundColor: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer,
-                      child: Icon(
-                        Icons.school_rounded,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+            if (isWideScreen) {
+              return Scaffold(
+                body: Row(
+                  children: [
+                    NavigationRail(
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: _onDestinationSelected,
+                      labelType: NavigationRailLabelType.all,
+                      leading: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: CircleAvatar(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer,
+                          child: Icon(
+                            Icons.school_rounded,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
                       ),
+                      destinations: [
+                        NavigationRailDestination(
+                          icon: const Icon(
+                            Icons.style_outlined,
+                            key: Key('nav_decks'),
+                          ),
+                          selectedIcon: const Icon(Icons.style),
+                          label: Text(l10n?.navHome ?? 'Decks'),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(
+                            Icons.bar_chart_outlined,
+                            key: Key('nav_stats'),
+                          ),
+                          selectedIcon: const Icon(Icons.bar_chart),
+                          label: Text(l10n?.navStats ?? 'Stats'),
+                        ),
+                        NavigationRailDestination(
+                          icon: const Icon(
+                            Icons.settings_outlined,
+                            key: Key('nav_settings'),
+                          ),
+                          selectedIcon: const Icon(Icons.settings),
+                          label: Text(l10n?.navSettings ?? 'Settings'),
+                        ),
+                      ],
                     ),
-                  ),
-                  destinations: [
-                    NavigationRailDestination(
-                      icon: const Icon(
-                        Icons.style_outlined,
-                        key: Key('nav_decks'),
-                      ),
-                      selectedIcon: const Icon(Icons.style),
-                      label: Text(l10n?.navHome ?? 'Decks'),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(
-                        Icons.bar_chart_outlined,
-                        key: Key('nav_stats'),
-                      ),
-                      selectedIcon: const Icon(Icons.bar_chart),
-                      label: Text(l10n?.navStats ?? 'Stats'),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(
-                        Icons.settings_outlined,
-                        key: Key('nav_settings'),
-                      ),
-                      selectedIcon: const Icon(Icons.settings),
-                      label: Text(l10n?.navSettings ?? 'Settings'),
-                    ),
+                    const VerticalDivider(thickness: 1, width: 1),
+                    Expanded(child: bodyStack),
                   ],
                 ),
-                const VerticalDivider(thickness: 1, width: 1),
-                Expanded(child: bodyStack),
-              ],
-            ),
-          );
-        }
+              );
+            }
 
-        return Scaffold(
-          body: bodyStack,
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _currentIndex,
-            onDestinationSelected: _onDestinationSelected,
-            destinations: [
-              NavigationDestination(
-                key: const Key('nav_decks'),
-                icon: const Icon(Icons.style_outlined),
-                selectedIcon: const Icon(Icons.style),
-                label: l10n?.navHome ?? 'Decks',
+            return Scaffold(
+              body: bodyStack,
+              bottomNavigationBar: NavigationBar(
+                selectedIndex: _currentIndex,
+                onDestinationSelected: _onDestinationSelected,
+                destinations: [
+                  NavigationDestination(
+                    key: const Key('nav_decks'),
+                    icon: const Icon(Icons.style_outlined),
+                    selectedIcon: const Icon(Icons.style),
+                    label: l10n?.navHome ?? 'Decks',
+                  ),
+                  NavigationDestination(
+                    key: const Key('nav_stats'),
+                    icon: const Icon(Icons.bar_chart_outlined),
+                    selectedIcon: const Icon(Icons.bar_chart),
+                    label: l10n?.navStats ?? 'Stats',
+                  ),
+                  NavigationDestination(
+                    key: const Key('nav_settings'),
+                    icon: const Icon(Icons.settings_outlined),
+                    selectedIcon: const Icon(Icons.settings),
+                    label: l10n?.navSettings ?? 'Settings',
+                  ),
+                ],
               ),
-              NavigationDestination(
-                key: const Key('nav_stats'),
-                icon: const Icon(Icons.bar_chart_outlined),
-                selectedIcon: const Icon(Icons.bar_chart),
-                label: l10n?.navStats ?? 'Stats',
+            );
+          },
+        ),
+      ),
+    );
+
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      screen = PlatformMenuBar(
+        menus: [
+          PlatformMenu(
+            label: 'Repetita',
+            menus: [
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.about,
               ),
-              NavigationDestination(
-                key: const Key('nav_settings'),
-                icon: const Icon(Icons.settings_outlined),
-                selectedIcon: const Icon(Icons.settings),
-                label: l10n?.navSettings ?? 'Settings',
+              PlatformMenuItem(
+                label: 'Preferences…',
+                shortcut: const SingleActivator(
+                  LogicalKeyboardKey.comma,
+                  meta: true,
+                ),
+                onSelected: () => _onDestinationSelected(2),
+              ),
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.servicesSubmenu,
+              ),
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.hide,
+              ),
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.hideOtherApplications,
+              ),
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.showAllApplications,
+              ),
+              const PlatformProvidedMenuItem(
+                type: PlatformProvidedMenuItemType.quit,
               ),
             ],
           ),
-        );
-      },
-    );
+        ],
+        child: screen,
+      );
+    }
+
+    return screen;
   }
 }

@@ -63,9 +63,9 @@ class StateDistributionBar extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$total total',
+                  l10n?.totalCount(total) ?? '$total total',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.outline,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

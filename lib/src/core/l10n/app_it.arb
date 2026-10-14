@@ -424,7 +424,59 @@
   "chooseTargetDeck": "Importa in un mazzo esistente",
   "searchCards": "Cerca carte...",
   "noCardsMatchingSearch": "Nessuna carta corrisponde alla ricerca.",
-  "fileSavedSuccess": "File salvato con successo!"
+  "fileSavedSuccess": "File salvato con successo!",
+  "discardChangesTitle": "Scartare le modifiche?",
+  "discardChangesMessage": "Ci sono modifiche non salvate. Sei sicuro di volerle scartare?",
+  "discard": "Scarta",
+  "addTag": "Aggiungi tag",
+  "clearSearch": "Cancella ricerca",
+  "totalCount": "{count} totale",
+  "@totalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "systemIntegration": "Integrazione di sistema: {platform}",
+  "@systemIntegration": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "heatmapReviewTooltip": "{count, plural, =1{1 ripasso il {date}} other{{count} ripassi il {date}}}",
+  "@heatmapReviewTooltip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayMon": "L",
+  "weekdayWed": "M",
+  "weekdayFri": "V",
+  "copyReleaseLink": "Copia link release",
+  "linkCopiedToClipboard": "URL della release copiato negli appunti: {url}",
+  "@linkCopiedToClipboard": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSavingCard": "Errore durante il salvataggio della carta: {error}",
+  "@errorSavingCard": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
 
 
