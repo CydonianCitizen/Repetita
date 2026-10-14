@@ -158,10 +158,11 @@ class UpdateCheckDialog extends ConsumerWidget {
                       Expanded(
                         child: SelectableText(
                           info.releaseUrl,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.primary,
-                            decoration: TextDecoration.underline,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ],
@@ -177,9 +178,7 @@ class UpdateCheckDialog extends ConsumerWidget {
               FilledButton.icon(
                 icon: const Icon(Icons.copy_rounded, size: 16),
                 onPressed: () {
-                  Clipboard.setData(
-                    ClipboardData(text: info.releaseUrl),
-                  );
+                  Clipboard.setData(ClipboardData(text: info.releaseUrl));
                   final messenger = ScaffoldMessenger.of(context);
                   Navigator.of(context).pop();
                   messenger.showSnackBar(

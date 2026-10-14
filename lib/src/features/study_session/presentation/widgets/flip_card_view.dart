@@ -83,20 +83,10 @@ class _FlipCardViewState extends ConsumerState<FlipCardView> {
     if (isReduced) {
       cardBody = widget.isAnswerRevealed
           ? RepaintBoundary(
-              child: _buildBackCard(
-                context,
-                colorScheme,
-                theme,
-                l10n,
-              ),
+              child: _buildBackCard(context, colorScheme, theme, l10n),
             )
           : RepaintBoundary(
-              child: _buildFrontCard(
-                context,
-                colorScheme,
-                theme,
-                l10n,
-              ),
+              child: _buildFrontCard(context, colorScheme, theme, l10n),
             );
     } else {
       cardBody = TweenAnimationBuilder<double>(
@@ -121,21 +111,11 @@ class _FlipCardViewState extends ConsumerState<FlipCardView> {
                     alignment: Alignment.center,
                     transform: Matrix4.identity()..rotateY(math.pi),
                     child: RepaintBoundary(
-                      child: _buildBackCard(
-                        context,
-                        colorScheme,
-                        theme,
-                        l10n,
-                      ),
+                      child: _buildBackCard(context, colorScheme, theme, l10n),
                     ),
                   )
                 : RepaintBoundary(
-                    child: _buildFrontCard(
-                      context,
-                      colorScheme,
-                      theme,
-                      l10n,
-                    ),
+                    child: _buildFrontCard(context, colorScheme, theme, l10n),
                   ),
           );
         },

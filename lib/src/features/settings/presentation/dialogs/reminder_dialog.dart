@@ -142,8 +142,8 @@ class ReminderDialog extends ConsumerWidget {
                         defaultTargetPlatform == TargetPlatform.windows
                             ? Icons.laptop_windows_rounded
                             : (defaultTargetPlatform == TargetPlatform.macOS
-                                ? Icons.laptop_mac_rounded
-                                : Icons.laptop_chromebook_rounded),
+                                  ? Icons.laptop_mac_rounded
+                                  : Icons.laptop_chromebook_rounded),
                         size: 16,
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -153,9 +153,10 @@ class ReminderDialog extends ConsumerWidget {
                           l10n?.systemIntegration(
                                 defaultTargetPlatform == TargetPlatform.windows
                                     ? 'Windows'
-                                    : (defaultTargetPlatform == TargetPlatform.macOS
-                                        ? 'macOS'
-                                        : 'Linux'),
+                                    : (defaultTargetPlatform ==
+                                              TargetPlatform.macOS
+                                          ? 'macOS'
+                                          : 'Linux'),
                               ) ??
                               'System integration: ${defaultTargetPlatform.name}',
                           style: Theme.of(context).textTheme.labelSmall

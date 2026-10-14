@@ -30,11 +30,12 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     _currentIndex = widget.initialIndex;
     _activatedIndices.add(_currentIndex);
 
-    const MethodChannel('com.repetita.app/menu').setMethodCallHandler((call) async {
-      if (call.method == 'openPreferences') {
-        _onDestinationSelected(2);
-      }
-    });
+    const MethodChannel('com.repetita.app/menu')
+        .setMethodCallHandler((call) async {
+          if (call.method == 'openPreferences') {
+            _onDestinationSelected(2);
+          }
+        });
   }
 
   void _onDestinationSelected(int index) {
@@ -95,7 +96,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                               .primaryContainer,
                           child: Icon(
                             Icons.school_rounded,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
                           ),
                         ),
                       ),

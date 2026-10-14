@@ -200,15 +200,15 @@ class StudyScreen extends ConsumerWidget {
 
               final animLevel = ref.watch(animationLevelControllerProvider);
               final isReduced =
-                  animLevel.isReduced || MediaQuery.of(context).disableAnimations;
+                  animLevel.isReduced ||
+                  MediaQuery.of(context).disableAnimations;
 
               Widget bodyWidget;
               if (sessionState.isCompleted ||
                   sessionState.currentCard == null) {
                 Widget titleWidget = Text(
                   sessionState.isCram
-                      ? (l10n?.cramCompletedTitle ??
-                            'Cram session completed!')
+                      ? (l10n?.cramCompletedTitle ?? 'Cram session completed!')
                       : (l10n?.allCardsReviewedTitle ??
                             'All cards reviewed for today!'),
                   style: theme.textTheme.headlineSmall?.copyWith(
@@ -239,14 +239,11 @@ class StudyScreen extends ConsumerWidget {
                   titleWidget = titleWidget
                       .animate()
                       .fadeIn(delay: 150.ms, duration: 300.ms)
-                      .slideY(
-                        begin: 0.15,
-                        end: 0,
-                        curve: Curves.easeOutCubic,
-                      );
-                  descWidget = descWidget
-                      .animate()
-                      .fadeIn(delay: 250.ms, duration: 300.ms);
+                      .slideY(begin: 0.15, end: 0, curve: Curves.easeOutCubic);
+                  descWidget = descWidget.animate().fadeIn(
+                    delay: 250.ms,
+                    duration: 300.ms,
+                  );
                   backButton = backButton
                       .animate()
                       .fadeIn(delay: 350.ms, duration: 300.ms)
@@ -265,8 +262,9 @@ class StudyScreen extends ConsumerWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5),
+                      color: colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -405,19 +403,21 @@ class StudyScreen extends ConsumerWidget {
                                     Text(
                                       l10n?.cardProgress(currentNum, total) ??
                                           'Card $currentNum of $total',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                     Text(
                                       l10n?.cardsRemaining(
                                             sessionState.remainingCards,
                                           ) ??
                                           '${sessionState.remainingCards} remaining',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -443,9 +443,10 @@ class StudyScreen extends ConsumerWidget {
                                             '${(progress * 100).round()}%',
                                         backgroundColor:
                                             colorScheme.surfaceContainerHighest,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          colorScheme.primary,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              colorScheme.primary,
+                                            ),
                                       );
                                     },
                                   ),
@@ -524,8 +525,9 @@ class StudyScreen extends ConsumerWidget {
                       sessionState.currentCard != null) ...{
                     const SingleActivator(LogicalKeyboardKey.space): () {
                       if (!sessionState.isAnswerRevealed) {
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         ref
                             .read(hapticServiceProvider)
                             .triggerSelection(intensity);
@@ -534,8 +536,9 @@ class StudyScreen extends ConsumerWidget {
                     },
                     const SingleActivator(LogicalKeyboardKey.enter): () {
                       if (!sessionState.isAnswerRevealed) {
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         ref
                             .read(hapticServiceProvider)
                             .triggerSelection(intensity);
@@ -545,8 +548,9 @@ class StudyScreen extends ConsumerWidget {
                     const SingleActivator(LogicalKeyboardKey.digit1): () {
                       if (sessionState.isAnswerRevealed) {
                         final haptic = ref.read(hapticServiceProvider);
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         unawaited(
                           haptic.triggerRatingFeedback(Rating.again, intensity),
                         );
@@ -556,8 +560,9 @@ class StudyScreen extends ConsumerWidget {
                     const SingleActivator(LogicalKeyboardKey.digit2): () {
                       if (sessionState.isAnswerRevealed) {
                         final haptic = ref.read(hapticServiceProvider);
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         unawaited(
                           haptic.triggerRatingFeedback(Rating.hard, intensity),
                         );
@@ -567,8 +572,9 @@ class StudyScreen extends ConsumerWidget {
                     const SingleActivator(LogicalKeyboardKey.digit3): () {
                       if (sessionState.isAnswerRevealed) {
                         final haptic = ref.read(hapticServiceProvider);
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         unawaited(
                           haptic.triggerRatingFeedback(Rating.good, intensity),
                         );
@@ -578,8 +584,9 @@ class StudyScreen extends ConsumerWidget {
                     const SingleActivator(LogicalKeyboardKey.digit4): () {
                       if (sessionState.isAnswerRevealed) {
                         final haptic = ref.read(hapticServiceProvider);
-                        final intensity =
-                            ref.read(hapticFeedbackControllerProvider);
+                        final intensity = ref.read(
+                          hapticFeedbackControllerProvider,
+                        );
                         unawaited(
                           haptic.triggerRatingFeedback(Rating.easy, intensity),
                         );
