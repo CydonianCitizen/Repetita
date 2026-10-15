@@ -27,6 +27,7 @@ class Cards extends Table {
   BoolColumn get isSuspended => boolean().withDefault(const Constant(false))();
   DateTimeColumn get buriedUntil => dateTime().nullable()();
   IntColumn get clozeIndex => integer().nullable()();
+  RealColumn get easinessFactor => real().withDefault(const Constant(2.5))();
 }
 
 @TableIndex(name: 'idx_review_logs_card_id', columns: {#cardId})
@@ -44,6 +45,7 @@ class ReviewLogs extends Table {
   IntColumn get lastElapsedDays => integer()();
   IntColumn get scheduledDays => integer()();
   DateTimeColumn get reviewedAt => dateTime()();
+  RealColumn get easinessFactor => real().withDefault(const Constant(2.5))();
 }
 
 class Tags extends Table {

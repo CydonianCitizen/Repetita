@@ -154,6 +154,8 @@ void main() {
       expect(find.byType(SettingsScreen), findsOneWidget);
       final backupTile = find.byKey(const Key('setting_backup_tile'));
       await tester.scrollUntilVisible(backupTile, 200);
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await pumpFrames(tester);
       expect(backupTile, findsOneWidget);
       await tester.tap(backupTile);
       await pumpFrames(tester);

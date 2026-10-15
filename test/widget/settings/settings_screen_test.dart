@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:repetita/src/core/l10n/generated/app_localizations.dart';
 import 'package:repetita/src/features/settings/data/update_service.dart';
 import 'package:repetita/src/features/settings/domain/animation_level.dart';
+import 'package:repetita/src/features/settings/domain/app_theme_mode.dart';
 import 'package:repetita/src/features/settings/domain/haptic_intensity.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/animation_level_controller.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/haptic_controller.dart';
@@ -38,7 +39,7 @@ void main() {
 
   group('SettingsScreen Widget Tests', () {
     testWidgets(
-      'renders all settings sections, tiles, branding, and animation slider',
+      'renders all settings sections, tiles, branding, and navigates to appearance sub-screen',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -62,29 +63,35 @@ void main() {
         expect(find.text('UPDATES & RELEASES'), findsOneWidget);
         expect(find.text('ABOUT & PRIVACY'), findsOneWidget);
 
-        // Tiles & Sliders
+        // Main navigation tiles
+        expect(
+          find.byKey(const Key('setting_appearance_tile')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('setting_study_algorithm_tile')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('setting_language_tile')), findsOneWidget);
+        expect(find.byKey(const Key('setting_backup_tile')), findsOneWidget);
+        expect(find.byKey(const Key('setting_updates_tile')), findsOneWidget);
+        expect(find.byKey(const Key('setting_about_tile')), findsOneWidget);
+
+        // Tap Appearance tile to navigate to AppearanceSettingsScreen
+        await tester.tap(find.byKey(const Key('setting_appearance_tile')));
+        await tester.pumpAndSettle();
+
         expect(find.byKey(const Key('setting_theme_tile')), findsOneWidget);
         expect(
           find.byKey(const Key('setting_animation_slider')),
           findsOneWidget,
         );
         expect(find.byKey(const Key('setting_haptic_slider')), findsOneWidget);
-        expect(find.byKey(const Key('setting_language_tile')), findsOneWidget);
-        expect(find.byKey(const Key('setting_fsrs_tile')), findsOneWidget);
-        expect(
-          find.byKey(const Key('setting_notifications_tile')),
-          findsOneWidget,
-        );
-        expect(find.byKey(const Key('setting_backup_tile')), findsOneWidget);
-        expect(
-          find.byKey(const Key('setting_github_update_tile')),
-          findsOneWidget,
-        );
       },
     );
 
     testWidgets(
-      'tapping Language tile opens dialog, selecting Italiano updates locale',
+      'tapping Language tile opens language sub-screen, selecting Italiano updates locale',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.0;
@@ -101,7 +108,7 @@ void main() {
         await tester.tap(find.byKey(const Key('setting_language_tile')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Select Language'), findsOneWidget);
+        expect(find.text('Language'), findsOneWidget);
         expect(find.text('English'), findsOneWidget);
         expect(find.text('Italiano'), findsOneWidget);
         expect(find.text('Español'), findsOneWidget);
@@ -110,9 +117,11 @@ void main() {
         await tester.tap(find.text('Italiano'));
         await tester.pumpAndSettle();
 
-        // Dialog closes and provider is updated to 'it'
-        expect(find.text('Select Language'), findsNothing);
         expect(container.read(localeControllerProvider), const Locale('it'));
+
+        // Pop back to main settings screen
+        await tester.tap(find.byType(BackButton));
+        await tester.pumpAndSettle();
 
         // Language in Italian now renders 'Impostazioni' and 'ASPETTO'
         expect(find.text('Impostazioni'), findsOneWidget);
@@ -121,7 +130,7 @@ void main() {
     );
 
     testWidgets(
-      'tapping Theme Mode tile opens dialog and selecting Dark Theme updates mode',
+      'tapping Theme Mode tile in Appearance sub-screen opens dialog and selecting Dark Theme updates mode',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.0;
@@ -135,7 +144,14 @@ void main() {
 
         await tester.pumpWidget(buildSubject(container: container));
 
-        expect(container.read(themeModeControllerProvider), ThemeMode.system);
+        expect(
+          container.read(themeModeControllerProvider),
+          AppThemeMode.system,
+        );
+
+        // Navigate to Appearance sub-screen
+        await tester.tap(find.byKey(const Key('setting_appearance_tile')));
+        await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const Key('setting_theme_tile')));
         await tester.pumpAndSettle();
@@ -143,18 +159,19 @@ void main() {
         expect(find.text('Theme Mode'), findsWidgets);
         expect(find.text('System Default'), findsWidgets);
         expect(find.text('Dark Theme'), findsOneWidget);
+        expect(find.text('AMOLED (Pure Black)'), findsOneWidget);
         expect(find.text('Light Theme'), findsOneWidget);
 
         // Tap Dark Theme in the dialog
         await tester.tap(find.widgetWithText(ListTile, 'Dark Theme'));
         await tester.pumpAndSettle();
 
-        expect(container.read(themeModeControllerProvider), ThemeMode.dark);
+        expect(container.read(themeModeControllerProvider), AppThemeMode.dark);
       },
     );
 
     testWidgets(
-      'animation slider adjusts intensity and test motion button reacts',
+      'animation slider in Appearance sub-screen adjusts intensity and test motion button reacts',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.0;
@@ -173,6 +190,10 @@ void main() {
           container.read(animationLevelControllerProvider),
           AnimationLevel.standard,
         );
+
+        // Navigate to Appearance sub-screen
+        await tester.tap(find.byKey(const Key('setting_appearance_tile')));
+        await tester.pumpAndSettle();
 
         // Drag slider to the left (Reduced = 0)
         final sliderFinder = find.byKey(const Key('setting_animation_slider'));
@@ -207,7 +228,7 @@ void main() {
     );
 
     testWidgets(
-      'haptic feedback slider adjusts intensity and test button triggers haptic feedback',
+      'haptic feedback slider in Appearance sub-screen adjusts intensity and test button triggers haptic feedback',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -226,6 +247,10 @@ void main() {
           container.read(hapticFeedbackControllerProvider),
           HapticIntensity.medium,
         );
+
+        // Navigate to Appearance sub-screen
+        await tester.tap(find.byKey(const Key('setting_appearance_tile')));
+        await tester.pumpAndSettle();
 
         // Find slider and drag to left (Off = 0)
         final hapticSliderFinder = find.byKey(
@@ -258,9 +283,9 @@ void main() {
     );
 
     testWidgets(
-      'study reminders dialog toggles switch and dispatches test notification',
+      'study reminders dialog in Study & Algorithm sub-screen toggles switch and dispatches test notification',
       (tester) async {
-        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
         addTearDown(() {
           tester.view.resetPhysicalSize();
@@ -271,6 +296,10 @@ void main() {
         addTearDown(container.dispose);
 
         await tester.pumpWidget(buildSubject(container: container));
+
+        // Navigate to Study & Algorithm sub-screen
+        await tester.tap(find.byKey(const Key('setting_study_algorithm_tile')));
+        await tester.pumpAndSettle();
 
         // Open Study Reminders dialog
         await tester.tap(find.byKey(const Key('setting_notifications_tile')));
@@ -303,7 +332,7 @@ void main() {
     );
 
     testWidgets(
-      'update check dialog displays up to date message on current version',
+      'update check dialog in Updates sub-screen displays up to date message on current version',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -329,6 +358,10 @@ void main() {
 
         await tester.pumpWidget(buildSubject(container: container));
 
+        // Navigate to Updates sub-screen
+        await tester.tap(find.byKey(const Key('setting_updates_tile')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.byKey(const Key('setting_github_update_tile')));
         await tester.pumpAndSettle();
 
@@ -348,7 +381,7 @@ void main() {
     );
 
     testWidgets(
-      'update check dialog displays update available and release notes',
+      'update check dialog in Updates sub-screen displays update available and release notes',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -374,6 +407,10 @@ void main() {
 
         await tester.pumpWidget(buildSubject(container: container));
 
+        // Navigate to Updates sub-screen
+        await tester.tap(find.byKey(const Key('setting_updates_tile')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.byKey(const Key('setting_github_update_tile')));
         await tester.pumpAndSettle();
 
@@ -390,7 +427,7 @@ void main() {
     );
 
     testWidgets(
-      'tapping License tile opens MIT License dialog with open source button',
+      'tapping License tile in About sub-screen opens MIT License dialog with open source button',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -400,6 +437,10 @@ void main() {
         });
 
         await tester.pumpWidget(buildSubject());
+
+        // Navigate to About sub-screen
+        await tester.tap(find.byKey(const Key('setting_about_tile')));
+        await tester.pumpAndSettle();
 
         // Tap License tile
         await tester.tap(find.byKey(const Key('setting_license_tile')));
@@ -421,7 +462,7 @@ void main() {
     );
 
     testWidgets(
-      'tapping FSRS tile opens parameters dialog, slider and interval chips interact cleanly',
+      'tapping FSRS tile in Study & Algorithm sub-screen opens parameters dialog, slider and interval chips interact cleanly',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -431,6 +472,10 @@ void main() {
         });
 
         await tester.pumpWidget(buildSubject());
+
+        // Navigate to Study & Algorithm sub-screen
+        await tester.tap(find.byKey(const Key('setting_study_algorithm_tile')));
+        await tester.pumpAndSettle();
 
         // Tap FSRS tile
         await tester.tap(find.byKey(const Key('setting_fsrs_tile')));
@@ -454,7 +499,7 @@ void main() {
     );
 
     testWidgets(
-      'desktop hides haptic slider and shows desktop notifications without time picker',
+      'desktop hides haptic slider in Appearance and shows desktop notifications without time picker in Study',
       (tester) async {
         tester.view.physicalSize = const Size(1080, 4000);
         tester.view.devicePixelRatio = 2.0;
@@ -468,9 +513,23 @@ void main() {
           await tester.pumpWidget(buildSubject());
           await tester.pumpAndSettle();
 
+          // Navigate to Appearance sub-screen
+          await tester.tap(find.byKey(const Key('setting_appearance_tile')));
+          await tester.pumpAndSettle();
+
           // Haptic slider is hidden on desktop
           expect(find.byKey(const Key('setting_haptic_slider')), findsNothing);
           expect(find.byKey(const Key('test_haptic_button')), findsNothing);
+
+          // Pop back to root settings
+          await tester.tap(find.byType(BackButton));
+          await tester.pumpAndSettle();
+
+          // Navigate to Study & Algorithm sub-screen
+          await tester.tap(
+            find.byKey(const Key('setting_study_algorithm_tile')),
+          );
+          await tester.pumpAndSettle();
 
           // Notifications tile shows Desktop Notifications
           expect(find.text('Desktop Notifications'), findsOneWidget);

@@ -15,7 +15,8 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 | **v0.6.0** <br>*(Completato)* | Ecosistema & File Transfer | • Importazione Anki Package (`.apkg`) [x]<br>• File Picker & Save nativo (.apkg, .json, .csv) [x]<br>• Ricerca Flashcard per Mazzo [x] | Alta |
 | **v0.7.0** <br>*(Completato)* | Desktop Edition (Windows & macOS) | • Supporto nativo desktop Windows (x64) & macOS [x]<br>• Layout adattivo Material 3 (`NavigationRail` vs `NavigationBar`) [x]<br>• Scorciatoie da tastiera (Space, 1-4, Ctrl+Z, Ctrl+Enter) [x]<br>• Dimensioni minime finestra e vincoli ergonomici maxWidth [x] | Media |
 | **v0.7.5** <br>*(Completato)* | Astrazione Motore SRS & CI/CD Release | • Interfaccia universale `SrsScheduler` & Riverpod provider [x]<br>• Seeder onboarding mazzo iniziale (`SampleDeckSeeder`) [x]<br>• Fix release pipeline CI/CD (macOS Universal, Windows x64, Android split) [x]<br>• Audit Ponytail & Impeccable (deduplicazione coda studio e dead code) [x] | Bassa |
-| **v0.8.0** <br>*(Pianificato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [x (v0.7.5)]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [ ]<br>• Selettore algoritmo nelle Impostazioni [ ]<br>• Migrazione schema Drift e gestione transizioni carte [ ] | Media |
+| **v0.8.0** <br>*(Completato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [x]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [x]<br>• Selettore algoritmo nelle Impostazioni [x]<br>• Migrazione schema Drift e gestione transizioni carte [x] | Media |
+| **v0.8.7** <br>*(Completato)* | Performance, Display & Settings Modularization | • Tema Pure Black AMOLED & gestione dinamica refresh rate [x]<br>• PRAGMA SQLite ad alte prestazioni (WAL, cache, mmap) [x]<br>• Haptic feedback nativo Android & ripristino vibrazione [x]<br>• Riorganizzazione modulare impostazioni in sotto-schermate [x] | Media |
 | **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate<br>• Zero bug, zero warning, 100% test coverage | Bassa |
 | **v1.5.0+** | Feature Complesse Deferred | • Ricerca Globale Flashcard (Card Browser)<br>• Markdown avanzato & formattazione ricca | Media |
 
@@ -172,7 +173,7 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 5.5 v0.8.0: Motore Multi-Algoritmo (FSRS & SM-2) [PIANIFICATO]
+### 5.5 v0.8.0: Motore Multi-Algoritmo (FSRS & SM-2) [COMPLETATO]
 * **Obiettivo**: Rendere Repetita un benchmark harness agnostico rispetto all'algoritmo SRS, supportando sia il moderno FSRS sia il classico SuperMemo SM-2 con selettore utente.
 * **Specifiche**:
   * **Modulo SM-2 Puro** (`lib/src/core/algorithms/sm2/`):
@@ -185,6 +186,24 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
   * **Gestione Transizione & Persistenza**:
     * Migrazione Drift per accogliere i metadati SM-2 senza perdita di coerenza per le carte preesistenti.
     * Miglioramento dell'import Anki (`.apkg`) per preservare il fattore $EF$ originario.
+
+---
+
+### 5.6 v0.8.7: Performance, Display & Settings Modularization [COMPLETATO]
+* **Obiettivo**: Minimizzare i consumi energetici su display OLED/AMOLED, massimizzare il throughput I/O del database locale, ripristinare il feedback aptico nativo e razionalizzare la UI delle impostazioni.
+* **Specifiche**:
+  * **Tema AMOLED Pure Black**:
+    * Palette scura a contrasto assoluto (`#000000`) per azzerare l'assorbimento dei pixel su display OLED.
+    * Integrato in `AppThemeMode.amoled` con toggle dedicato e persistenza Riverpod.
+  * **Ottimizzazione I/O SQLite (`AppDatabase`)**:
+    * Configurazione PRAGMA: `journal_mode = WAL`, `synchronous = NORMAL`, `cache_size = -64000` (64MB), `temp_store = MEMORY`, `mmap_size = 268435456` (256MB).
+  * **Gestione Dinamica Refresh Rate**:
+    * `DisplayRefreshRateService` con platform channel Android (`setPreferredDisplayMode`) per limitare il frame rate (60Hz / Standard / Massimo) durante lo studio e risparmiare batteria.
+  * **Feedback Aptico Nativo**:
+    * Platform channel nativo Android (`repetita/haptics`) con fallback su `HapticFeedback` di Flutter e permesso `android.permission.VIBRATE` per garantire il funzionamento su tutti i dispositivi.
+  * **Modularizzazione Impostazioni**:
+    * Scomposizione della schermata Impostazioni in sotto-schermate tematiche: *Aspetto*, *Algoritmo di studio*, *Lingua*, *Aggiornamenti*, *Informazioni*.
+    * Rimozione del word wrapping disomogeneo e pulizia dei badge testuali ridondanti nella navigazione principale.
 
 ---
 

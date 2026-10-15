@@ -470,6 +470,66 @@ abstract class AppLocalizations {
   /// **'Offline Spaced Repetition Engine • {version}'**
   String appSubtitle(String version);
 
+  /// No description provided for @settingsAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & Display'**
+  String get settingsAppearanceTitle;
+
+  /// No description provided for @settingsAppearanceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, display, motion'**
+  String get settingsAppearanceDesc;
+
+  /// No description provided for @settingsStudyAlgorithmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study & Scheduling'**
+  String get settingsStudyAlgorithmTitle;
+
+  /// No description provided for @settingsStudyAlgorithmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'FSRS, retention, reminders'**
+  String get settingsStudyAlgorithmDesc;
+
+  /// No description provided for @settingsLanguageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface language'**
+  String get settingsLanguageDesc;
+
+  /// No description provided for @settingsBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON & CSV transfer'**
+  String get settingsBackupDesc;
+
+  /// No description provided for @settingsUpdatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get settingsUpdatesTitle;
+
+  /// No description provided for @settingsUpdatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Check GitHub releases'**
+  String get settingsUpdatesDesc;
+
+  /// No description provided for @settingsAboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About & Credits'**
+  String get settingsAboutTitle;
+
+  /// No description provided for @settingsAboutDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'MIT License & credits'**
+  String get settingsAboutDesc;
+
   /// No description provided for @sectionAppearance.
   ///
   /// In en, this message translates to:
@@ -485,7 +545,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeModeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'System default, Light, or Dark'**
+  /// **'Light, Dark, or AMOLED'**
   String get themeModeSubtitle;
 
   /// No description provided for @themeSystem.
@@ -500,11 +560,71 @@ abstract class AppLocalizations {
   /// **'Dark Theme'**
   String get themeDark;
 
+  /// No description provided for @themeAmoled.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED (Pure Black)'**
+  String get themeAmoled;
+
   /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
   /// **'Light Theme'**
   String get themeLight;
+
+  /// No description provided for @themeAmoledSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure black for OLED displays'**
+  String get themeAmoledSubtitle;
+
+  /// No description provided for @refreshRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Rate'**
+  String get refreshRate;
+
+  /// No description provided for @refreshRateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Display refresh frequency'**
+  String get refreshRateSubtitle;
+
+  /// No description provided for @refreshRateAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'System Default (Dynamic)'**
+  String get refreshRateAuto;
+
+  /// No description provided for @refreshRateAutoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptive refresh rate managed by Android OS'**
+  String get refreshRateAutoDesc;
+
+  /// No description provided for @refreshRatePowerSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Saver (60 Hz)'**
+  String get refreshRatePowerSave;
+
+  /// No description provided for @refreshRatePowerSaveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed 60 Hz to minimize GPU power consumption'**
+  String get refreshRatePowerSaveDesc;
+
+  /// No description provided for @refreshRateHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Fluidity (90/120 Hz)'**
+  String get refreshRateHigh;
+
+  /// No description provided for @refreshRateHighDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest supported refresh rate for silky-smooth motion'**
+  String get refreshRateHighDesc;
 
   /// No description provided for @animationIntensity.
   ///
@@ -515,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @animationIntensitySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Motion level and micro-interactions'**
+  /// **'Motion and transitions'**
   String get animationIntensitySubtitle;
 
   /// No description provided for @animationReduced.
@@ -527,7 +647,7 @@ abstract class AppLocalizations {
   /// No description provided for @animationReducedDesc.
   ///
   /// In en, this message translates to:
-  /// **'Instant transitions, battery-friendly, accessibility-ready'**
+  /// **'Instant, battery saver'**
   String get animationReducedDesc;
 
   /// No description provided for @animationStandard.
@@ -539,7 +659,7 @@ abstract class AppLocalizations {
   /// No description provided for @animationStandardDesc.
   ///
   /// In en, this message translates to:
-  /// **'Balanced Material 3 fluid transitions'**
+  /// **'Fluid, balanced motion'**
   String get animationStandardDesc;
 
   /// No description provided for @animationExpressive.
@@ -551,7 +671,7 @@ abstract class AppLocalizations {
   /// No description provided for @animationExpressiveDesc.
   ///
   /// In en, this message translates to:
-  /// **'Playful spring physics, bouncy feedback, and lively motion'**
+  /// **'Dynamic spring motion'**
   String get animationExpressiveDesc;
 
   /// No description provided for @testMotion.
@@ -569,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @hapticFeedbackSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Vibrations on answer ratings and interactions'**
+  /// **'Touch vibration response'**
   String get hapticFeedbackSubtitle;
 
   /// No description provided for @hapticOff.
@@ -581,7 +701,7 @@ abstract class AppLocalizations {
   /// No description provided for @hapticOffDesc.
   ///
   /// In en, this message translates to:
-  /// **'Vibrations disabled'**
+  /// **'No vibration'**
   String get hapticOffDesc;
 
   /// No description provided for @hapticLight.
@@ -593,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @hapticLightDesc.
   ///
   /// In en, this message translates to:
-  /// **'Subtle tactile clicks'**
+  /// **'Subtle clicks'**
   String get hapticLightDesc;
 
   /// No description provided for @hapticMedium.
@@ -605,7 +725,7 @@ abstract class AppLocalizations {
   /// No description provided for @hapticMediumDesc.
   ///
   /// In en, this message translates to:
-  /// **'Balanced physical response'**
+  /// **'Balanced pulse'**
   String get hapticMediumDesc;
 
   /// No description provided for @hapticStrong.
@@ -617,7 +737,7 @@ abstract class AppLocalizations {
   /// No description provided for @hapticStrongDesc.
   ///
   /// In en, this message translates to:
-  /// **'Prominent tactile buzz and pulses'**
+  /// **'Strong pulse'**
   String get hapticStrongDesc;
 
   /// No description provided for @testHaptic.
@@ -647,7 +767,7 @@ abstract class AppLocalizations {
   /// No description provided for @languageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Select app interface language'**
+  /// **'Interface language'**
   String get languageSubtitle;
 
   /// No description provided for @systemLanguageSubtitle.
@@ -707,7 +827,7 @@ abstract class AppLocalizations {
   /// No description provided for @fsrsParametersSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Desired retention, max intervals, request weights'**
+  /// **'Retention and intervals'**
   String get fsrsParametersSubtitle;
 
   /// No description provided for @retentionTarget.
@@ -761,7 +881,7 @@ abstract class AppLocalizations {
   /// No description provided for @studyRemindersSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Daily review notifications'**
+  /// **'Daily review alerts'**
   String get studyRemindersSubtitle;
 
   /// No description provided for @remindersOff.
@@ -821,7 +941,7 @@ abstract class AppLocalizations {
   /// No description provided for @desktopNotificationsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'System notifications and review alerts'**
+  /// **'System review alerts'**
   String get desktopNotificationsSubtitle;
 
   /// No description provided for @desktopNotificationsActive.
@@ -863,7 +983,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Export and import decks via JSON or CSV'**
+  /// **'JSON and CSV transfer'**
   String get backupSubtitle;
 
   /// No description provided for @sectionUpdates.
@@ -881,7 +1001,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkForUpdatesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Verify installed version against GitHub releases'**
+  /// **'Check GitHub releases'**
   String get checkForUpdatesSubtitle;
 
   /// No description provided for @checkingForUpdates.
@@ -947,7 +1067,7 @@ abstract class AppLocalizations {
   /// No description provided for @licenseSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'MIT License • Open Source'**
+  /// **'MIT License • Credits'**
   String get licenseSubtitle;
 
   /// No description provided for @licenseDialogTitle.
@@ -1873,6 +1993,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save card: {error}'**
   String errorSavingCard(String error);
+
+  /// No description provided for @srsAlgorithm.
+  ///
+  /// In en, this message translates to:
+  /// **'SRS Algorithm'**
+  String get srsAlgorithm;
+
+  /// No description provided for @srsAlgorithmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the spaced repetition scheduler for card reviews.'**
+  String get srsAlgorithmDesc;
+
+  /// No description provided for @fsrsAlgorithmName.
+  ///
+  /// In en, this message translates to:
+  /// **'FSRS (Default)'**
+  String get fsrsAlgorithmName;
+
+  /// No description provided for @fsrsAlgorithmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Modern stability model'**
+  String get fsrsAlgorithmDesc;
+
+  /// No description provided for @sm2AlgorithmName.
+  ///
+  /// In en, this message translates to:
+  /// **'SM-2 (Classic)'**
+  String get sm2AlgorithmName;
+
+  /// No description provided for @sm2AlgorithmDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic SuperMemo 2 model'**
+  String get sm2AlgorithmDesc;
 }
 
 class _AppLocalizationsDelegate

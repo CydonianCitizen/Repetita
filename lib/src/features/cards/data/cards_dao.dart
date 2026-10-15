@@ -23,6 +23,7 @@ extension CardToEntity on Card {
     isSuspended: isSuspended,
     buriedUntil: buriedUntil?.toUtc(),
     clozeIndex: clozeIndex,
+    easinessFactor: easinessFactor,
   );
 }
 

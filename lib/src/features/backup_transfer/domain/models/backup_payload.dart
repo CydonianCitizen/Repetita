@@ -53,6 +53,7 @@ class CardPayload {
     required this.state,
     required this.stability,
     required this.difficulty,
+    this.easinessFactor = 2.5,
     required this.due,
     this.lastReview,
     required this.reps,
@@ -70,6 +71,7 @@ class CardPayload {
   final int state;
   final double stability;
   final double difficulty;
+  final double easinessFactor;
   final DateTime due;
   final DateTime? lastReview;
   final int reps;
@@ -87,6 +89,7 @@ class CardPayload {
     'state': state,
     'stability': stability,
     'difficulty': difficulty,
+    'easinessFactor': easinessFactor,
     'due': due.toUtc().toIso8601String(),
     'lastReview': lastReview?.toUtc().toIso8601String(),
     'reps': reps,
@@ -105,6 +108,7 @@ class CardPayload {
     state: json['state'] as int,
     stability: (json['stability'] as num).toDouble(),
     difficulty: (json['difficulty'] as num).toDouble(),
+    easinessFactor: (json['easinessFactor'] as num?)?.toDouble() ?? 2.5,
     due: DateTime.parse(json['due'] as String).toUtc(),
     lastReview: json['lastReview'] != null
         ? DateTime.parse(json['lastReview'] as String).toUtc()
@@ -131,6 +135,7 @@ class CardPayload {
           state == other.state &&
           stability == other.stability &&
           difficulty == other.difficulty &&
+          easinessFactor == other.easinessFactor &&
           due == other.due &&
           lastReview == other.lastReview &&
           reps == other.reps &&
@@ -149,6 +154,7 @@ class CardPayload {
     state,
     stability,
     difficulty,
+    easinessFactor,
     due,
     lastReview,
     reps,
@@ -169,6 +175,7 @@ class ReviewLogPayload {
     required this.due,
     required this.stability,
     required this.difficulty,
+    this.easinessFactor = 2.5,
     required this.elapsedDays,
     required this.lastElapsedDays,
     required this.scheduledDays,
@@ -182,6 +189,7 @@ class ReviewLogPayload {
   final DateTime due;
   final double stability;
   final double difficulty;
+  final double easinessFactor;
   final int elapsedDays;
   final int lastElapsedDays;
   final int scheduledDays;
@@ -195,6 +203,7 @@ class ReviewLogPayload {
     'due': due.toUtc().toIso8601String(),
     'stability': stability,
     'difficulty': difficulty,
+    'easinessFactor': easinessFactor,
     'elapsedDays': elapsedDays,
     'lastElapsedDays': lastElapsedDays,
     'scheduledDays': scheduledDays,
@@ -210,6 +219,7 @@ class ReviewLogPayload {
         due: DateTime.parse(json['due'] as String).toUtc(),
         stability: (json['stability'] as num).toDouble(),
         difficulty: (json['difficulty'] as num).toDouble(),
+        easinessFactor: (json['easinessFactor'] as num?)?.toDouble() ?? 2.5,
         elapsedDays: json['elapsedDays'] as int,
         lastElapsedDays: json['lastElapsedDays'] as int,
         scheduledDays: json['scheduledDays'] as int,
@@ -228,6 +238,7 @@ class ReviewLogPayload {
           due == other.due &&
           stability == other.stability &&
           difficulty == other.difficulty &&
+          easinessFactor == other.easinessFactor &&
           elapsedDays == other.elapsedDays &&
           lastElapsedDays == other.lastElapsedDays &&
           scheduledDays == other.scheduledDays &&
@@ -242,6 +253,7 @@ class ReviewLogPayload {
     due,
     stability,
     difficulty,
+    easinessFactor,
     elapsedDays,
     lastElapsedDays,
     scheduledDays,

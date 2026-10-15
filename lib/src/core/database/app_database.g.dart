@@ -529,6 +529,18 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _easinessFactorMeta = const VerificationMeta(
+    'easinessFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easinessFactor = GeneratedColumn<double>(
+    'easiness_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -546,6 +558,7 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     isSuspended,
     buriedUntil,
     clozeIndex,
+    easinessFactor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -660,6 +673,15 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         clozeIndex.isAcceptableOrUnknown(data['cloze_index']!, _clozeIndexMeta),
       );
     }
+    if (data.containsKey('easiness_factor')) {
+      context.handle(
+        _easinessFactorMeta,
+        easinessFactor.isAcceptableOrUnknown(
+          data['easiness_factor']!,
+          _easinessFactorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -729,6 +751,10 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         DriftSqlType.int,
         data['${effectivePrefix}cloze_index'],
       ),
+      easinessFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}easiness_factor'],
+      )!,
     );
   }
 
@@ -754,6 +780,7 @@ class Card extends DataClass implements Insertable<Card> {
   final bool isSuspended;
   final DateTime? buriedUntil;
   final int? clozeIndex;
+  final double easinessFactor;
   const Card({
     required this.id,
     required this.deckId,
@@ -770,6 +797,7 @@ class Card extends DataClass implements Insertable<Card> {
     required this.isSuspended,
     this.buriedUntil,
     this.clozeIndex,
+    required this.easinessFactor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -795,6 +823,7 @@ class Card extends DataClass implements Insertable<Card> {
     if (!nullToAbsent || clozeIndex != null) {
       map['cloze_index'] = Variable<int>(clozeIndex);
     }
+    map['easiness_factor'] = Variable<double>(easinessFactor);
     return map;
   }
 
@@ -821,6 +850,7 @@ class Card extends DataClass implements Insertable<Card> {
       clozeIndex: clozeIndex == null && nullToAbsent
           ? const Value.absent()
           : Value(clozeIndex),
+      easinessFactor: Value(easinessFactor),
     );
   }
 
@@ -845,6 +875,7 @@ class Card extends DataClass implements Insertable<Card> {
       isSuspended: serializer.fromJson<bool>(json['isSuspended']),
       buriedUntil: serializer.fromJson<DateTime?>(json['buriedUntil']),
       clozeIndex: serializer.fromJson<int?>(json['clozeIndex']),
+      easinessFactor: serializer.fromJson<double>(json['easinessFactor']),
     );
   }
   @override
@@ -866,6 +897,7 @@ class Card extends DataClass implements Insertable<Card> {
       'isSuspended': serializer.toJson<bool>(isSuspended),
       'buriedUntil': serializer.toJson<DateTime?>(buriedUntil),
       'clozeIndex': serializer.toJson<int?>(clozeIndex),
+      'easinessFactor': serializer.toJson<double>(easinessFactor),
     };
   }
 
@@ -885,6 +917,7 @@ class Card extends DataClass implements Insertable<Card> {
     bool? isSuspended,
     Value<DateTime?> buriedUntil = const Value.absent(),
     Value<int?> clozeIndex = const Value.absent(),
+    double? easinessFactor,
   }) => Card(
     id: id ?? this.id,
     deckId: deckId ?? this.deckId,
@@ -901,6 +934,7 @@ class Card extends DataClass implements Insertable<Card> {
     isSuspended: isSuspended ?? this.isSuspended,
     buriedUntil: buriedUntil.present ? buriedUntil.value : this.buriedUntil,
     clozeIndex: clozeIndex.present ? clozeIndex.value : this.clozeIndex,
+    easinessFactor: easinessFactor ?? this.easinessFactor,
   );
   Card copyWithCompanion(CardsCompanion data) {
     return Card(
@@ -929,6 +963,9 @@ class Card extends DataClass implements Insertable<Card> {
       clozeIndex: data.clozeIndex.present
           ? data.clozeIndex.value
           : this.clozeIndex,
+      easinessFactor: data.easinessFactor.present
+          ? data.easinessFactor.value
+          : this.easinessFactor,
     );
   }
 
@@ -949,7 +986,8 @@ class Card extends DataClass implements Insertable<Card> {
           ..write('createdAt: $createdAt, ')
           ..write('isSuspended: $isSuspended, ')
           ..write('buriedUntil: $buriedUntil, ')
-          ..write('clozeIndex: $clozeIndex')
+          ..write('clozeIndex: $clozeIndex, ')
+          ..write('easinessFactor: $easinessFactor')
           ..write(')'))
         .toString();
   }
@@ -971,6 +1009,7 @@ class Card extends DataClass implements Insertable<Card> {
     isSuspended,
     buriedUntil,
     clozeIndex,
+    easinessFactor,
   );
   @override
   bool operator ==(Object other) =>
@@ -990,7 +1029,8 @@ class Card extends DataClass implements Insertable<Card> {
           other.createdAt == this.createdAt &&
           other.isSuspended == this.isSuspended &&
           other.buriedUntil == this.buriedUntil &&
-          other.clozeIndex == this.clozeIndex);
+          other.clozeIndex == this.clozeIndex &&
+          other.easinessFactor == this.easinessFactor);
 }
 
 class CardsCompanion extends UpdateCompanion<Card> {
@@ -1009,6 +1049,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
   final Value<bool> isSuspended;
   final Value<DateTime?> buriedUntil;
   final Value<int?> clozeIndex;
+  final Value<double> easinessFactor;
   const CardsCompanion({
     this.id = const Value.absent(),
     this.deckId = const Value.absent(),
@@ -1025,6 +1066,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.isSuspended = const Value.absent(),
     this.buriedUntil = const Value.absent(),
     this.clozeIndex = const Value.absent(),
+    this.easinessFactor = const Value.absent(),
   });
   CardsCompanion.insert({
     this.id = const Value.absent(),
@@ -1042,6 +1084,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.isSuspended = const Value.absent(),
     this.buriedUntil = const Value.absent(),
     this.clozeIndex = const Value.absent(),
+    this.easinessFactor = const Value.absent(),
   }) : deckId = Value(deckId),
        front = Value(front),
        back = Value(back),
@@ -1062,6 +1105,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Expression<bool>? isSuspended,
     Expression<DateTime>? buriedUntil,
     Expression<int>? clozeIndex,
+    Expression<double>? easinessFactor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1079,6 +1123,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
       if (isSuspended != null) 'is_suspended': isSuspended,
       if (buriedUntil != null) 'buried_until': buriedUntil,
       if (clozeIndex != null) 'cloze_index': clozeIndex,
+      if (easinessFactor != null) 'easiness_factor': easinessFactor,
     });
   }
 
@@ -1098,6 +1143,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Value<bool>? isSuspended,
     Value<DateTime?>? buriedUntil,
     Value<int?>? clozeIndex,
+    Value<double>? easinessFactor,
   }) {
     return CardsCompanion(
       id: id ?? this.id,
@@ -1115,6 +1161,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
       isSuspended: isSuspended ?? this.isSuspended,
       buriedUntil: buriedUntil ?? this.buriedUntil,
       clozeIndex: clozeIndex ?? this.clozeIndex,
+      easinessFactor: easinessFactor ?? this.easinessFactor,
     );
   }
 
@@ -1166,6 +1213,9 @@ class CardsCompanion extends UpdateCompanion<Card> {
     if (clozeIndex.present) {
       map['cloze_index'] = Variable<int>(clozeIndex.value);
     }
+    if (easinessFactor.present) {
+      map['easiness_factor'] = Variable<double>(easinessFactor.value);
+    }
     return map;
   }
 
@@ -1186,7 +1236,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
           ..write('createdAt: $createdAt, ')
           ..write('isSuspended: $isSuspended, ')
           ..write('buriedUntil: $buriedUntil, ')
-          ..write('clozeIndex: $clozeIndex')
+          ..write('clozeIndex: $clozeIndex, ')
+          ..write('easinessFactor: $easinessFactor')
           ..write(')'))
         .toString();
   }
@@ -1316,6 +1367,18 @@ class $ReviewLogsTable extends ReviewLogs
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _easinessFactorMeta = const VerificationMeta(
+    'easinessFactor',
+  );
+  @override
+  late final GeneratedColumn<double> easinessFactor = GeneratedColumn<double>(
+    'easiness_factor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2.5),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1329,6 +1392,7 @@ class $ReviewLogsTable extends ReviewLogs
     lastElapsedDays,
     scheduledDays,
     reviewedAt,
+    easinessFactor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1434,6 +1498,15 @@ class $ReviewLogsTable extends ReviewLogs
     } else if (isInserting) {
       context.missing(_reviewedAtMeta);
     }
+    if (data.containsKey('easiness_factor')) {
+      context.handle(
+        _easinessFactorMeta,
+        easinessFactor.isAcceptableOrUnknown(
+          data['easiness_factor']!,
+          _easinessFactorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1487,6 +1560,10 @@ class $ReviewLogsTable extends ReviewLogs
         DriftSqlType.dateTime,
         data['${effectivePrefix}reviewed_at'],
       )!,
+      easinessFactor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}easiness_factor'],
+      )!,
     );
   }
 
@@ -1508,6 +1585,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
   final int lastElapsedDays;
   final int scheduledDays;
   final DateTime reviewedAt;
+  final double easinessFactor;
   const ReviewLog({
     required this.id,
     required this.cardId,
@@ -1520,6 +1598,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     required this.lastElapsedDays,
     required this.scheduledDays,
     required this.reviewedAt,
+    required this.easinessFactor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1535,6 +1614,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     map['last_elapsed_days'] = Variable<int>(lastElapsedDays);
     map['scheduled_days'] = Variable<int>(scheduledDays);
     map['reviewed_at'] = Variable<DateTime>(reviewedAt);
+    map['easiness_factor'] = Variable<double>(easinessFactor);
     return map;
   }
 
@@ -1551,6 +1631,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
       lastElapsedDays: Value(lastElapsedDays),
       scheduledDays: Value(scheduledDays),
       reviewedAt: Value(reviewedAt),
+      easinessFactor: Value(easinessFactor),
     );
   }
 
@@ -1571,6 +1652,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
       lastElapsedDays: serializer.fromJson<int>(json['lastElapsedDays']),
       scheduledDays: serializer.fromJson<int>(json['scheduledDays']),
       reviewedAt: serializer.fromJson<DateTime>(json['reviewedAt']),
+      easinessFactor: serializer.fromJson<double>(json['easinessFactor']),
     );
   }
   @override
@@ -1588,6 +1670,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
       'lastElapsedDays': serializer.toJson<int>(lastElapsedDays),
       'scheduledDays': serializer.toJson<int>(scheduledDays),
       'reviewedAt': serializer.toJson<DateTime>(reviewedAt),
+      'easinessFactor': serializer.toJson<double>(easinessFactor),
     };
   }
 
@@ -1603,6 +1686,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     int? lastElapsedDays,
     int? scheduledDays,
     DateTime? reviewedAt,
+    double? easinessFactor,
   }) => ReviewLog(
     id: id ?? this.id,
     cardId: cardId ?? this.cardId,
@@ -1615,6 +1699,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
     scheduledDays: scheduledDays ?? this.scheduledDays,
     reviewedAt: reviewedAt ?? this.reviewedAt,
+    easinessFactor: easinessFactor ?? this.easinessFactor,
   );
   ReviewLog copyWithCompanion(ReviewLogsCompanion data) {
     return ReviewLog(
@@ -1639,6 +1724,9 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
       reviewedAt: data.reviewedAt.present
           ? data.reviewedAt.value
           : this.reviewedAt,
+      easinessFactor: data.easinessFactor.present
+          ? data.easinessFactor.value
+          : this.easinessFactor,
     );
   }
 
@@ -1655,7 +1743,8 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
           ..write('elapsedDays: $elapsedDays, ')
           ..write('lastElapsedDays: $lastElapsedDays, ')
           ..write('scheduledDays: $scheduledDays, ')
-          ..write('reviewedAt: $reviewedAt')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('easinessFactor: $easinessFactor')
           ..write(')'))
         .toString();
   }
@@ -1673,6 +1762,7 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
     lastElapsedDays,
     scheduledDays,
     reviewedAt,
+    easinessFactor,
   );
   @override
   bool operator ==(Object other) =>
@@ -1688,7 +1778,8 @@ class ReviewLog extends DataClass implements Insertable<ReviewLog> {
           other.elapsedDays == this.elapsedDays &&
           other.lastElapsedDays == this.lastElapsedDays &&
           other.scheduledDays == this.scheduledDays &&
-          other.reviewedAt == this.reviewedAt);
+          other.reviewedAt == this.reviewedAt &&
+          other.easinessFactor == this.easinessFactor);
 }
 
 class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
@@ -1703,6 +1794,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
   final Value<int> lastElapsedDays;
   final Value<int> scheduledDays;
   final Value<DateTime> reviewedAt;
+  final Value<double> easinessFactor;
   const ReviewLogsCompanion({
     this.id = const Value.absent(),
     this.cardId = const Value.absent(),
@@ -1715,6 +1807,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
     this.lastElapsedDays = const Value.absent(),
     this.scheduledDays = const Value.absent(),
     this.reviewedAt = const Value.absent(),
+    this.easinessFactor = const Value.absent(),
   });
   ReviewLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -1728,6 +1821,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
     required int lastElapsedDays,
     required int scheduledDays,
     required DateTime reviewedAt,
+    this.easinessFactor = const Value.absent(),
   }) : cardId = Value(cardId),
        rating = Value(rating),
        state = Value(state),
@@ -1750,6 +1844,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
     Expression<int>? lastElapsedDays,
     Expression<int>? scheduledDays,
     Expression<DateTime>? reviewedAt,
+    Expression<double>? easinessFactor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1763,6 +1858,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
       if (lastElapsedDays != null) 'last_elapsed_days': lastElapsedDays,
       if (scheduledDays != null) 'scheduled_days': scheduledDays,
       if (reviewedAt != null) 'reviewed_at': reviewedAt,
+      if (easinessFactor != null) 'easiness_factor': easinessFactor,
     });
   }
 
@@ -1778,6 +1874,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
     Value<int>? lastElapsedDays,
     Value<int>? scheduledDays,
     Value<DateTime>? reviewedAt,
+    Value<double>? easinessFactor,
   }) {
     return ReviewLogsCompanion(
       id: id ?? this.id,
@@ -1791,6 +1888,7 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
       lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
       scheduledDays: scheduledDays ?? this.scheduledDays,
       reviewedAt: reviewedAt ?? this.reviewedAt,
+      easinessFactor: easinessFactor ?? this.easinessFactor,
     );
   }
 
@@ -1830,6 +1928,9 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
     if (reviewedAt.present) {
       map['reviewed_at'] = Variable<DateTime>(reviewedAt.value);
     }
+    if (easinessFactor.present) {
+      map['easiness_factor'] = Variable<double>(easinessFactor.value);
+    }
     return map;
   }
 
@@ -1846,7 +1947,8 @@ class ReviewLogsCompanion extends UpdateCompanion<ReviewLog> {
           ..write('elapsedDays: $elapsedDays, ')
           ..write('lastElapsedDays: $lastElapsedDays, ')
           ..write('scheduledDays: $scheduledDays, ')
-          ..write('reviewedAt: $reviewedAt')
+          ..write('reviewedAt: $reviewedAt, ')
+          ..write('easinessFactor: $easinessFactor')
           ..write(')'))
         .toString();
   }
@@ -2953,6 +3055,7 @@ typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
   Value<bool> isSuspended,
   Value<DateTime?> buriedUntil,
   Value<int?> clozeIndex,
+  Value<double> easinessFactor,
 });
 typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<int> id,
@@ -2970,6 +3073,7 @@ typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<bool> isSuspended,
   Value<DateTime?> buriedUntil,
   Value<int?> clozeIndex,
+  Value<double> easinessFactor,
 });
 
 final class $$CardsTableReferences
@@ -3106,6 +3210,11 @@ class $$CardsTableFilterComposer extends Composer<_$AppDatabase, $CardsTable> {
 
   ColumnFilters<int> get clozeIndex => $composableBuilder(
     column: $table.clozeIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3262,6 +3371,11 @@ class $$CardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DecksTableOrderingComposer get deckId {
     final $$DecksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3344,6 +3458,11 @@ class $$CardsTableAnnotationComposer
 
   GeneratedColumn<int> get clozeIndex => $composableBuilder(
     column: $table.clozeIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
     builder: (column) => column,
   );
 
@@ -3468,6 +3587,7 @@ class $$CardsTableTableManager
                 Value<bool> isSuspended = const Value.absent(),
                 Value<DateTime?> buriedUntil = const Value.absent(),
                 Value<int?> clozeIndex = const Value.absent(),
+                Value<double> easinessFactor = const Value.absent(),
               }) => CardsCompanion(
                 id: id,
                 deckId: deckId,
@@ -3484,6 +3604,7 @@ class $$CardsTableTableManager
                 isSuspended: isSuspended,
                 buriedUntil: buriedUntil,
                 clozeIndex: clozeIndex,
+                easinessFactor: easinessFactor,
               ),
           createCompanionCallback:
               ({
@@ -3502,6 +3623,7 @@ class $$CardsTableTableManager
                 Value<bool> isSuspended = const Value.absent(),
                 Value<DateTime?> buriedUntil = const Value.absent(),
                 Value<int?> clozeIndex = const Value.absent(),
+                Value<double> easinessFactor = const Value.absent(),
               }) => CardsCompanion.insert(
                 id: id,
                 deckId: deckId,
@@ -3518,6 +3640,7 @@ class $$CardsTableTableManager
                 isSuspended: isSuspended,
                 buriedUntil: buriedUntil,
                 clozeIndex: clozeIndex,
+                easinessFactor: easinessFactor,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3639,6 +3762,7 @@ typedef $$ReviewLogsTableCreateCompanionBuilder = ReviewLogsCompanion Function({
   required int lastElapsedDays,
   required int scheduledDays,
   required DateTime reviewedAt,
+  Value<double> easinessFactor,
 });
 typedef $$ReviewLogsTableUpdateCompanionBuilder = ReviewLogsCompanion Function({
   Value<int> id,
@@ -3652,6 +3776,7 @@ typedef $$ReviewLogsTableUpdateCompanionBuilder = ReviewLogsCompanion Function({
   Value<int> lastElapsedDays,
   Value<int> scheduledDays,
   Value<DateTime> reviewedAt,
+  Value<double> easinessFactor,
 });
 
 final class $$ReviewLogsTableReferences
@@ -3732,6 +3857,11 @@ class $$ReviewLogsTableFilterComposer
 
   ColumnFilters<DateTime> get reviewedAt => $composableBuilder(
     column: $table.reviewedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3818,6 +3948,11 @@ class $$ReviewLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CardsTableOrderingComposer get cardId {
     final $$CardsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3891,6 +4026,11 @@ class $$ReviewLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get easinessFactor => $composableBuilder(
+    column: $table.easinessFactor,
+    builder: (column) => column,
+  );
+
   $$CardsTableAnnotationComposer get cardId {
     final $$CardsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -3954,6 +4094,7 @@ class $$ReviewLogsTableTableManager
                 Value<int> lastElapsedDays = const Value.absent(),
                 Value<int> scheduledDays = const Value.absent(),
                 Value<DateTime> reviewedAt = const Value.absent(),
+                Value<double> easinessFactor = const Value.absent(),
               }) => ReviewLogsCompanion(
                 id: id,
                 cardId: cardId,
@@ -3966,6 +4107,7 @@ class $$ReviewLogsTableTableManager
                 lastElapsedDays: lastElapsedDays,
                 scheduledDays: scheduledDays,
                 reviewedAt: reviewedAt,
+                easinessFactor: easinessFactor,
               ),
           createCompanionCallback:
               ({
@@ -3980,6 +4122,7 @@ class $$ReviewLogsTableTableManager
                 required int lastElapsedDays,
                 required int scheduledDays,
                 required DateTime reviewedAt,
+                Value<double> easinessFactor = const Value.absent(),
               }) => ReviewLogsCompanion.insert(
                 id: id,
                 cardId: cardId,
@@ -3992,6 +4135,7 @@ class $$ReviewLogsTableTableManager
                 lastElapsedDays: lastElapsedDays,
                 scheduledDays: scheduledDays,
                 reviewedAt: reviewedAt,
+                easinessFactor: easinessFactor,
               ),
           withReferenceMapper: (p0) => p0
               .map(

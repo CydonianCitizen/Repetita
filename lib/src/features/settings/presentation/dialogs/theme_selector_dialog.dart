@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../domain/app_theme_mode.dart';
 import '../controllers/theme_mode_controller.dart';
 
 class ThemeSelectorDialog extends ConsumerWidget {
@@ -22,64 +23,85 @@ class ThemeSelectorDialog extends ConsumerWidget {
 
     return AlertDialog(
       title: Text(l10n?.themeMode ?? 'Theme Mode'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.system
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.system ? primaryColor : null,
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(
+                currentMode == AppThemeMode.system
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked,
+                color: currentMode == AppThemeMode.system ? primaryColor : null,
+              ),
+              title: Text(l10n?.themeSystem ?? 'System Default'),
+              subtitle: Text(
+                l10n?.themeModeSubtitle ?? 'Follow device theme settings',
+              ),
+              onTap: () {
+                ref
+                    .read(themeModeControllerProvider.notifier)
+                    .setThemeMode(AppThemeMode.system);
+                Navigator.of(context).pop();
+              },
             ),
-            title: Text(l10n?.themeSystem ?? 'System Default'),
-            subtitle: Text(
-              l10n?.themeModeSubtitle ?? 'Follow device theme settings',
+            ListTile(
+              leading: Icon(
+                currentMode == AppThemeMode.dark
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked,
+                color: currentMode == AppThemeMode.dark ? primaryColor : null,
+              ),
+              title: Text(l10n?.themeDark ?? 'Dark Theme'),
+              subtitle: Text(
+                l10n?.themeDarkSubtitle ?? 'Always use dark palette',
+              ),
+              onTap: () {
+                ref
+                    .read(themeModeControllerProvider.notifier)
+                    .setThemeMode(AppThemeMode.dark);
+                Navigator.of(context).pop();
+              },
             ),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.system);
-              Navigator.of(context).pop();
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.dark
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.dark ? primaryColor : null,
+            ListTile(
+              leading: Icon(
+                currentMode == AppThemeMode.amoled
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked,
+                color: currentMode == AppThemeMode.amoled ? primaryColor : null,
+              ),
+              title: Text(l10n?.themeAmoled ?? 'AMOLED (Pure Black)'),
+              subtitle: Text(
+                l10n?.themeAmoledSubtitle ??
+                    'Optimized for OLED displays to save battery',
+              ),
+              onTap: () {
+                ref
+                    .read(themeModeControllerProvider.notifier)
+                    .setThemeMode(AppThemeMode.amoled);
+                Navigator.of(context).pop();
+              },
             ),
-            title: Text(l10n?.themeDark ?? 'Dark Theme'),
-            subtitle: Text(
-              l10n?.themeDarkSubtitle ?? 'Always use dark palette',
+            ListTile(
+              leading: Icon(
+                currentMode == AppThemeMode.light
+                    ? Icons.check_circle_rounded
+                    : Icons.radio_button_unchecked,
+                color: currentMode == AppThemeMode.light ? primaryColor : null,
+              ),
+              title: Text(l10n?.themeLight ?? 'Light Theme'),
+              subtitle: Text(
+                l10n?.themeLightSubtitle ?? 'Always use light palette',
+              ),
+              onTap: () {
+                ref
+                    .read(themeModeControllerProvider.notifier)
+                    .setThemeMode(AppThemeMode.light);
+                Navigator.of(context).pop();
+              },
             ),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.dark);
-              Navigator.of(context).pop();
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.light
-                  ? Icons.check_circle_rounded
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.light ? primaryColor : null,
-            ),
-            title: Text(l10n?.themeLight ?? 'Light Theme'),
-            subtitle: Text(
-              l10n?.themeLightSubtitle ?? 'Always use light palette',
-            ),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.light);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(

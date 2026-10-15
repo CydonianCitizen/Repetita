@@ -21,8 +21,8 @@ class RepetitaApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      darkTheme: themeMode.isAmoled ? AppTheme.amoledTheme : AppTheme.darkTheme,
+      themeMode: themeMode.flutterThemeMode,
       home: const MainNavigationScreen(),
     );
   }

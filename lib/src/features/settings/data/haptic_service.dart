@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,6 +12,24 @@ final hapticServiceProvider = Provider<HapticService>((ref) {
 class HapticService {
   const HapticService();
 
+  static const MethodChannel _channel = MethodChannel(
+    'com.example.repetita/haptics',
+  );
+
+  Future<void> _vibrate(
+    String nativeType,
+    Future<void> Function() flutterFallback,
+  ) async {
+    await flutterFallback();
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        await _channel.invokeMethod<bool>('vibrate', {'type': nativeType});
+      } catch (_) {
+        // Ignored when running in widget test environment
+      }
+    }
+  }
+
   Future<void> triggerRatingFeedback(
     Rating rating,
     HapticIntensity intensity,
@@ -21,48 +40,48 @@ class HapticService {
       case Rating.again:
         // Complete failure: distinctive warning/alert tactile pulse
         if (intensity == HapticIntensity.light) {
-          await HapticFeedback.mediumImpact();
+          await _vibrate('medium', () => HapticFeedback.mediumImpact());
         } else {
-          await HapticFeedback.heavyImpact();
+          await _vibrate('heavy', () => HapticFeedback.heavyImpact());
           await Future<void>.delayed(const Duration(milliseconds: 60));
-          await HapticFeedback.heavyImpact();
+          await _vibrate('heavy', () => HapticFeedback.heavyImpact());
         }
         break;
 
       case Rating.hard:
         // High effort recall: firm tactile thud
         if (intensity == HapticIntensity.light) {
-          await HapticFeedback.lightImpact();
+          await _vibrate('light', () => HapticFeedback.lightImpact());
         } else if (intensity == HapticIntensity.medium) {
-          await HapticFeedback.mediumImpact();
+          await _vibrate('medium', () => HapticFeedback.mediumImpact());
         } else {
-          await HapticFeedback.heavyImpact();
+          await _vibrate('heavy', () => HapticFeedback.heavyImpact());
         }
         break;
 
       case Rating.good:
         // Standard successful recall: pleasant balanced tap
         if (intensity == HapticIntensity.light) {
-          await HapticFeedback.selectionClick();
+          await _vibrate('click', () => HapticFeedback.selectionClick());
         } else if (intensity == HapticIntensity.medium) {
-          await HapticFeedback.lightImpact();
+          await _vibrate('light', () => HapticFeedback.lightImpact());
         } else {
-          await HapticFeedback.mediumImpact();
+          await _vibrate('medium', () => HapticFeedback.mediumImpact());
         }
         break;
 
       case Rating.easy:
         // Instant/effortless recall: crisp rapid double click
         if (intensity == HapticIntensity.light) {
-          await HapticFeedback.selectionClick();
+          await _vibrate('click', () => HapticFeedback.selectionClick());
         } else if (intensity == HapticIntensity.medium) {
-          await HapticFeedback.selectionClick();
+          await _vibrate('click', () => HapticFeedback.selectionClick());
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          await HapticFeedback.selectionClick();
+          await _vibrate('click', () => HapticFeedback.selectionClick());
         } else {
-          await HapticFeedback.lightImpact();
+          await _vibrate('light', () => HapticFeedback.lightImpact());
           await Future<void>.delayed(const Duration(milliseconds: 50));
-          await HapticFeedback.selectionClick();
+          await _vibrate('click', () => HapticFeedback.selectionClick());
         }
         break;
     }
@@ -75,19 +94,19 @@ class HapticService {
       case HapticIntensity.off:
         break;
       case HapticIntensity.light:
-        await HapticFeedback.lightImpact();
+        await _vibrate('light', () => HapticFeedback.lightImpact());
         break;
       case HapticIntensity.medium:
-        await HapticFeedback.mediumImpact();
+        await _vibrate('medium', () => HapticFeedback.mediumImpact());
         break;
       case HapticIntensity.strong:
-        await HapticFeedback.heavyImpact();
+        await _vibrate('heavy', () => HapticFeedback.heavyImpact());
         break;
     }
   }
 
   Future<void> triggerSelection(HapticIntensity intensity) async {
     if (intensity.isOff) return;
-    await HapticFeedback.selectionClick();
+    await _vibrate('click', () => HapticFeedback.selectionClick());
   }
 }

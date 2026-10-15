@@ -216,13 +216,43 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get settingsAppearanceTitle => 'Aspetto e Schermo';
+
+  @override
+  String get settingsAppearanceDesc => 'Tema, schermo, movimento';
+
+  @override
+  String get settingsStudyAlgorithmTitle => 'Studio e Ripasso';
+
+  @override
+  String get settingsStudyAlgorithmDesc => 'FSRS, ritenzione, promemoria';
+
+  @override
+  String get settingsLanguageDesc => 'Lingua interfaccia';
+
+  @override
+  String get settingsBackupDesc => 'Backup JSON e CSV';
+
+  @override
+  String get settingsUpdatesTitle => 'Aggiornamenti';
+
+  @override
+  String get settingsUpdatesDesc => 'Verifica release GitHub';
+
+  @override
+  String get settingsAboutTitle => 'Info e Crediti';
+
+  @override
+  String get settingsAboutDesc => 'Licenza MIT e crediti';
+
+  @override
   String get sectionAppearance => 'ASPETTO';
 
   @override
   String get themeMode => 'Tema';
 
   @override
-  String get themeModeSubtitle => 'Predefinito di sistema, Chiaro o Scuro';
+  String get themeModeSubtitle => 'Chiaro, Scuro o AMOLED';
 
   @override
   String get themeSystem => 'Predefinito di sistema';
@@ -231,35 +261,64 @@ class AppLocalizationsIt extends AppLocalizations {
   String get themeDark => 'Tema Scuro';
 
   @override
+  String get themeAmoled => 'AMOLED (Nero assoluto)';
+
+  @override
   String get themeLight => 'Tema Chiaro';
+
+  @override
+  String get themeAmoledSubtitle => 'Nero puro per display OLED';
+
+  @override
+  String get refreshRate => 'Frequenza di aggiornamento';
+
+  @override
+  String get refreshRateSubtitle => 'Frequenza schermo';
+
+  @override
+  String get refreshRateAuto => 'Predefinito di sistema (Dinamico)';
+
+  @override
+  String get refreshRateAutoDesc =>
+      'Frequenza adattiva gestita dal sistema operativo Android';
+
+  @override
+  String get refreshRatePowerSave => 'Risparmio batteria (60 Hz)';
+
+  @override
+  String get refreshRatePowerSaveDesc =>
+      'Blocca a 60 Hz per minimizzare il consumo della GPU';
+
+  @override
+  String get refreshRateHigh => 'Massima fluidità (90/120 Hz)';
+
+  @override
+  String get refreshRateHighDesc =>
+      'Massima frequenza supportata per transizioni ultra-fluide';
 
   @override
   String get animationIntensity => 'Intensità animazioni';
 
   @override
-  String get animationIntensitySubtitle =>
-      'Livello di movimento e micro-interazioni';
+  String get animationIntensitySubtitle => 'Transizioni e animazioni';
 
   @override
   String get animationReduced => 'Ridotte';
 
   @override
-  String get animationReducedDesc =>
-      'Transizioni istantanee, risparmio energetico e massima accessibilità';
+  String get animationReducedDesc => 'Istantanee, risparmio batteria';
 
   @override
   String get animationStandard => 'Standard';
 
   @override
-  String get animationStandardDesc =>
-      'Transizioni fluide bilanciate Material 3';
+  String get animationStandardDesc => 'Fluide e bilanciate';
 
   @override
   String get animationExpressive => 'Espressive';
 
   @override
-  String get animationExpressiveDesc =>
-      'Fisica elastica dinamica, micro-interazioni ricche ed espressive';
+  String get animationExpressiveDesc => 'Fisica elastica dinamica';
 
   @override
   String get testMotion => 'Prova movimento';
@@ -268,31 +327,31 @@ class AppLocalizationsIt extends AppLocalizations {
   String get hapticFeedback => 'Feedback aptico';
 
   @override
-  String get hapticFeedbackSubtitle => 'Vibrazioni alla risposta e interazioni';
+  String get hapticFeedbackSubtitle => 'Vibrazione al tocco';
 
   @override
   String get hapticOff => 'Disattivato';
 
   @override
-  String get hapticOffDesc => 'Vibrazioni disattivate';
+  String get hapticOffDesc => 'Nessuna vibrazione';
 
   @override
   String get hapticLight => 'Leggero';
 
   @override
-  String get hapticLightDesc => 'Click tattili delicati';
+  String get hapticLightDesc => 'Click leggeri';
 
   @override
   String get hapticMedium => 'Medio';
 
   @override
-  String get hapticMediumDesc => 'Risposta fisica bilanciata';
+  String get hapticMediumDesc => 'Impulso bilanciato';
 
   @override
   String get hapticStrong => 'Forte';
 
   @override
-  String get hapticStrongDesc => 'Vibrazioni decise e impulsi tattili';
+  String get hapticStrongDesc => 'Feedback deciso';
 
   @override
   String get testHaptic => 'Prova vibrazione';
@@ -307,7 +366,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get language => 'Lingua';
 
   @override
-  String get languageSubtitle => 'Seleziona la lingua dell\'interfaccia';
+  String get languageSubtitle => 'Lingua interfaccia';
 
   @override
   String get systemLanguageSubtitle => 'Segui la lingua del dispositivo';
@@ -337,8 +396,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get fsrsParameters => 'Parametri algoritmo FSRS';
 
   @override
-  String get fsrsParametersSubtitle =>
-      'Ritenzione desiderata, intervalli massimi, pesi';
+  String get fsrsParametersSubtitle => 'Ritenzione e intervalli';
 
   @override
   String get retentionTarget => '90% ritenzione';
@@ -367,7 +425,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get studyReminders => 'Promemoria di studio';
 
   @override
-  String get studyRemindersSubtitle => 'Notifiche giornaliere di ripasso';
+  String get studyRemindersSubtitle => 'Avvisi giornalieri';
 
   @override
   String get remindersOff => 'Disattivate';
@@ -399,8 +457,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get desktopNotifications => 'Notifiche desktop';
 
   @override
-  String get desktopNotificationsSubtitle =>
-      'Notifiche di sistema e avvisi di ripasso';
+  String get desktopNotificationsSubtitle => 'Avvisi di sistema';
 
   @override
   String get desktopNotificationsActive => 'Notifiche di sistema attive';
@@ -422,7 +479,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sectionDataBackup => 'DATI E BACKUP';
 
   @override
-  String get backupSubtitle => 'Esporta e importa mazzi tramite JSON o CSV';
+  String get backupSubtitle => 'Backup JSON e CSV';
 
   @override
   String get sectionUpdates => 'AGGIORNAMENTI E RELEASE';
@@ -431,8 +488,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get checkForUpdates => 'Verifica aggiornamenti';
 
   @override
-  String get checkForUpdatesSubtitle =>
-      'Confronta la versione installata con le release GitHub';
+  String get checkForUpdatesSubtitle => 'Verifica release GitHub';
 
   @override
   String get checkingForUpdates => 'Verifica release su GitHub in corso...';
@@ -470,7 +526,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get licenseAndCredits => 'Licenza e riconoscimenti';
 
   @override
-  String get licenseSubtitle => 'Licenza MIT • Open Source';
+  String get licenseSubtitle => 'Licenza MIT • Crediti';
 
   @override
   String get licenseDialogTitle => 'Licenza MIT';
@@ -1022,4 +1078,23 @@ class AppLocalizationsIt extends AppLocalizations {
   String errorSavingCard(String error) {
     return 'Errore durante il salvataggio della carta: $error';
   }
+
+  @override
+  String get srsAlgorithm => 'Algoritmo SRS';
+
+  @override
+  String get srsAlgorithmDesc =>
+      'Seleziona l\'algoritmo di ripetizione spaziata per lo studio.';
+
+  @override
+  String get fsrsAlgorithmName => 'FSRS (Predefinito)';
+
+  @override
+  String get fsrsAlgorithmDesc => 'Modello basato su stabilità';
+
+  @override
+  String get sm2AlgorithmName => 'SM-2 (Classico)';
+
+  @override
+  String get sm2AlgorithmDesc => 'Classico SuperMemo 2 (standard Anki)';
 }

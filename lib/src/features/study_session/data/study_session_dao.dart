@@ -120,6 +120,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           lastReview: Value(updatedCard.lastReview),
           reps: Value(updatedCard.reps),
           lapses: Value(updatedCard.lapses),
+          easinessFactor: Value(updatedCard.easinessFactor),
         ),
       );
 
@@ -135,6 +136,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           lastElapsedDays: logSnapshot.lastElapsedDays,
           scheduledDays: logSnapshot.scheduledDays,
           reviewedAt: logSnapshot.reviewedAt,
+          easinessFactor: Value(logSnapshot.easinessFactor),
         ),
       );
 
@@ -157,6 +159,7 @@ class StudySessionDao extends DatabaseAccessor<AppDatabase>
           lastReview: Value(previousCard.lastReview),
           reps: Value(previousCard.reps),
           lapses: Value(previousCard.lapses),
+          easinessFactor: Value(previousCard.easinessFactor),
         ),
       );
 

@@ -89,12 +89,14 @@ class AnkiRawCard {
     required this.noteId,
     required this.deckId,
     required this.ord,
+    this.factor = 2500,
   });
 
   final int id;
   final int noteId;
   final int deckId;
   final int ord;
+  final int factor;
 }
 
 /// Synthesized card ready for insertion into Repetita database.
@@ -105,6 +107,7 @@ class AnkiParsedCard {
     this.clozeIndex,
     required this.tags,
     required this.deckName,
+    this.easinessFactor = 2.5,
   });
 
   final String front;
@@ -112,4 +115,5 @@ class AnkiParsedCard {
   final int? clozeIndex;
   final List<String> tags;
   final String deckName;
+  final double easinessFactor;
 }

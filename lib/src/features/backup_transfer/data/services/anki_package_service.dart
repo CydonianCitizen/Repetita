@@ -129,7 +129,9 @@ class AnkiPackageService {
       }
 
       // 3. Read 'cards' table
-      final cardRows = ankiDb.select('SELECT id, nid, did, ord FROM cards');
+      final cardRows = ankiDb.select(
+        'SELECT id, nid, did, ord, factor FROM cards',
+      );
       final parsedCards = <AnkiParsedCard>[];
       int skipped = 0;
 
@@ -138,6 +140,8 @@ class AnkiPackageService {
           final nid = row['nid'] as int;
           final did = row['did'] as int;
           final ord = row['ord'] as int;
+          final factor = (row['factor'] as num?)?.toInt() ?? 2500;
+          final ef = factor > 0 ? (factor / 1000.0) : 2.5;
 
           final note = notesMap[nid];
           if (note == null) {
@@ -152,6 +156,7 @@ class AnkiPackageService {
             ord: ord,
             did: did,
             decks: ankiDecks,
+            easinessFactor: ef,
           );
 
           if (synthesized != null) {
@@ -262,6 +267,7 @@ class AnkiPackageService {
     required int ord,
     required int did,
     required Map<int, String> decks,
+    double easinessFactor = 2.5,
   }) {
     String rawFront = '';
     String rawBack = '';
@@ -319,6 +325,7 @@ class AnkiPackageService {
       clozeIndex: clozeIndex,
       tags: note.tags,
       deckName: deckName,
+      easinessFactor: easinessFactor,
     );
   }
 
@@ -414,6 +421,7 @@ class AnkiPackageService {
                 createdAt: Value(effectiveNow),
                 isSuspended: const Value(false),
                 clozeIndex: Value(card.clozeIndex),
+                easinessFactor: Value(card.easinessFactor),
               ),
             );
         cardsImported++;

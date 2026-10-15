@@ -12,6 +12,7 @@ class ReviewLogSnapshot {
     required this.lastElapsedDays,
     required this.scheduledDays,
     required this.reviewedAt,
+    this.easinessFactor = 2.5,
   });
 
   final Rating rating;
@@ -23,6 +24,7 @@ class ReviewLogSnapshot {
   final int lastElapsedDays;
   final int scheduledDays;
   final DateTime reviewedAt;
+  final double easinessFactor;
 
   @override
   bool operator ==(Object other) =>
@@ -37,7 +39,8 @@ class ReviewLogSnapshot {
           elapsedDays == other.elapsedDays &&
           lastElapsedDays == other.lastElapsedDays &&
           scheduledDays == other.scheduledDays &&
-          reviewedAt == other.reviewedAt;
+          reviewedAt == other.reviewedAt &&
+          easinessFactor == other.easinessFactor;
 
   @override
   int get hashCode => Object.hash(
@@ -50,6 +53,7 @@ class ReviewLogSnapshot {
     lastElapsedDays,
     scheduledDays,
     reviewedAt,
+    easinessFactor,
   );
 }
 

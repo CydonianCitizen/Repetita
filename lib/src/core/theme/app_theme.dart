@@ -8,6 +8,8 @@ abstract final class AppTheme {
 
   static ThemeData get darkTheme => _buildTheme(MaterialTheme.darkScheme());
 
+  static ThemeData get amoledTheme => _buildTheme(MaterialTheme.amoledScheme());
+
   static ThemeData _buildTheme(ColorScheme colorScheme) {
     final textTheme = createAppTextTheme(brightness: colorScheme.brightness);
 

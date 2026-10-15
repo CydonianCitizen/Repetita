@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/database/database_provider.dart';
+import '../../domain/app_theme_mode.dart';
 
 part 'theme_mode_controller.g.dart';
 
@@ -10,9 +11,9 @@ class ThemeModeController extends _$ThemeModeController {
   static const _key = 'app_theme_mode';
 
   @override
-  ThemeMode build() {
+  AppThemeMode build() {
     _loadFromDb();
-    return ThemeMode.system;
+    return AppThemeMode.system;
   }
 
   Future<void> _loadFromDb() async {
@@ -20,7 +21,7 @@ class ThemeModeController extends _$ThemeModeController {
       final db = ref.read(databaseProvider);
       final saved = await db.getSetting(_key);
       if (saved != null) {
-        final mode = ThemeMode.values.cast<ThemeMode?>().firstWhere(
+        final mode = AppThemeMode.values.cast<AppThemeMode?>().firstWhere(
           (m) => m?.name == saved,
           orElse: () => null,
         );
@@ -33,7 +34,7 @@ class ThemeModeController extends _$ThemeModeController {
     }
   }
 
-  Future<void> setThemeMode(ThemeMode mode) async {
+  Future<void> setThemeMode(AppThemeMode mode) async {
     state = mode;
     try {
       await ref.read(databaseProvider).setSetting(_key, mode.name);

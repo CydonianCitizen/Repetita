@@ -13,7 +13,7 @@ part of 'theme_mode_controller.dart';
 final themeModeControllerProvider = ThemeModeControllerProvider._();
 
 final class ThemeModeControllerProvider
-    extends $NotifierProvider<ThemeModeController, ThemeMode> {
+    extends $NotifierProvider<ThemeModeController, AppThemeMode> {
   ThemeModeControllerProvider._()
     : super(
         from: null,
@@ -33,28 +33,28 @@ final class ThemeModeControllerProvider
   ThemeModeController create() => ThemeModeController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ThemeMode value) {
+  Override overrideWithValue(AppThemeMode value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ThemeMode>(value),
+      providerOverride: $SyncValueProvider<AppThemeMode>(value),
     );
   }
 }
 
 String _$themeModeControllerHash() =>
-    r'8036b6df436cb1d1ffa40a503cdde09b8a72c741';
+    r'f492c9a518188848fbe5de5e7f39fba00d320418';
 
-abstract class _$ThemeModeController extends $Notifier<ThemeMode> {
-  ThemeMode build();
+abstract class _$ThemeModeController extends $Notifier<AppThemeMode> {
+  AppThemeMode build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<ThemeMode, ThemeMode>;
+    final ref = this.ref as $Ref<AppThemeMode, AppThemeMode>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<ThemeMode, ThemeMode>,
-              ThemeMode,
+              AnyNotifier<AppThemeMode, AppThemeMode>,
+              AppThemeMode,
               Object?,
               Object?
             >;

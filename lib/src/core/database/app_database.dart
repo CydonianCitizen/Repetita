@@ -24,13 +24,17 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON;');
+        await customStatement('PRAGMA journal_mode = WAL;');
+        await customStatement('PRAGMA synchronous = NORMAL;');
+        await customStatement('PRAGMA temp_store = MEMORY;');
+        await customStatement('PRAGMA cache_size = -64000;');
       },
       onUpgrade: (m, from, to) async {
         if (from < 2) {
@@ -61,6 +65,10 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_card_tags_tag_id ON card_tags (tag_id)',
           );
+        }
+        if (from < 6) {
+          await m.addColumn(cards, cards.easinessFactor);
+          await m.addColumn(reviewLogs, reviewLogs.easinessFactor);
         }
       },
     );

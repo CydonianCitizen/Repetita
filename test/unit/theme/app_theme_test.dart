@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/theme/app_theme.dart';
 import 'package:repetita/src/core/theme/font_theme.dart';
+import 'package:repetita/src/features/settings/domain/app_theme_mode.dart';
 import 'package:repetita/src/features/settings/presentation/controllers/theme_mode_controller.dart';
 
 void main() {
@@ -50,26 +51,44 @@ void main() {
       expect(theme.appBarTheme.elevation, 0);
     });
 
+    test('amoledTheme configures Material 3 with pure black surface', () {
+      final theme = AppTheme.amoledTheme;
+
+      expect(theme.useMaterial3, isTrue);
+      expect(theme.brightness, Brightness.dark);
+      expect(theme.colorScheme.primary, const Color(0xffdbc66e));
+      expect(theme.colorScheme.surface, const Color(0xff000000));
+      expect(theme.scaffoldBackgroundColor, const Color(0xff000000));
+      expect(theme.canvasColor, const Color(0xff000000));
+      expect(theme.appBarTheme.centerTitle, isTrue);
+      expect(theme.appBarTheme.elevation, 0);
+    });
+
     test('ThemeModeController initializes to system and transitions modes', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(themeModeControllerProvider), ThemeMode.system);
+      expect(container.read(themeModeControllerProvider), AppThemeMode.system);
 
       container
           .read(themeModeControllerProvider.notifier)
-          .setThemeMode(ThemeMode.dark);
-      expect(container.read(themeModeControllerProvider), ThemeMode.dark);
+          .setThemeMode(AppThemeMode.dark);
+      expect(container.read(themeModeControllerProvider), AppThemeMode.dark);
 
       container
           .read(themeModeControllerProvider.notifier)
-          .setThemeMode(ThemeMode.light);
-      expect(container.read(themeModeControllerProvider), ThemeMode.light);
+          .setThemeMode(AppThemeMode.amoled);
+      expect(container.read(themeModeControllerProvider), AppThemeMode.amoled);
 
       container
           .read(themeModeControllerProvider.notifier)
-          .setThemeMode(ThemeMode.system);
-      expect(container.read(themeModeControllerProvider), ThemeMode.system);
+          .setThemeMode(AppThemeMode.light);
+      expect(container.read(themeModeControllerProvider), AppThemeMode.light);
+
+      container
+          .read(themeModeControllerProvider.notifier)
+          .setThemeMode(AppThemeMode.system);
+      expect(container.read(themeModeControllerProvider), AppThemeMode.system);
     });
   });
 }
