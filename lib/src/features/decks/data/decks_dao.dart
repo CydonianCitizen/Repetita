@@ -101,6 +101,29 @@ class DecksDao extends DatabaseAccessor<AppDatabase> with _$DecksDaoMixin {
         .then((rows) => rows > 0);
   }
 
+  Future<Deck?> getDeckById(int id) {
+    return (select(decks)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Stream<Deck?> watchDeckById(int id) {
+    return (select(decks)..where((t) => t.id.equals(id))).watchSingleOrNull();
+  }
+
+  Future<bool> setDeckExamDate({
+    required int deckId,
+    DateTime? examDate,
+    double? targetRetention,
+  }) {
+    return (update(decks)..where((t) => t.id.equals(deckId)))
+        .write(
+          DecksCompanion(
+            examDate: Value(examDate?.toUtc()),
+            targetRetention: Value(targetRetention),
+          ),
+        )
+        .then((rows) => rows > 0);
+  }
+
   Future<int> deleteDeck(int id) {
     return (delete(decks)..where((t) => t.id.equals(id))).go();
   }
