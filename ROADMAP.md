@@ -17,8 +17,14 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 | **v0.7.5** <br>*(Completato)* | Astrazione Motore SRS & CI/CD Release | • Interfaccia universale `SrsScheduler` & Riverpod provider [x]<br>• Seeder onboarding mazzo iniziale (`SampleDeckSeeder`) [x]<br>• Fix release pipeline CI/CD (macOS Universal, Windows x64, Android split) [x]<br>• Audit Ponytail & Impeccable (deduplicazione coda studio e dead code) [x] | Bassa |
 | **v0.8.0** <br>*(Completato)* | Motore Multi-Algoritmo (FSRS & SM-2) | • Architettura Strategy Pattern per scheduler SRS [x]<br>• Motore logico SM-2 puro (Easiness Factor & Intervalli) [x]<br>• Selettore algoritmo nelle Impostazioni [x]<br>• Migrazione schema Drift e gestione transizioni carte [x] | Media |
 | **v0.8.7** <br>*(Completato)* | Performance, Display & Settings Modularization | • Tema Pure Black AMOLED & gestione dinamica refresh rate [x]<br>• PRAGMA SQLite ad alte prestazioni (WAL, cache, mmap) [x]<br>• Haptic feedback nativo Android & ripristino vibrazione [x]<br>• Riorganizzazione modulare impostazioni in sotto-schermate [x] | Media |
-| **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate<br>• Zero bug, zero warning, 100% test coverage | Bassa |
-| **v1.5.0+** | Feature Complesse Deferred | • Ricerca Globale Flashcard (Card Browser)<br>• Markdown avanzato & formattazione ricca | Media |
+| **v0.9.0** <br>*(Pianificato)* | Study Controls, Revision & Exam Mastery | • Set Due Date / Reset / Create Copy [NUOVA]<br>• Leech Detection (soglia lapse + auto-tag/suspend) [NUOVA]<br>• Flag Colorate (4 colori) + Mark<br>• Exam Scheduler (piano per data esame, retention consigliata)<br>• Fuzz factor FSRS & Pause scheduler (vacation mode)<br>• Backup automatico rolling | Bassa |
+| **v1.0.0** | Consolidamento & Stabilità Finale | • Migrazioni Drift blindate (test suite automatica)<br>• Zero bug, zero warning, 100% test coverage motori SRS | Bassa |
+| **v1.1.0** | Modello Note, Siblings & Input Attivo | • Carte reverse come note type [NUOVA]<br>• Bury siblings automatico [NUOVA]<br>• Type-in-the-answer [NUOVA]<br>• Supporto RTL languages [NUOVA]<br>• Timeboxing & Auto-advance | Media |
+| **v1.2.0** | Media Pipeline & Image Occlusion | • Pipeline Media Immagini (storage locale, deduplica SHA-256)<br>• Editor & Rendering Studio (zoom, adaptive)<br>• Import/Export media con .apkg<br>• Image Occlusion (canvas editor, hide-all reveal-one) | Alta |
+| **v1.3.0** | Ecosistema, Gerarchia & Card Browser | • Export `.apkg` completo compatibile Anki<br>• Subdeck gerarchici (`PARENT::CHILD`)<br>• Ricerca Globale Flashcard (Card Browser FTS5) | Media |
+| **v1.4.0** | Audio & Ergonomia Mobile | • Audio nelle carte (registrazione/playback open-source)<br>• Widget home screen + quick study<br>• Gesture personalizzabili in Studio<br>• Whiteboard effimera in Studio (recall motorio) | Media |
+| **v1.5.0** | Visual Analytics Avanzate | • Grafici avanzati (`StatsScreen`: ritenzione reale, curve S/D/R per carta) | Bassa |
+| **Spike / v2.0.0** <br>*(Ricerca)* | Ricerca tecnica (PoC non vincolati a versione) | • Sincronizzazione opzionale file-based (zero-cloud) [NUOVA]<br>• FSRS Optimizer on-device (gradient descent Dart puro)<br>• TTS offline di sistema (Android TTS, Windows SAPI, macOS say)<br>• Markdown avanzato + MathJax | Variabile |
 
 ---
 
@@ -207,12 +213,258 @@ Documento di pianificazione tecnica basato sulle scelte funzionali definite per 
 
 ---
 
-### 6. Funzionalità Differite (Post v1.0.0 / v1.5.0)
+### 6. Architettura dei Rilasci Futuri (v0.9.0 -> v2.0.0)
 
-Le seguenti feature sono escluse dal percorso critico verso la v1.0.0 e pianificate per la v1.5.0:
+Il piano evolutivo nasce da un'analisi di benchmark sulle feature dei competitor (Anki Desktop, AnkiDroid, AnkiMobile, RemNote, Mochi, ecosistema FSRS) e assegna a ciascuna funzionalità una versione precisa:
+* **v0.9.0**: Study Controls, Revision Utilities & Exam Mastery (Set Due/Reset/Copy §7.3, Leech Detection §7.4, Flag colorate §7.2, Fuzz §8.1, Vacation mode §8.2, Rolling Backup §7.1, Exam Scheduler §12.1).
+* **v1.0.0**: Consolidamento, Migrazioni Drift blindate & Test Coverage completa.
+* **v1.1.0**: Modello Note, Siblings & Input Attivo (Carte Reverse §10.1, Bury Siblings §10.2, Type-in-the-answer §10.3, RTL languages §13.3, Timeboxing §10.5, Auto-advance §10.6).
+* **v1.2.0**: Media Pipeline & Image Occlusion (§9.1-9.3, §10.4).
+* **v1.3.0**: Ecosistema, Gerarchia & Card Browser (Export .apkg §11.1, Subdeck §11.2, Card Browser FTS5 §11.3).
+* **v1.4.0**: Audio & Ergonomia Mobile (Audio §9.4, Widget §13.1, Gestures §13.2, Whiteboard §15.1).
+* **v1.5.0**: Visual Analytics Avanzate (Grafici e curve di ritenzione §14.4).
+* **Spike / v2.0.0**: Sincronizzazione opzionale file-based (§14.5), FSRS Optimizer (§14.1), TTS offline (§14.2), Markdown avanzato + MathJax (§14.3).
 
-* **Ricerca Globale Flashcard (Global Card Browser)**:
-  * Schermata dedicata per cercare e filtrare istantaneamente tra migliaia di carte di tutti i mazzi contemporaneamente.
-  * Verrà implementata quando la complessità e la mole di carte degli utenti giustificherà una vista browser stile Anki con FTS (Full-Text Search SQLite).
-* **Supporto Markdown Avanzato**:
-  * Formattazione complessa con tabelle, blocchi di codice con syntax highlighting e formule matematiche LaTeX avanzate.
+---
+
+### 7. Dati & Utilità di Revisione [v0.9.0]
+
+#### 7.1 Backup Automatico Rolling
+* **Obiettivo**: Proteggere l'utente dalla perdita di dati anche quando non esporta mai manualmente (il backup JSON/CSV esiste ma è un'azione onerosa e facilmente dimenticata).
+* **Specifiche**:
+  * Snapshot automatico del database all'avvio se sono trascorse più di N ore dall'ultimo backup (riferimento AnkiDroid: 5 ore, retention 8 copie).
+  * Formato: riutilizzo del payload JSON di `BackupService` oppure copia fisica SQLite via `VACUUM INTO` (atomicità garantita dal WAL attivo).
+  * Retention configurabile in Impostazioni → Backup (default: ultime 8 copie), eliminazione FIFO delle più vecchie.
+  * UI: lista backup con data e ripristino con conferma esplicita (pattern anti-restore distruttivo dell'audit §2.6).
+  * Esecuzione differita a app idle, mai durante la sessione di studio.
+
+#### 7.2 Flag Colorate (4 colori) + Mark
+* **Obiettivo**: Marcatura rapida di carte problematiche durante la sessione senza uscire dal flusso di studio.
+* **Specifiche**:
+  * Schema: campo `flag` in `Cards` (int, 0=nessuna, 1=rossa, 2=arancione, 3=verde, 4=blu) + flag booleano "marked" a livello nota.
+  * Toggle dal menu azioni di `StudyScreen`; bandierina visibile nell'angolo della carta durante la revisione.
+  * Badge e filtri per flag in `DeckDetailScreen`, combinabili con i filtri tag esistenti (`filteredDeckCardsProvider`).
+  * Sintassi di ricerca compatibile Anki (`flag:1`) in ottica Card Browser globale (§11.3).
+
+#### 7.3 Set Due Date / Reset / Create Copy [NUOVA]
+* **Obiettivo**: Controllo manuale fine sullo scheduling e sul contenuto, senza passare dalle valutazioni SRS.
+* **Specifiche**:
+  * **Set Due Date**: forza la scadenza di una carta a una data scelta, dal menu azioni di `StudyScreen` e di `DeckDetailScreen` (differire a domani, pianificare ripassi pre-esame).
+  * **Reset Progress**: riporta la carta in coda come nuova azzerando `state`, `stability`, `difficulty`, `easinessFactor` ma conservando lo storico `ReviewLogs` (ripartenze pulite senza perdita di storia).
+  * **Create Copy**: duplica la nota nell'editor con campi precompilati per creare varianti senza ri-digitare.
+  * Costo contenuto: tre metodi DAO in transazione atomica + voci di menu.
+
+#### 7.4 Leech Detection [NUOVA]
+* **Obiettivo**: Rilevare automaticamente le carte "sanguisughe" che falliscono ripetutamente — quasi sempre sintomo di carta scritta male (ambigua o troppo densa) — e guidare l'utente alla correzione invece che lasciarle succhiare tempo ogni sessione.
+* **Specifiche**:
+  * Soglia lapse configurabile (riferimento Anki: 8 lapse) sul campo `Cards.lapses` già esistente.
+  * Al superamento della soglia: tag automatico "leech" + notifica in sessione con azioni rapide (modifica carta, sospendi, ignora).
+  * Filtro "leech" in `DeckDetailScreen` e nel Card Browser (§11.3); contatore dedicato in `StatsScreen`.
+  * Due modalità come Anki: "solo tagga" oppure "tagga e sospendi" (scelta in Impostazioni → Studio).
+
+---
+
+### 8. Scheduling Avanzato [v0.9.0]
+
+#### 8.1 Fuzz Factor FSRS
+* **Obiettivo**: Evitare il clustering: carte introdotte e valutate identicamente non devono scadere tutte lo stesso giorno (fenomeno tipico dei mazzi importati con scadenze uniformi).
+* **Specifiche**:
+  * Offset pseudo-casuale proporzionale all'intervallo, con range calibrati sull'implementazione di riferimento FSRS/Anki; disattivo sulle carte in learning e sugli intervalli < 2 giorni.
+  * Applicato in `SrsScheduler` solo alla schedulazione reale; l'anteprima sugli intervalli dei pulsanti di rating resta deterministica.
+  * RNG iniettabile e seedabile per test deterministici, coerente con il pattern `clock_provider`.
+  * Opzione avanzata disattivabile nel dialog parametri FSRS.
+
+#### 8.2 Pause Scheduler (Vacation Mode)
+* **Obiettivo**: Congelare lo scheduling durante pause e ferie senza generare backlog insostenibile né falsi lapse.
+* **Specifiche**:
+  * Impostazione con intervallo date (o toggle on/off con data fine) in Impostazioni → Studio.
+  * Durante la pausa: coda studio nascosta, reminder giornalieri sospesi automaticamente.
+  * Alla riattivazione: shift unico di massa `due += giorni di pausa` sulle carte review/learning. FSRS gestisce nativamente le review in ritardo, ma lo shift evita il picco di workload del primo giorno di rientro.
+  * Le nuove carte restano congelate (posizione in coda invariata).
+
+---
+
+### 9. Media [v1.2.0 & v1.4.0]
+
+#### 9.1 Pipeline Media
+* **Obiettivo**: Fondazione tecnica per le immagini (prerequisito diretto di Image Occlusion §10.4 e base per l'Audio §9.4). Prima tappa del piano media: immagini prima, audio dopo.
+* **Specifiche**:
+  * Tabella Drift `Media` (id, fileName, checksum SHA-256, sizeBytes, createdAt) + directory media privata dell'app (`path_provider` già in bundle).
+  * Deduplica per checksum; comando "Verifica media" per la pulizia degli orfani (stile Anki "Check media").
+  * Compressione/resize automatico all'inserimento (target: lato lungo ≤ 1600px, dimensione contenuta).
+  * Inserimento: `file_picker` (già dipendenza), incolla da clipboard, drag & drop su desktop.
+
+#### 9.2 Editor & Rendering Studio
+* **Obiettivo**: Immagini di prima classe nell'editor e nella sessione di studio.
+* **Specifiche**:
+  * Embed nel testo delle carte con risoluzione dei riferimenti (`media://id`), mantenendo la compatibilità con `<img src="...">` proveniente dall'import Anki.
+  * Rendering in `FlipCardView` con tap-to-zoom e adattamento al tema (opzionale filtro invert in dark/AMOLED per immagini a linee).
+  * Preview live nell'editor dual-pane desktop (`card_editor_screen.dart`).
+
+#### 9.3 Import / Export
+* **Obiettivo**: Chiudere il loop con i deck Anki esistenti: l'import `.apkg` estrae già i media oggi, ma non possono essere visualizzati né conservati.
+* **Specifiche**:
+  * Import `.apkg`: persistenza dei media estratti nella tabella `Media` e rewriting dei riferimenti nelle carte.
+  * Backup JSON: payload esteso con i media (archivio con riferimenti o base64 inline).
+  * CSV: invariato (formato testuale).
+
+#### 9.4 Audio nelle Carte
+* **Obiettivo**: Supporto audio per lingue e pronuncia. Seconda e ultima tappa del piano media, dopo le immagini.
+* **Specifiche**:
+  * Registrazione da microfono nell'editor con riascolto pre-salvataggio; import file audio da `file_picker`.
+  * Playback automatico fronte/retro in sessione + replay manuale (tasto `R` su desktop); solo plugin audio open-source compatibili F-Droid.
+  * Audio inclusi in export `.apkg` (§11.1) e backup JSON.
+
+---
+
+### 10. Tipi di Carta & Studio [v1.1.0 & v1.2.0]
+
+#### 10.1 Carte Reverse come Note Type [NUOVA]
+* **Obiettivo**: Generazione bidirezionale Fronte→Retro e Retro→Fronte dalla stessa nota (vocabolari, definizioni bidirezionali). L'import `.apkg` già riconosce il modello "Basic (and reversed)" ma l'editor non può crearlo.
+* **Specifiche**:
+  * Introduzione del concetto di **nota** con N carte generate: campo `noteId` in `Cards` (+ eventuale tabella `Notes` per i contenuti condivisi) e tipo di nota sul modello.
+  * **Meccanismo di generazione**: pura sostituzione/scambio di campi definita dal tipo di nota (template) — operazione meccanica e deterministica, nessun LLM né generazione di contenuti. Il tipo "Basic (and reversed)" produce 2 carte scambiando fronte/retro; il tipo "Cloze" produce 1 carta per numero di cloze (meccanismo già implementato dal `ClozeParser` e dal batching atomico, oggi però senza legame `noteId` tra le carte generate).
+  * Ogni carta generata mantiene **stato SRS indipendente** (`stability`, `difficulty`, `easinessFactor`, `due`, `lapses`): il motore logico schedula ogni sorella separatamente, come memorie distinte. Il `noteId` serve solo come legame di provenienza per bury siblings (§10.2), modifica sincronizzata ed eliminazione a cascata.
+  * Editor: opzione "genera anche la carta inversa" con preview delle carte che verranno create.
+  * Creazione/modifica/eliminazione sincronizzata delle carte sorelle in transazione atomica.
+  * Dipendenze strutturali: Bury Siblings (§10.2) e Image Occlusion multi-maschera (§10.4) si agganciano allo stesso concetto di nota.
+
+#### 10.2 Bury Siblings Automatico [NUOVA]
+* **Obiettivo**: Evitare l'autoinganno: vedere carte sorelle della stessa nota nella stessa sessione fa "ricordare" per contagio, non per richiamo attivo.
+* **Specifiche**:
+  * La relazione sibling è **derivata automaticamente** dal `noteId` (§10.1): le carte generate dalla stessa nota sono sorelle per costruzione — nessuna segnalazione manuale dell'utente è richiesta. Due carte create indipendentemente, anche se simili per contenuto, non sono sorelle.
+  * Al rating di una carta, le sorelle in stato new/review vengono seppellite fino al giorno dopo (comportamento Anki); le carte in learning restano visibili (il tempo è critico).
+  * Opzione attivabile/disattivabile (default: attiva) + azione "Unbury" dalla schermata del mazzo.
+  * Dipendenza: richiede il concetto di nota (§10.1).
+
+#### 10.3 Type-in-the-Answer [NUOVA]
+* **Obiettivo**: Verifica oggettiva del richiamo per spelling, numeri e formule, contro l'autovalutazione indulgente.
+* **Specifiche**:
+  * Campo di input nel fronte della carta (marcatore `{{type:...}}` sul campo o flag per tipo di nota).
+  * Confronto carattere-per-carattere al flip: verde (corretto), rosso (errato), grigio (mancante) — classi `typeGood`/`typeBad`/`typeMissed` come Anki/AnkiDroid.
+  * La digitazione non forza il rating: l'utente sceglie comunque Again/Hard/Good/Easy.
+  * Compatibilità IME per lingue, collegata al supporto RTL (§13.3).
+
+#### 10.4 Image Occlusion
+* **Dipendenza**: Media — Immagini (§9.1).
+* **Obiettivo**: Generare carte "indovina la parte nascosta" da un'immagine (anatomia, mappe, diagrammi, schemi) — la feature train di Anki/RemNote per contenuti visivi.
+* **Specifiche**:
+  * Editor dedicato: caricamento immagine → disegno di rettangoli/ellissi di mascheratura → generazione N carte (una per maschera, con raggruppamento a livello nota).
+  * Modalità "hide all, reveal one" (default stile Anki).
+  * Rendering: maschere riempite col colore superficie del tema, reveal al flip della carta.
+  * Non distruttivo: definizione delle maschere in JSON referenziato dalla carta, modificabile in seguito.
+
+#### 10.5 Timeboxing
+* **Obiettivo**: Sessioni a tempo con riepilogo periodico per mantenere la concentrazione (tecnica Pomodoro-like).
+* **Specifiche**:
+  * Impostazione limite minuti (0 = disattivato) in Impostazioni → Studio.
+  * Alla scadenza: riepilogo carte studiate e tempo trascorso con scelta "continua"/"termina" (comportamento AnkiDroid).
+
+#### 10.6 Auto-advance
+* **Obiettivo**: Flusso hands-free per revisioni passive.
+* **Specifiche**:
+  * Mostra la risposta automaticamente dopo N secondi configurabili; opzione di passaggio alla carta successiva con rating automatico "Again" dopo M secondi (comportamento AnkiDroid).
+  * Transizioni coerenti con `animation_level` dell'app.
+
+---
+
+### 11. Interoperabilità & Organizzazione [v1.3.0]
+
+#### 11.1 Export .apkg (Deck Package)
+* **Obiettivo**: Interoperabilità bidirezionale con l'ecosistema Anki. Oggi Repetita importa ma non esporta: senza export la data ownership è incompleta (lock-in in entrata).
+* **Specifiche**:
+  * Generazione archivio `.apkg` (ZIP): `collection.anki2` con schema SQLite di Anki (notes, cards, revlog, media mapping) via package `sqlite3` già in bundle — zero nuove dipendenze.
+  * Mappatura modelli: Basic, Basic (and reversed), Cloze nativi `{{c1::}}`; preservazione del fattore EF per SM-2 e dello storico `ReviewLogs`.
+  * Opzioni export: "includi storico revisioni" e "includi media" (default: senza scheduling, per condivisione pulita come Anki).
+  * Estensione speculare di `AnkiPackageService` (oggi solo reader → anche writer).
+
+#### 11.2 Subdeck Gerarchici (`PARENT::CHILD`)
+* **Obiettivo**: Organizzazione a albero stile Anki per corsi, libri e lingue.
+* **Specifiche**:
+  * Schema: campo `parentId` in `Decks` con display path derivato; convenzione `::` retrocompatibile con i nomi esistenti e migrazione automatica.
+  * UI: albero espandibile con indentazione in `DeckListScreen`, conteggi aggregati (somma figli) per i nodi padre.
+  * Studio di un deck padre include tutti i sottodeck (semantica Anki).
+  * Import `.apkg`: ricostituzione della gerarchia originale del mazzo.
+
+#### 11.3 Ricerca Globale Flashcard (Card Browser) [ex-differita]
+* **Obiettivo**: Cercare e filtrare istantaneamente tra migliaia di carte di tutti i mazzi contemporaneamente.
+* **Specifiche**:
+  * FTS5 SQLite per la ricerca full-text con indici virtuali dedicati.
+  * Sintassi filtri stile Anki (`tag:`, `deck:`, `flag:`, `is:due`, `is:suspended`) e ricerche salvate.
+  * Azioni bulk: cambio mazzo, sospensione, ri-schedulazione, flag, eliminazione con conferma.
+
+---
+
+### 12. Esami [v0.9.0]
+
+#### 12.1 Exam Scheduler: Piano di Studio per Data Esame
+* **Obiettivo**: Data l'esame, Repetita pianifica il lavoro quotidiano (stile RemNote, ma completamente offline sui dati locali).
+* **Specifiche**:
+  * Configurazione: data esame per mazzo (o gruppo di mazzi), ore di studio giornaliere disponibili.
+  * Calcolo: combinazione del forecast esistente (`StatsDao.getDueForecast`) con stima del workload delle nuove carte → distribuzione del carico sui giorni rimanenti e alert su backlog insostenibile.
+  * Suggerimento "retention boost" temporaneo (es. 0.90 → 0.95 pre-esame) con preview dell'impatto sul workload giornaliero.
+  * Schermata piano giornaliero: "Oggi: 40 review + 12 nuove" con tracking del completamento.
+
+---
+
+### 13. Piattaforma & i18n [v1.1.0 & v1.4.0]
+
+#### 13.1 Widget Home Screen + Quick Study [v1.4.0]
+* **Obiettivo**: Studiare senza aprire l'app: il conteggio delle dovute sempre visibile sulla home.
+* **Specifiche**:
+  * Widget ridimensionabile (2x1 / 4x2) con conteggio carte dovute per mazzo, aggiornato via `WorkManager` (nessun push FCM, compatibilità F-Droid preservata).
+  * Deep link `repetita://study?deck=<id>` per apertura diretta della sessione studio.
+
+#### 13.2 Gesture Personalizzabili [v1.4.0]
+* **Obiettivo**: Velocità estrema di revisione su mobile senza toccare i pulsanti di rating.
+* **Specifiche**:
+  * Mappatura configurabile: swipe (su/giù/sinistra/destra), double-tap, tap zone → azioni (rating 1-4, flip, undo, flag, bury, suspend).
+  * Perimetro limitato a `StudyScreen`; persistenza in `appSettings`.
+
+#### 13.3 Supporto RTL Languages [v1.1.0 - NUOVA]
+* **Obiettivo**: Editing e visualizzazione corretti per lingue destra→sinistra (arabo, ebraico, farsi, urdu) — oggi punteggiatura e numeri risultano disallineati nei testi misti.
+* **Specifiche**:
+  * Rilevamento automatico della direzione per paragrafo (algoritmo Unicode Bidi sul primo carattere forte) oppure flag esplicito per campo/nota.
+  * Allineamento a destra e flusso corretto in `FlipCardView`, `card_editor_screen.dart` e nei card tile.
+  * Cura specifica per il cloze in RTL: il markup `{{c1::...}}` contiene caratteri neutri/LTR (lesson AnkiDroid: dedicare un tipo di nota per cloze RTL).
+
+---
+
+### 14. Spike di Ricerca Tecnica [Spike / v2.0.0]
+
+Output atteso per ciascuno spike: documento tecnico, PoC prototipale e decisione GO/NO-GO.
+
+#### 14.1 FSRS Optimizer On-Device
+* Fattibilità di un ottimizzatore dei parametri FSRS in Dart puro (gradient descent) addestrato sui `ReviewLogs` locali, senza pytorch né servizi esterni.
+* Domande aperte: soglia minima di review per un'ottimizzazione utile; qualità dell'ottimo rispetto all'optimizer di riferimento (benchmark su dataset FSRS-Anki-20k); architettura preset per-mazzo compatibile con lo Strategy Pattern `SrsScheduler`.
+
+#### 14.2 TTS Offline di Sistema
+* Integrazione text-to-speech con i motori di sistema (Android TTS engine, Windows SAPI, macOS `say`) via platform channel, zero servizi cloud.
+* Domande aperte: comportamento su motori AOSP senza Google Services (target F-Droid); selezione lingua per campo/mazzo; fallback desktop.
+
+#### 14.3 Markdown Avanzato + MathJax
+* Rendering di tabelle, blocchi codice con syntax highlighting e formule (LaTeX) in `FlipCardView` e nell'editor.
+* Domande aperte: pacchetti Dart disponibili vs renderer custom (coerenza col principio zero-dependency dell'`ReviewHeatmapWidget`); performance dentro il flip animato (lesson audit §1.8); impatto sull'import/export.
+
+#### 14.4 Grafici Avanzati
+* Estensione di `StatsScreen`: true retention per bucket di intervallo, distribuzione degli intervalli, breakdown dei pulsanti risposta, curva S/D/R per singola carta (Card Info).
+* Domande aperte: libreria esterna (`fl_chart`) vs custom painting (pattern dell'heatmap esistente); query di aggregazione SQL senza degradare l'I/O (lesson audit §1.4).
+
+#### 14.5 Sincronizzazione Opzionale File-Based [NUOVA — versione TBD, da studiare]
+* Studio di fattibilità della replica del database tra dispositivi tramite cartella condivisa replicata dall'utente con strumenti a sua scelta (Syncthing, SMB, WebDAV, chiavetta USB) — in coerenza con la filosofia offline-first e zero-cloud.
+* Domande aperte: strategia di merge (i `ReviewLogs` sono append-only e si fondono naturalmente; i conflitti reali riguardano solo mazzi/carte modificati); last-write-wins vs log di sincronizzazione vs CRDT; la replica a caldo di un file SQLite in WAL non è sicura → valutare snapshot, esportazioni incrementali o protocollo custom; UI di risoluzione conflitti.
+
+---
+
+### 15. Funzionalità Candidate (in valutazione — decisione pendente) [DA DECIDERE]
+
+#### 15.1 Whiteboard in Studio
+* Canvas trasparente sovrapposto alla carta durante la sessione per scrittura a mano (dito/stylus). Il tratto è **effimero**: cancellato alla carta successiva, mai persistito.
+* Caso d'uso primario (comportamento AnkiDroid): **recall attivo motorio** — scrivere l'ideogramma, etichettare l'anatomia, abbozzare la formula *prima* del flip. Non è una funzione di note-taking: nulla viene salvato sulla carta.
+* Domanda aperta (2026-10-17): la destinazione d'uso è la scrittura della risposta come esercizio (recall attivo) oppure l'appunto di lavoro temporaneo? Per appunti persistenti servirebbe una feature distinta (annotazioni per carta), da valutare separatamente.
+
+---
+
+### 16. Funzionalità Scartate
+
+* **Profili Multipli** (stile Anki): scartato il 2026-10-17. Il caso d'uso (più utenti sullo stesso dispositivo o separazione di contesti di studio) è considerato non rilevante per il target single-user di Repetita; la separazione per mazzi e tag è ritenuta sufficiente e non giustifica i costi di isolamento DB/impostazioni.
