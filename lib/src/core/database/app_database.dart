@@ -24,7 +24,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -69,6 +69,11 @@ class AppDatabase extends _$AppDatabase {
         if (from < 6) {
           await m.addColumn(cards, cards.easinessFactor);
           await m.addColumn(reviewLogs, reviewLogs.easinessFactor);
+        }
+        if (from < 7) {
+          await m.addColumn(cards, cards.flag);
+          await m.addColumn(decks, decks.examDate);
+          await m.addColumn(decks, decks.targetRetention);
         }
       },
     );

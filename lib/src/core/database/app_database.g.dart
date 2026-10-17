@@ -69,6 +69,28 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _examDateMeta = const VerificationMeta(
+    'examDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> examDate = GeneratedColumn<DateTime>(
+    'exam_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetRetentionMeta = const VerificationMeta(
+    'targetRetention',
+  );
+  @override
+  late final GeneratedColumn<double> targetRetention = GeneratedColumn<double>(
+    'target_retention',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -76,6 +98,8 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
     description,
     createdAt,
     updatedAt,
+    examDate,
+    targetRetention,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -121,6 +145,21 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('exam_date')) {
+      context.handle(
+        _examDateMeta,
+        examDate.isAcceptableOrUnknown(data['exam_date']!, _examDateMeta),
+      );
+    }
+    if (data.containsKey('target_retention')) {
+      context.handle(
+        _targetRetentionMeta,
+        targetRetention.isAcceptableOrUnknown(
+          data['target_retention']!,
+          _targetRetentionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -150,6 +189,14 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      examDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}exam_date'],
+      ),
+      targetRetention: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_retention'],
+      ),
     );
   }
 
@@ -165,12 +212,16 @@ class Deck extends DataClass implements Insertable<Deck> {
   final String? description;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime? examDate;
+  final double? targetRetention;
   const Deck({
     required this.id,
     required this.name,
     this.description,
     required this.createdAt,
     required this.updatedAt,
+    this.examDate,
+    this.targetRetention,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -182,6 +233,12 @@ class Deck extends DataClass implements Insertable<Deck> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || examDate != null) {
+      map['exam_date'] = Variable<DateTime>(examDate);
+    }
+    if (!nullToAbsent || targetRetention != null) {
+      map['target_retention'] = Variable<double>(targetRetention);
+    }
     return map;
   }
 
@@ -194,6 +251,12 @@ class Deck extends DataClass implements Insertable<Deck> {
           : Value(description),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      examDate: examDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(examDate),
+      targetRetention: targetRetention == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetRetention),
     );
   }
 
@@ -208,6 +271,8 @@ class Deck extends DataClass implements Insertable<Deck> {
       description: serializer.fromJson<String?>(json['description']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      examDate: serializer.fromJson<DateTime?>(json['examDate']),
+      targetRetention: serializer.fromJson<double?>(json['targetRetention']),
     );
   }
   @override
@@ -219,6 +284,8 @@ class Deck extends DataClass implements Insertable<Deck> {
       'description': serializer.toJson<String?>(description),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'examDate': serializer.toJson<DateTime?>(examDate),
+      'targetRetention': serializer.toJson<double?>(targetRetention),
     };
   }
 
@@ -228,12 +295,18 @@ class Deck extends DataClass implements Insertable<Deck> {
     Value<String?> description = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<DateTime?> examDate = const Value.absent(),
+    Value<double?> targetRetention = const Value.absent(),
   }) => Deck(
     id: id ?? this.id,
     name: name ?? this.name,
     description: description.present ? description.value : this.description,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    examDate: examDate.present ? examDate.value : this.examDate,
+    targetRetention: targetRetention.present
+        ? targetRetention.value
+        : this.targetRetention,
   );
   Deck copyWithCompanion(DecksCompanion data) {
     return Deck(
@@ -244,6 +317,10 @@ class Deck extends DataClass implements Insertable<Deck> {
           : this.description,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      examDate: data.examDate.present ? data.examDate.value : this.examDate,
+      targetRetention: data.targetRetention.present
+          ? data.targetRetention.value
+          : this.targetRetention,
     );
   }
 
@@ -254,13 +331,23 @@ class Deck extends DataClass implements Insertable<Deck> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('examDate: $examDate, ')
+          ..write('targetRetention: $targetRetention')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, description, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    description,
+    createdAt,
+    updatedAt,
+    examDate,
+    targetRetention,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -269,7 +356,9 @@ class Deck extends DataClass implements Insertable<Deck> {
           other.name == this.name &&
           other.description == this.description &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.examDate == this.examDate &&
+          other.targetRetention == this.targetRetention);
 }
 
 class DecksCompanion extends UpdateCompanion<Deck> {
@@ -278,12 +367,16 @@ class DecksCompanion extends UpdateCompanion<Deck> {
   final Value<String?> description;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<DateTime?> examDate;
+  final Value<double?> targetRetention;
   const DecksCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.description = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.examDate = const Value.absent(),
+    this.targetRetention = const Value.absent(),
   });
   DecksCompanion.insert({
     this.id = const Value.absent(),
@@ -291,6 +384,8 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     this.description = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.examDate = const Value.absent(),
+    this.targetRetention = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Deck> custom({
     Expression<int>? id,
@@ -298,6 +393,8 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     Expression<String>? description,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<DateTime>? examDate,
+    Expression<double>? targetRetention,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -305,6 +402,8 @@ class DecksCompanion extends UpdateCompanion<Deck> {
       if (description != null) 'description': description,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (examDate != null) 'exam_date': examDate,
+      if (targetRetention != null) 'target_retention': targetRetention,
     });
   }
 
@@ -314,6 +413,8 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     Value<String?>? description,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<DateTime?>? examDate,
+    Value<double?>? targetRetention,
   }) {
     return DecksCompanion(
       id: id ?? this.id,
@@ -321,6 +422,8 @@ class DecksCompanion extends UpdateCompanion<Deck> {
       description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      examDate: examDate ?? this.examDate,
+      targetRetention: targetRetention ?? this.targetRetention,
     );
   }
 
@@ -342,6 +445,12 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (examDate.present) {
+      map['exam_date'] = Variable<DateTime>(examDate.value);
+    }
+    if (targetRetention.present) {
+      map['target_retention'] = Variable<double>(targetRetention.value);
+    }
     return map;
   }
 
@@ -352,7 +461,9 @@ class DecksCompanion extends UpdateCompanion<Deck> {
           ..write('name: $name, ')
           ..write('description: $description, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('examDate: $examDate, ')
+          ..write('targetRetention: $targetRetention')
           ..write(')'))
         .toString();
   }
@@ -541,6 +652,16 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     requiredDuringInsert: false,
     defaultValue: const Constant(2.5),
   );
+  static const VerificationMeta _flagMeta = const VerificationMeta('flag');
+  @override
+  late final GeneratedColumn<int> flag = GeneratedColumn<int>(
+    'flag',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -559,6 +680,7 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
     buriedUntil,
     clozeIndex,
     easinessFactor,
+    flag,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -682,6 +804,12 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         ),
       );
     }
+    if (data.containsKey('flag')) {
+      context.handle(
+        _flagMeta,
+        flag.isAcceptableOrUnknown(data['flag']!, _flagMeta),
+      );
+    }
     return context;
   }
 
@@ -755,6 +883,10 @@ class $CardsTable extends Cards with TableInfo<$CardsTable, Card> {
         DriftSqlType.double,
         data['${effectivePrefix}easiness_factor'],
       )!,
+      flag: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}flag'],
+      )!,
     );
   }
 
@@ -781,6 +913,7 @@ class Card extends DataClass implements Insertable<Card> {
   final DateTime? buriedUntil;
   final int? clozeIndex;
   final double easinessFactor;
+  final int flag;
   const Card({
     required this.id,
     required this.deckId,
@@ -798,6 +931,7 @@ class Card extends DataClass implements Insertable<Card> {
     this.buriedUntil,
     this.clozeIndex,
     required this.easinessFactor,
+    required this.flag,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -824,6 +958,7 @@ class Card extends DataClass implements Insertable<Card> {
       map['cloze_index'] = Variable<int>(clozeIndex);
     }
     map['easiness_factor'] = Variable<double>(easinessFactor);
+    map['flag'] = Variable<int>(flag);
     return map;
   }
 
@@ -851,6 +986,7 @@ class Card extends DataClass implements Insertable<Card> {
           ? const Value.absent()
           : Value(clozeIndex),
       easinessFactor: Value(easinessFactor),
+      flag: Value(flag),
     );
   }
 
@@ -876,6 +1012,7 @@ class Card extends DataClass implements Insertable<Card> {
       buriedUntil: serializer.fromJson<DateTime?>(json['buriedUntil']),
       clozeIndex: serializer.fromJson<int?>(json['clozeIndex']),
       easinessFactor: serializer.fromJson<double>(json['easinessFactor']),
+      flag: serializer.fromJson<int>(json['flag']),
     );
   }
   @override
@@ -898,6 +1035,7 @@ class Card extends DataClass implements Insertable<Card> {
       'buriedUntil': serializer.toJson<DateTime?>(buriedUntil),
       'clozeIndex': serializer.toJson<int?>(clozeIndex),
       'easinessFactor': serializer.toJson<double>(easinessFactor),
+      'flag': serializer.toJson<int>(flag),
     };
   }
 
@@ -918,6 +1056,7 @@ class Card extends DataClass implements Insertable<Card> {
     Value<DateTime?> buriedUntil = const Value.absent(),
     Value<int?> clozeIndex = const Value.absent(),
     double? easinessFactor,
+    int? flag,
   }) => Card(
     id: id ?? this.id,
     deckId: deckId ?? this.deckId,
@@ -935,6 +1074,7 @@ class Card extends DataClass implements Insertable<Card> {
     buriedUntil: buriedUntil.present ? buriedUntil.value : this.buriedUntil,
     clozeIndex: clozeIndex.present ? clozeIndex.value : this.clozeIndex,
     easinessFactor: easinessFactor ?? this.easinessFactor,
+    flag: flag ?? this.flag,
   );
   Card copyWithCompanion(CardsCompanion data) {
     return Card(
@@ -966,6 +1106,7 @@ class Card extends DataClass implements Insertable<Card> {
       easinessFactor: data.easinessFactor.present
           ? data.easinessFactor.value
           : this.easinessFactor,
+      flag: data.flag.present ? data.flag.value : this.flag,
     );
   }
 
@@ -987,7 +1128,8 @@ class Card extends DataClass implements Insertable<Card> {
           ..write('isSuspended: $isSuspended, ')
           ..write('buriedUntil: $buriedUntil, ')
           ..write('clozeIndex: $clozeIndex, ')
-          ..write('easinessFactor: $easinessFactor')
+          ..write('easinessFactor: $easinessFactor, ')
+          ..write('flag: $flag')
           ..write(')'))
         .toString();
   }
@@ -1010,6 +1152,7 @@ class Card extends DataClass implements Insertable<Card> {
     buriedUntil,
     clozeIndex,
     easinessFactor,
+    flag,
   );
   @override
   bool operator ==(Object other) =>
@@ -1030,7 +1173,8 @@ class Card extends DataClass implements Insertable<Card> {
           other.isSuspended == this.isSuspended &&
           other.buriedUntil == this.buriedUntil &&
           other.clozeIndex == this.clozeIndex &&
-          other.easinessFactor == this.easinessFactor);
+          other.easinessFactor == this.easinessFactor &&
+          other.flag == this.flag);
 }
 
 class CardsCompanion extends UpdateCompanion<Card> {
@@ -1050,6 +1194,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
   final Value<DateTime?> buriedUntil;
   final Value<int?> clozeIndex;
   final Value<double> easinessFactor;
+  final Value<int> flag;
   const CardsCompanion({
     this.id = const Value.absent(),
     this.deckId = const Value.absent(),
@@ -1067,6 +1212,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.buriedUntil = const Value.absent(),
     this.clozeIndex = const Value.absent(),
     this.easinessFactor = const Value.absent(),
+    this.flag = const Value.absent(),
   });
   CardsCompanion.insert({
     this.id = const Value.absent(),
@@ -1085,6 +1231,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     this.buriedUntil = const Value.absent(),
     this.clozeIndex = const Value.absent(),
     this.easinessFactor = const Value.absent(),
+    this.flag = const Value.absent(),
   }) : deckId = Value(deckId),
        front = Value(front),
        back = Value(back),
@@ -1106,6 +1253,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Expression<DateTime>? buriedUntil,
     Expression<int>? clozeIndex,
     Expression<double>? easinessFactor,
+    Expression<int>? flag,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1124,6 +1272,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
       if (buriedUntil != null) 'buried_until': buriedUntil,
       if (clozeIndex != null) 'cloze_index': clozeIndex,
       if (easinessFactor != null) 'easiness_factor': easinessFactor,
+      if (flag != null) 'flag': flag,
     });
   }
 
@@ -1144,6 +1293,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
     Value<DateTime?>? buriedUntil,
     Value<int?>? clozeIndex,
     Value<double>? easinessFactor,
+    Value<int>? flag,
   }) {
     return CardsCompanion(
       id: id ?? this.id,
@@ -1162,6 +1312,7 @@ class CardsCompanion extends UpdateCompanion<Card> {
       buriedUntil: buriedUntil ?? this.buriedUntil,
       clozeIndex: clozeIndex ?? this.clozeIndex,
       easinessFactor: easinessFactor ?? this.easinessFactor,
+      flag: flag ?? this.flag,
     );
   }
 
@@ -1216,6 +1367,9 @@ class CardsCompanion extends UpdateCompanion<Card> {
     if (easinessFactor.present) {
       map['easiness_factor'] = Variable<double>(easinessFactor.value);
     }
+    if (flag.present) {
+      map['flag'] = Variable<int>(flag.value);
+    }
     return map;
   }
 
@@ -1237,7 +1391,8 @@ class CardsCompanion extends UpdateCompanion<Card> {
           ..write('isSuspended: $isSuspended, ')
           ..write('buriedUntil: $buriedUntil, ')
           ..write('clozeIndex: $clozeIndex, ')
-          ..write('easinessFactor: $easinessFactor')
+          ..write('easinessFactor: $easinessFactor, ')
+          ..write('flag: $flag')
           ..write(')'))
         .toString();
   }
@@ -2757,6 +2912,8 @@ typedef $$DecksTableCreateCompanionBuilder = DecksCompanion Function({
   Value<String?> description,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<DateTime?> examDate,
+  Value<double?> targetRetention,
 });
 typedef $$DecksTableUpdateCompanionBuilder = DecksCompanion Function({
   Value<int> id,
@@ -2764,6 +2921,8 @@ typedef $$DecksTableUpdateCompanionBuilder = DecksCompanion Function({
   Value<String?> description,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<DateTime?> examDate,
+  Value<double?> targetRetention,
 });
 
 final class $$DecksTableReferences
@@ -2820,6 +2979,16 @@ class $$DecksTableFilterComposer extends Composer<_$AppDatabase, $DecksTable> {
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get examDate => $composableBuilder(
+    column: $table.examDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetRetention => $composableBuilder(
+    column: $table.targetRetention,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2882,6 +3051,16 @@ class $$DecksTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get examDate => $composableBuilder(
+    column: $table.examDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get targetRetention => $composableBuilder(
+    column: $table.targetRetention,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DecksTableAnnotationComposer
@@ -2909,6 +3088,14 @@ class $$DecksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get examDate =>
+      $composableBuilder(column: $table.examDate, builder: (column) => column);
+
+  GeneratedColumn<double> get targetRetention => $composableBuilder(
+    column: $table.targetRetention,
+    builder: (column) => column,
+  );
 
   Expression<T> cardsRefs<T extends Object>(
     Expression<T> Function($$CardsTableAnnotationComposer a) f,
@@ -2969,12 +3156,16 @@ class $$DecksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> examDate = const Value.absent(),
+                Value<double?> targetRetention = const Value.absent(),
               }) => DecksCompanion(
                 id: id,
                 name: name,
                 description: description,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                examDate: examDate,
+                targetRetention: targetRetention,
               ),
           createCompanionCallback:
               ({
@@ -2983,12 +3174,16 @@ class $$DecksTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> examDate = const Value.absent(),
+                Value<double?> targetRetention = const Value.absent(),
               }) => DecksCompanion.insert(
                 id: id,
                 name: name,
                 description: description,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                examDate: examDate,
+                targetRetention: targetRetention,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -3056,6 +3251,7 @@ typedef $$CardsTableCreateCompanionBuilder = CardsCompanion Function({
   Value<DateTime?> buriedUntil,
   Value<int?> clozeIndex,
   Value<double> easinessFactor,
+  Value<int> flag,
 });
 typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<int> id,
@@ -3074,6 +3270,7 @@ typedef $$CardsTableUpdateCompanionBuilder = CardsCompanion Function({
   Value<DateTime?> buriedUntil,
   Value<int?> clozeIndex,
   Value<double> easinessFactor,
+  Value<int> flag,
 });
 
 final class $$CardsTableReferences
@@ -3215,6 +3412,11 @@ class $$CardsTableFilterComposer extends Composer<_$AppDatabase, $CardsTable> {
 
   ColumnFilters<double> get easinessFactor => $composableBuilder(
     column: $table.easinessFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get flag => $composableBuilder(
+    column: $table.flag,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3376,6 +3578,11 @@ class $$CardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get flag => $composableBuilder(
+    column: $table.flag,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DecksTableOrderingComposer get deckId {
     final $$DecksTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3465,6 +3672,9 @@ class $$CardsTableAnnotationComposer
     column: $table.easinessFactor,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get flag =>
+      $composableBuilder(column: $table.flag, builder: (column) => column);
 
   $$DecksTableAnnotationComposer get deckId {
     final $$DecksTableAnnotationComposer composer = $composerBuilder(
@@ -3588,6 +3798,7 @@ class $$CardsTableTableManager
                 Value<DateTime?> buriedUntil = const Value.absent(),
                 Value<int?> clozeIndex = const Value.absent(),
                 Value<double> easinessFactor = const Value.absent(),
+                Value<int> flag = const Value.absent(),
               }) => CardsCompanion(
                 id: id,
                 deckId: deckId,
@@ -3605,6 +3816,7 @@ class $$CardsTableTableManager
                 buriedUntil: buriedUntil,
                 clozeIndex: clozeIndex,
                 easinessFactor: easinessFactor,
+                flag: flag,
               ),
           createCompanionCallback:
               ({
@@ -3624,6 +3836,7 @@ class $$CardsTableTableManager
                 Value<DateTime?> buriedUntil = const Value.absent(),
                 Value<int?> clozeIndex = const Value.absent(),
                 Value<double> easinessFactor = const Value.absent(),
+                Value<int> flag = const Value.absent(),
               }) => CardsCompanion.insert(
                 id: id,
                 deckId: deckId,
@@ -3641,6 +3854,7 @@ class $$CardsTableTableManager
                 buriedUntil: buriedUntil,
                 clozeIndex: clozeIndex,
                 easinessFactor: easinessFactor,
+                flag: flag,
               ),
           withReferenceMapper: (p0) => p0
               .map(

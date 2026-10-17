@@ -20,6 +20,7 @@ class CardEntity {
     this.buriedUntil,
     this.clozeIndex,
     this.easinessFactor = 2.5,
+    this.flag = 0,
   });
 
   final int id;
@@ -38,6 +39,7 @@ class CardEntity {
   final DateTime? buriedUntil;
   final int? clozeIndex;
   final double easinessFactor;
+  final int flag;
 
   bool get isCloze => ClozeParser.isCloze(front);
 
@@ -88,7 +90,8 @@ class CardEntity {
           isSuspended == other.isSuspended &&
           buriedUntil == other.buriedUntil &&
           clozeIndex == other.clozeIndex &&
-          easinessFactor == other.easinessFactor;
+          easinessFactor == other.easinessFactor &&
+          flag == other.flag;
 
   @override
   int get hashCode => Object.hash(
@@ -108,5 +111,6 @@ class CardEntity {
     buriedUntil,
     clozeIndex,
     easinessFactor,
+    flag,
   );
 }

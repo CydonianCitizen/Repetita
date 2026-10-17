@@ -6,6 +6,8 @@ class Decks extends Table {
   TextColumn get description => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get examDate => dateTime().nullable()();
+  RealColumn get targetRetention => real().nullable()();
 }
 
 @TableIndex(name: 'idx_cards_deck_id', columns: {#deckId})
@@ -28,6 +30,7 @@ class Cards extends Table {
   DateTimeColumn get buriedUntil => dateTime().nullable()();
   IntColumn get clozeIndex => integer().nullable()();
   RealColumn get easinessFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get flag => integer().withDefault(const Constant(0))();
 }
 
 @TableIndex(name: 'idx_review_logs_card_id', columns: {#cardId})

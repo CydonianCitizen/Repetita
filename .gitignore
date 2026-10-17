@@ -58,3 +58,4 @@ MILESTONE.md
 *.keystore
 android/key.properties
 key.properties
+.superpowers/

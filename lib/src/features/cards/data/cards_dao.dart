@@ -24,6 +24,7 @@ extension CardToEntity on Card {
     buriedUntil: buriedUntil?.toUtc(),
     clozeIndex: clozeIndex,
     easinessFactor: easinessFactor,
+    flag: flag,
   );
 }
 
@@ -126,6 +127,53 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     return (update(cards)..where((t) => t.id.equals(id)))
         .write(const CardsCompanion(buriedUntil: Value(null)))
         .then((rows) => rows > 0);
+  }
+
+  Future<Card?> getCardById(int id) {
+    return (select(cards)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<bool> setCardFlag(int id, int flag) {
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(CardsCompanion(flag: Value(flag)))
+        .then((rows) => rows > 0);
+  }
+
+  Future<bool> setCardDueDate(int id, DateTime due) {
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(CardsCompanion(due: Value(due.toUtc())))
+        .then((rows) => rows > 0);
+  }
+
+  Future<bool> resetCardProgress(int id) {
+    final now = DateTime.now().toUtc();
+    return (update(cards)..where((t) => t.id.equals(id)))
+        .write(
+          CardsCompanion(
+            state: const Value(0),
+            reps: const Value(0),
+            lapses: const Value(0),
+            stability: const Value(0.0),
+            difficulty: const Value(0.0),
+            easinessFactor: const Value(2.5),
+            due: Value(now),
+            lastReview: const Value(null),
+          ),
+        )
+        .then((rows) => rows > 0);
+  }
+
+  Future<int> duplicateCard(int id) async {
+    final card = await getCardById(id);
+    if (card == null) {
+      throw ArgumentError('Card $id not found');
+    }
+    return createCard(
+      deckId: card.deckId,
+      front: card.front,
+      back: card.back,
+      clozeIndex: card.clozeIndex,
+    );
   }
 
   Future<int> deleteCard(int id) {
