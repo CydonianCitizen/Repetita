@@ -6,7 +6,7 @@ import 'package:repetita/src/features/decks/domain/exam_study_planner.dart';
 
 void main() {
   group('ExamStudyPlanner Tests', () {
-    final planner = const ExamStudyPlanner();
+    const planner = ExamStudyPlanner();
 
     test('calculates correct daily new cards quota when days remaining > 0', () {
       final now = DateTime(2026, 10, 1);

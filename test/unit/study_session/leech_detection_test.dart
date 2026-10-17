@@ -5,10 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_models.dart';
 import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
-import 'package:repetita/src/features/cards/data/cards_dao.dart';
-import 'package:repetita/src/features/study_session/data/study_session_dao.dart';
 import 'package:repetita/src/features/study_session/presentation/controllers/study_session_controller.dart';
-import 'package:repetita/src/features/tags/data/tags_dao.dart';
+
 
 void main() {
   late AppDatabase db;
@@ -48,12 +46,12 @@ void main() {
 
       // Pre-set lapses to 2, state to Review (2)
       await (db.update(db.cards)..where((tbl) => tbl.id.equals(cardId))).write(
-        CardsCompanion(
-          state: const Value(2),
-          reps: const Value(5),
-          lapses: const Value(2),
-          stability: const Value(2.0),
-          difficulty: const Value(7.0),
+        const CardsCompanion(
+          state: Value(2),
+          reps: Value(5),
+          lapses: Value(2),
+          stability: Value(2.0),
+          difficulty: Value(7.0),
         ),
       );
 
@@ -84,14 +82,15 @@ void main() {
 
       // Pre-set lapses to 1, state to Review (2)
       await (db.update(db.cards)..where((tbl) => tbl.id.equals(cardId))).write(
-        CardsCompanion(
-          state: const Value(2),
-          reps: const Value(4),
-          lapses: const Value(1),
-          stability: const Value(1.5),
-          difficulty: const Value(8.0),
+        const CardsCompanion(
+          state: Value(2),
+          reps: Value(4),
+          lapses: Value(1),
+          stability: Value(1.5),
+          difficulty: Value(8.0),
         ),
       );
+
 
       final controllerProvider = studySessionControllerProvider(testDeckId);
       await container.read(controllerProvider.future);

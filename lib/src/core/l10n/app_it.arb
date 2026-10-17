@@ -502,7 +502,36 @@
   "fsrsAlgorithmName": "FSRS (Predefinito)",
   "fsrsAlgorithmDesc": "Modello basato su stabilità",
   "sm2AlgorithmName": "SM-2 (Classico)",
-  "sm2AlgorithmDesc": "Classico SuperMemo 2 (standard Anki)"
+  "sm2AlgorithmDesc": "Classico SuperMemo 2 (standard Anki)",
+  "examPlan": "Piano di Studio Esame",
+  "examDate": "Data Esame",
+  "setExamDate": "Imposta Data Esame",
+  "clearExamDate": "Rimuovi Data Esame",
+  "daysRemaining": "{count, plural, =0{Oggi} =1{1 giorno rimasto} other{{count} giorni rimasti}}",
+  "dailyNewTarget": "Obiettivo: {count} nuove carte/giorno",
+  "estimatedReviews": "~{count} ripassi/giorno",
+  "retentionTarget": "Target memorizzazione: {percent}%",
+  "unsustainableWorkload": "Carico elevato! Valuta di iniziare prima o ridurre il target di memorizzazione.",
+  "setDueDate": "Imposta Data di Scadenza",
+  "resetProgress": "Azzera Progressi",
+  "resetProgressConfirmation": "Sei sicuro di voler azzerare i progressi di questa carta? Tornerà ad essere una carta nuova, ma la cronologia dei ripassi sarà preservata.",
+  "duplicateCard": "Crea Copia",
+  "flag": "Contrassegno",
+  "flagNone": "Nessun Contrassegno",
+  "flagRed": "Rosso",
+  "flagOrange": "Arancione",
+  "flagGreen": "Verde",
+  "flagBlue": "Blu",
+  "filterAll": "Tutte",
+  "filterLeech": "Sanguisuga",
+  "filterFlag": "Contrassegno",
+  "leechDetectedAlert": "Sanguisuga rilevata! Carta fallita ripetutamente.",
+  "leechSuspendedAlert": "Sanguisuga rilevata! Carta sospesa automaticamente.",
+  "autoBackups": "Backup Automatici",
+  "noAutoBackupsYet": "Nessun backup automatico ancora presente.",
+  "restoreBackup": "Ripristina",
+  "restoreBackupConfirmation": "Sei sicuro di voler ripristinare questo backup? I dati correnti verranno sostituiti."
 }
+
 
 

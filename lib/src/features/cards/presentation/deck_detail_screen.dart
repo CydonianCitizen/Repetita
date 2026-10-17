@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/algorithms/cloze/cloze_parser.dart';
 import '../../../core/database/app_database.dart' show Deck;
+import '../../../core/database/database_provider.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/card_state_colors.dart';
 import '../../../core/utils/clock_provider.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../decks/presentation/widgets/exam_plan_card.dart';
 import '../../study_session/presentation/study_screen.dart';
 import '../../study_session/presentation/widgets/custom_study_dialog.dart';
 import '../../tags/domain/tag_entity.dart';
@@ -15,6 +17,22 @@ import '../../tags/presentation/controllers/tags_controller.dart';
 import '../domain/card_entity.dart';
 import 'card_editor_screen.dart';
 import 'controllers/card_list_controller.dart';
+
+Color _getFlagColor(int flag) {
+  switch (flag) {
+    case 1:
+      return Colors.red;
+    case 2:
+      return Colors.orange;
+    case 3:
+      return Colors.green;
+    case 4:
+      return Colors.blue;
+    default:
+      return Colors.transparent;
+  }
+}
+
 
 class DeckDetailScreen extends ConsumerStatefulWidget {
   const DeckDetailScreen({super.key, required this.deck});
@@ -113,24 +131,61 @@ class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
             final now = ref.watch(clockProvider)();
             final dueCount = cards.where((c) => c.isDue(now)).length;
 
-            return Column(
-              children: [
-                _DeckStudyHeader(
-                  deck: widget.deck,
-                  cards: cards,
-                  dueCount: dueCount,
-                  allDeckTags: allDeckTags,
-                ),
-                Expanded(
-                  child: _DeckCardsSection(
-                    deck: widget.deck,
-                    cards: cards,
-                    allDeckTags: allDeckTags,
-                    cardTagsMap: cardTagsMap,
-                  ),
-                ),
-              ],
+            final deckStream = ref.watch(decksDaoProvider).watchDeckById(widget.deck.id);
+
+            return StreamBuilder<Deck?>(
+              stream: deckStream,
+              initialData: widget.deck,
+              builder: (context, deckSnap) {
+                final currentDeck = deckSnap.data ?? widget.deck;
+                return Column(
+                  children: [
+                    _DeckStudyHeader(
+                      deck: currentDeck,
+                      cards: cards,
+                      dueCount: dueCount,
+                      allDeckTags: allDeckTags,
+                    ),
+                    ExamPlanCard(
+                      deck: currentDeck,
+                      cards: cards,
+                      now: now,
+                      onSetExamDate: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: currentDeck.examDate ??
+                              now.add(const Duration(days: 30)),
+                          firstDate: now,
+                          lastDate: now.add(const Duration(days: 3650)),
+                        );
+                        if (picked != null) {
+                          await ref.read(decksDaoProvider).setDeckExamDate(
+                            deckId: currentDeck.id,
+                            examDate: picked,
+                          );
+                        }
+                      },
+                      onClearExamDate: () async {
+                        await ref.read(decksDaoProvider).setDeckExamDate(
+                          deckId: currentDeck.id,
+                          examDate: null,
+                          targetRetention: null,
+                        );
+                      },
+                    ),
+                    Expanded(
+                      child: _DeckCardsSection(
+                        deck: currentDeck,
+                        cards: cards,
+                        allDeckTags: allDeckTags,
+                        cardTagsMap: cardTagsMap,
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
+
           },
         ),
       ),
@@ -160,6 +215,10 @@ class _CardTile extends StatelessWidget {
     required this.onDelete,
     required this.onToggleSuspend,
     required this.onToggleBury,
+    required this.onSetDueDate,
+    required this.onResetProgress,
+    required this.onDuplicate,
+    required this.onSetFlag,
   });
 
   final CardEntity card;
@@ -169,6 +228,11 @@ class _CardTile extends StatelessWidget {
   final Future<void> Function() onDelete;
   final Future<void> Function() onToggleSuspend;
   final Future<void> Function() onToggleBury;
+  final Future<void> Function(DateTime newDue) onSetDueDate;
+  final Future<void> Function() onResetProgress;
+  final Future<void> Function() onDuplicate;
+  final Future<void> Function(int flag) onSetFlag;
+
 
   @override
   Widget build(BuildContext context) {
@@ -306,6 +370,12 @@ class _CardTile extends StatelessWidget {
                               ),
                             ),
                           ),
+                        if (card.flag > 0)
+                          Icon(
+                            Icons.flag_rounded,
+                            size: 16,
+                            color: _getFlagColor(card.flag),
+                          ),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -335,6 +405,109 @@ class _CardTile extends StatelessWidget {
                       ),
                       onSelected: (value) async {
                         if (value == 'edit') onEdit();
+                        if (value == 'setDueDate') {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: card.due,
+                            firstDate: now.subtract(const Duration(days: 365)),
+                            lastDate: now.add(const Duration(days: 3650)),
+                          );
+                          if (picked != null) {
+                            await onSetDueDate(picked);
+                          }
+                        }
+                        if (value == 'resetProgress') {
+                          if (!context.mounted) return;
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: Text(l10n?.resetProgress ?? 'Reset Progress'),
+                              content: Text(
+                                l10n?.resetProgressConfirmation ??
+                                    'Are you sure you want to reset this card\'s SRS progress? It will become a new card, but review logs are kept.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(false),
+                                  child: Text(l10n?.cancel ?? 'Cancel'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.of(ctx).pop(true),
+                                  child: Text(l10n?.resetProgress ?? 'Reset'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirmed == true) {
+                            await onResetProgress();
+                          }
+                        }
+
+                        if (value == 'duplicate') await onDuplicate();
+                        if (value == 'flag') {
+                          if (!context.mounted) return;
+                          final chosen = await showDialog<int>(
+                            context: context,
+                            builder: (ctx) => SimpleDialog(
+                              title: Text(l10n?.flag ?? 'Flag'),
+                              children: [
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.of(ctx).pop(0),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.outlined_flag, size: 20),
+                                      const SizedBox(width: 12),
+                                      Text(l10n?.flagNone ?? 'No Flag'),
+                                    ],
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.of(ctx).pop(1),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.flag, size: 20, color: Colors.red),
+                                      const SizedBox(width: 12),
+                                      Text(l10n?.flagRed ?? 'Red Flag'),
+                                    ],
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.of(ctx).pop(2),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.flag, size: 20, color: Colors.orange),
+                                      const SizedBox(width: 12),
+                                      Text(l10n?.flagOrange ?? 'Orange Flag'),
+                                    ],
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.of(ctx).pop(3),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.flag, size: 20, color: Colors.green),
+                                      const SizedBox(width: 12),
+                                      Text(l10n?.flagGreen ?? 'Green Flag'),
+                                    ],
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  onPressed: () => Navigator.of(ctx).pop(4),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.flag, size: 20, color: Colors.blue),
+                                      const SizedBox(width: 12),
+                                      Text(l10n?.flagBlue ?? 'Blue Flag'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (chosen != null) {
+                            await onSetFlag(chosen);
+                          }
+                        }
                         if (value == 'suspend') await onToggleSuspend();
                         if (value == 'bury') await onToggleBury();
                         if (value == 'delete') await onDelete();
@@ -345,35 +518,105 @@ class _CardTile extends StatelessWidget {
                         return [
                           PopupMenuItem(
                             value: 'edit',
-                            child: Text(itemL10n?.edit ?? 'Edit'),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.edit_outlined, size: 18),
+                                const SizedBox(width: 8),
+                                Text(itemL10n?.edit ?? 'Edit'),
+                              ],
+                            ),
                           ),
                           PopupMenuItem(
+                            value: 'setDueDate',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.calendar_today_outlined, size: 18),
+                                const SizedBox(width: 8),
+                                Text(itemL10n?.setDueDate ?? 'Set Due Date'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'resetProgress',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.restart_alt_rounded, size: 18),
+                                const SizedBox(width: 8),
+                                Text(itemL10n?.resetProgress ?? 'Reset Progress'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'duplicate',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.copy_rounded, size: 18),
+                                const SizedBox(width: 8),
+                                Text(itemL10n?.duplicateCard ?? 'Duplicate Card'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'flag',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  card.flag > 0 ? Icons.flag : Icons.outlined_flag,
+                                  size: 18,
+                                  color: card.flag > 0 ? _getFlagColor(card.flag) : null,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(itemL10n?.flag ?? 'Flag'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+
+                          PopupMenuItem(
                             value: 'suspend',
-                            child: Text(
-                              card.isSuspended
-                                  ? (itemL10n?.unsuspendCard ??
-                                        'Unsuspend Card')
-                                  : (itemL10n?.suspendCard ?? 'Suspend Card'),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.pause_circle_outline, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  card.isSuspended
+                                      ? (itemL10n?.unsuspendCard ?? 'Unsuspend Card')
+                                      : (itemL10n?.suspendCard ?? 'Suspend Card'),
+                                ),
+                              ],
                             ),
                           ),
                           PopupMenuItem(
                             value: 'bury',
-                            child: Text(
-                              isBuried
-                                  ? (itemL10n?.unburyCard ?? 'Unbury Card')
-                                  : (itemL10n?.buryCard ?? 'Bury Card'),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.alarm_off, size: 18),
+                                const SizedBox(width: 8),
+                                Text(
+                                  isBuried
+                                      ? (itemL10n?.unburyCard ?? 'Unbury Card')
+                                      : (itemL10n?.buryCard ?? 'Bury Card'),
+                                ),
+                              ],
                             ),
                           ),
                           PopupMenuItem(
                             value: 'delete',
-                            child: Text(
-                              itemL10n?.delete ?? 'Delete',
-                              style: TextStyle(color: scheme.error),
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline, size: 18, color: scheme.error),
+                                const SizedBox(width: 8),
+                                Text(
+                                  itemL10n?.delete ?? 'Delete',
+                                  style: TextStyle(color: scheme.error),
+                                ),
+                              ],
                             ),
                           ),
                         ];
                       },
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -588,6 +831,7 @@ class _DeckCardsSection extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final selectedTagId = ref.watch(deckTagFilterProvider);
+    final selectedFlag = ref.watch(deckCardFlagFilterProvider);
     final displayedCards = ref.watch(filteredDeckCardsProvider(deck.id));
     final now = ref.watch(clockProvider)();
 
@@ -639,11 +883,100 @@ class _DeckCardsSection extends ConsumerWidget {
             ),
           ),
         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          child: SizedBox(
+            height: 34,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: FilterChip(
+                    key: const Key('filter_flag_all'),
+                    label: Text(l10n?.filterFlag ?? 'Flag'),
+                    selected: selectedFlag == null,
+                    onSelected: (_) => ref
+                        .read(deckCardFlagFilterProvider.notifier)
+                        .clear(),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    avatar: const Icon(Icons.flag, size: 16, color: Colors.red),
+                    label: Text(l10n?.flagRed ?? 'Red'),
+                    selected: selectedFlag == 1,
+                    onSelected: (selected) {
+                      ref
+                          .read(deckCardFlagFilterProvider.notifier)
+                          .setFilter(selected ? 1 : null);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    avatar: const Icon(Icons.flag, size: 16, color: Colors.orange),
+                    label: Text(l10n?.flagOrange ?? 'Orange'),
+                    selected: selectedFlag == 2,
+                    onSelected: (selected) {
+                      ref
+                          .read(deckCardFlagFilterProvider.notifier)
+                          .setFilter(selected ? 2 : null);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    avatar: const Icon(Icons.flag, size: 16, color: Colors.green),
+                    label: Text(l10n?.flagGreen ?? 'Green'),
+                    selected: selectedFlag == 3,
+                    onSelected: (selected) {
+                      ref
+                          .read(deckCardFlagFilterProvider.notifier)
+                          .setFilter(selected ? 3 : null);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    avatar: const Icon(Icons.flag, size: 16, color: Colors.blue),
+                    label: Text(l10n?.flagBlue ?? 'Blue'),
+                    selected: selectedFlag == 4,
+                    onSelected: (selected) {
+                      ref
+                          .read(deckCardFlagFilterProvider.notifier)
+                          .setFilter(selected ? 4 : null);
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    avatar: Icon(Icons.warning_amber_rounded, size: 16, color: colorScheme.error),
+                    label: Text(l10n?.filterLeech ?? 'Leech'),
+                    selected: selectedFlag == -1,
+                    onSelected: (selected) {
+                      ref
+                          .read(deckCardFlagFilterProvider.notifier)
+                          .setFilter(selected ? -1 : null);
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: [
               Text(
-                'Cards (${displayedCards.length}${selectedTagId != null ? ' / ${cards.length}' : ''})',
+                'Cards (${displayedCards.length}${displayedCards.length != cards.length ? ' / ${cards.length}' : ''})',
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
@@ -652,6 +985,7 @@ class _DeckCardsSection extends ConsumerWidget {
             ],
           ),
         ),
+
         Expanded(
           child: cards.isEmpty
               ? Center(
@@ -820,7 +1154,80 @@ class _DeckCardsSection extends ConsumerWidget {
                           }
                         }
                       },
+                      onSetDueDate: (newDue) async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .setCardDueDate(card.id, newDue);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to set due date: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      onResetProgress: () async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .resetCardProgress(card.id);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to reset progress: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      onDuplicate: () async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .duplicateCard(card.id);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to duplicate card: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      onSetFlag: (flag) async {
+                        try {
+                          await ref
+                              .read(
+                                cardListControllerProvider(deck.id).notifier,
+                              )
+                              .setCardFlag(card.id, flag);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to set flag: $e'),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        }
+                      },
                     );
+
                   },
                 ),
         ),

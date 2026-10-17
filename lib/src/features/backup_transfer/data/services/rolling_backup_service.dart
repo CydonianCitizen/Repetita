@@ -81,8 +81,14 @@ class RollingBackupService {
     }
   }
 
-  Future<List<File>> listAutoBackups() async {
-    final dir = await _resolveDirectory();
+  static Future<List<File>> getAutoBackups({Directory? backupDir}) async {
+    Directory dir;
+    if (backupDir != null) {
+      dir = backupDir;
+    } else {
+      final appDocDir = await getApplicationDocumentsDirectory();
+      dir = Directory(p.join(appDocDir.path, 'backups', 'auto'));
+    }
     if (!dir.existsSync()) return [];
 
     final files = dir
@@ -97,4 +103,10 @@ class RollingBackupService {
     files.sort((a, b) => b.path.compareTo(a.path)); // Newest first
     return files;
   }
+
+  Future<List<File>> listAutoBackups() async {
+    final dir = await _resolveDirectory();
+    return getAutoBackups(backupDir: dir);
+  }
 }
+

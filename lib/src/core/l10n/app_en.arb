@@ -547,7 +547,64 @@
   "fsrsAlgorithmName": "FSRS (Default)",
   "fsrsAlgorithmDesc": "Modern stability model",
   "sm2AlgorithmName": "SM-2 (Classic)",
-  "sm2AlgorithmDesc": "Classic SuperMemo 2 model"
+  "sm2AlgorithmDesc": "Classic SuperMemo 2 model",
+  "examPlan": "Exam Study Plan",
+  "examDate": "Exam Date",
+  "setExamDate": "Set Exam Date",
+  "clearExamDate": "Clear Exam Date",
+  "daysRemaining": "{count, plural, =0{Today} =1{1 day remaining} other{{count} days remaining}}",
+  "@daysRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyNewTarget": "Target: {count} new cards/day",
+  "@dailyNewTarget": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "estimatedReviews": "~{count} reviews/day",
+  "@estimatedReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retentionTarget": "Target retention: {percent}%",
+  "@retentionTarget": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "unsustainableWorkload": "Heavy workload! You may want to start earlier or lower retention target.",
+  "setDueDate": "Set Due Date",
+  "resetProgress": "Reset Progress",
+  "resetProgressConfirmation": "Are you sure you want to reset this card's SRS progress? It will become a new card, but review logs are kept.",
+  "duplicateCard": "Duplicate Card",
+  "flag": "Flag",
+  "flagNone": "No Flag",
+  "flagRed": "Red Flag",
+  "flagOrange": "Orange Flag",
+  "flagGreen": "Green Flag",
+  "flagBlue": "Blue Flag",
+  "filterAll": "All",
+  "filterLeech": "Leech",
+  "filterFlag": "Flag",
+  "leechDetectedAlert": "Leech detected! Card lapsed multiple times.",
+  "leechSuspendedAlert": "Leech detected! Card automatically suspended.",
+  "autoBackups": "Automatic Backups",
+  "noAutoBackupsYet": "No automatic backups yet.",
+  "restoreBackup": "Restore",
+  "restoreBackupConfirmation": "Are you sure you want to restore this backup? Current data will be replaced."
 }
+
 
 

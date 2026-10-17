@@ -72,14 +72,15 @@ void main() {
 
       // Mutate card with custom state via custom statement or update
       await (db.update(db.cards)..where((tbl) => tbl.id.equals(cardId))).write(
-        CardsCompanion(
-          state: const Value(2),
-          reps: const Value(12),
-          lapses: const Value(4),
-          stability: const Value(18.5),
-          difficulty: const Value(6.2),
-          easinessFactor: const Value(1.7),
+        const CardsCompanion(
+          state: Value(2),
+          reps: Value(12),
+          lapses: Value(4),
+          stability: Value(18.5),
+          difficulty: Value(6.2),
+          easinessFactor: Value(1.7),
         ),
+
       );
 
       var modified = await cardsDao.getCardById(cardId);

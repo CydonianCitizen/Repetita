@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,9 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/services/file_picker_service.dart';
 import '../../decks/data/decks_dao.dart';
 import '../../decks/presentation/controllers/deck_list_controller.dart';
+import '../data/services/rolling_backup_service.dart';
 import 'controllers/backup_controller.dart';
+
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -101,7 +104,58 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     }
   }
 
+  Future<void> _handleRestoreAutoBackup(File file) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n?.restoreBackupTitle ?? 'Confirm Restore'),
+        content: Text(
+          l10n?.restoreBackupConfirmation ??
+              'Are you sure you want to restore this backup? Current data will be replaced.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n?.restoreBackup ?? 'Restore'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      final jsonString = await file.readAsString();
+      await ref.read(backupControllerProvider.notifier).importJson(
+            jsonString,
+            replaceExisting: true,
+          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.backupRestoredSuccess ?? 'Backup restored successfully!',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorSnackBar('${l10n?.restoreFailed ?? "Restore failed"}: $e');
+      }
+    }
+  }
+
   Future<void> _handleExportCsv() async {
+
     try {
       final csvString = await ref
           .read(backupControllerProvider.notifier)
@@ -312,6 +366,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                _AutoBackupsCard(
+                  onRestoreFile: _handleRestoreAutoBackup,
+                ),
               ],
             ),
             if (isLoading)
@@ -326,8 +384,125 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 }
 
+class _AutoBackupsCard extends StatefulWidget {
+  const _AutoBackupsCard({required this.onRestoreFile});
+
+  final Future<void> Function(File file) onRestoreFile;
+
+  @override
+  State<_AutoBackupsCard> createState() => _AutoBackupsCardState();
+}
+
+class _AutoBackupsCardState extends State<_AutoBackupsCard> {
+  late Future<List<File>> _backupsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  void _reload() {
+    setState(() {
+      _backupsFuture = RollingBackupService.getAutoBackups();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.history_rounded, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n?.autoBackups ?? 'Automatic Backups',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 20),
+                  tooltip: 'Refresh',
+                  onPressed: _reload,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder<List<File>>(
+              future: _backupsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox.shrink();
+                }
+
+                final files = snapshot.data ?? [];
+                if (files.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      l10n?.noAutoBackupsYet ?? 'No automatic backups yet.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  );
+                }
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: files.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final file = files[index];
+                    final name = file.uri.pathSegments.last;
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      leading: const Icon(Icons.description_outlined, size: 20),
+                      title: Text(name),
+                      trailing: TextButton(
+                        onPressed: () async {
+                          await widget.onRestoreFile(file);
+                          _reload();
+                        },
+                        child: Text(l10n?.restoreBackup ?? 'Restore'),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+}
+
 class _AnkiDestinationDialog extends StatefulWidget {
   const _AnkiDestinationDialog({required this.decks});
+
 
   final List<DeckWithCounts> decks;
 

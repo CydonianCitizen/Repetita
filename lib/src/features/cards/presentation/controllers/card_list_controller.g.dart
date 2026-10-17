@@ -62,13 +62,66 @@ abstract class _$DeckCardSearchQuery extends $Notifier<String> {
   }
 }
 
-/// Cards of [deckId] filtered by the currently selected tag and search query.
+@ProviderFor(DeckCardFlagFilter)
+final deckCardFlagFilterProvider = DeckCardFlagFilterProvider._();
+
+final class DeckCardFlagFilterProvider
+    extends $NotifierProvider<DeckCardFlagFilter, int?> {
+  DeckCardFlagFilterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'deckCardFlagFilterProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$deckCardFlagFilterHash();
+
+  @$internal
+  @override
+  DeckCardFlagFilter create() => DeckCardFlagFilter();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int?>(value),
+    );
+  }
+}
+
+String _$deckCardFlagFilterHash() =>
+    r'bd169e0465011790fed565e5178511cc9614793e';
+
+abstract class _$DeckCardFlagFilter extends $Notifier<int?> {
+  int? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int?, int?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int?, int?>,
+              int?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
 /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 @ProviderFor(filteredDeckCards)
 final filteredDeckCardsProvider = FilteredDeckCardsFamily._();
 
-/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
 /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 final class FilteredDeckCardsProvider
@@ -79,7 +132,7 @@ final class FilteredDeckCardsProvider
           List<CardEntity>
         >
     with $Provider<List<CardEntity>> {
-  /// Cards of [deckId] filtered by the currently selected tag and search query.
+  /// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
   /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
   FilteredDeckCardsProvider._({
     required FilteredDeckCardsFamily super.from,
@@ -132,9 +185,9 @@ final class FilteredDeckCardsProvider
   }
 }
 
-String _$filteredDeckCardsHash() => r'23e8efdfa14221116c1038c85e5cc0000b78c72c';
+String _$filteredDeckCardsHash() => r'c37d7bfbc6655abaf10ccddb3308e30e00c6594f';
 
-/// Cards of [deckId] filtered by the currently selected tag and search query.
+/// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
 /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
 final class FilteredDeckCardsFamily extends $Family
@@ -148,7 +201,7 @@ final class FilteredDeckCardsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Cards of [deckId] filtered by the currently selected tag and search query.
+  /// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
   /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 
   FilteredDeckCardsProvider call(int deckId) =>
@@ -200,7 +253,7 @@ final class CardListControllerProvider
 }
 
 String _$cardListControllerHash() =>
-    r'8c12e9e0a0b6ed4e18ad8c25310328befeaf4d20';
+    r'f793cc4b9cc2bb1037162ef49dbbece3ec7be7c2';
 
 final class CardListControllerFamily extends $Family
     with

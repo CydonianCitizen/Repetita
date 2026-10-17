@@ -833,8 +833,8 @@ abstract class AppLocalizations {
   /// No description provided for @retentionTarget.
   ///
   /// In en, this message translates to:
-  /// **'90% retention'**
-  String get retentionTarget;
+  /// **'Target retention: {percent}%'**
+  String retentionTarget(int percent);
 
   /// No description provided for @desiredRetention.
   ///
@@ -2029,6 +2029,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Classic SuperMemo 2 model'**
   String get sm2AlgorithmDesc;
+
+  /// No description provided for @examPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Study Plan'**
+  String get examPlan;
+
+  /// No description provided for @examDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Exam Date'**
+  String get examDate;
+
+  /// No description provided for @setExamDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Exam Date'**
+  String get setExamDate;
+
+  /// No description provided for @clearExamDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Exam Date'**
+  String get clearExamDate;
+
+  /// No description provided for @daysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Today} =1{1 day remaining} other{{count} days remaining}}'**
+  String daysRemaining(int count);
+
+  /// No description provided for @dailyNewTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target: {count} new cards/day'**
+  String dailyNewTarget(int count);
+
+  /// No description provided for @estimatedReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'~{count} reviews/day'**
+  String estimatedReviews(int count);
+
+  /// No description provided for @unsustainableWorkload.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy workload! You may want to start earlier or lower retention target.'**
+  String get unsustainableWorkload;
+
+  /// No description provided for @setDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Due Date'**
+  String get setDueDate;
+
+  /// No description provided for @resetProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Progress'**
+  String get resetProgress;
+
+  /// No description provided for @resetProgressConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reset this card\'s SRS progress? It will become a new card, but review logs are kept.'**
+  String get resetProgressConfirmation;
+
+  /// No description provided for @duplicateCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Card'**
+  String get duplicateCard;
+
+  /// No description provided for @flag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get flag;
+
+  /// No description provided for @flagNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No Flag'**
+  String get flagNone;
+
+  /// No description provided for @flagRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red Flag'**
+  String get flagRed;
+
+  /// No description provided for @flagOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange Flag'**
+  String get flagOrange;
+
+  /// No description provided for @flagGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Flag'**
+  String get flagGreen;
+
+  /// No description provided for @flagBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue Flag'**
+  String get flagBlue;
+
+  /// No description provided for @filterLeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Leech'**
+  String get filterLeech;
+
+  /// No description provided for @filterFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag'**
+  String get filterFlag;
+
+  /// No description provided for @leechDetectedAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Leech detected! Card lapsed multiple times.'**
+  String get leechDetectedAlert;
+
+  /// No description provided for @leechSuspendedAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Leech detected! Card automatically suspended.'**
+  String get leechSuspendedAlert;
+
+  /// No description provided for @autoBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Backups'**
+  String get autoBackups;
+
+  /// No description provided for @noAutoBackupsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic backups yet.'**
+  String get noAutoBackupsYet;
+
+  /// No description provided for @restoreBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restoreBackup;
+
+  /// No description provided for @restoreBackupConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore this backup? Current data will be replaced.'**
+  String get restoreBackupConfirmation;
 }
 
 class _AppLocalizationsDelegate

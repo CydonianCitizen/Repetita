@@ -399,7 +399,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get fsrsParametersSubtitle => 'Ritenzione e intervalli';
 
   @override
-  String get retentionTarget => '90% ritenzione';
+  String retentionTarget(int percent) {
+    return 'Target memorizzazione: $percent%';
+  }
 
   @override
   String get desiredRetention => 'Ritenzione desiderata';
@@ -1097,4 +1099,100 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get sm2AlgorithmDesc => 'Classico SuperMemo 2 (standard Anki)';
+
+  @override
+  String get examPlan => 'Piano di Studio Esame';
+
+  @override
+  String get examDate => 'Data Esame';
+
+  @override
+  String get setExamDate => 'Imposta Data Esame';
+
+  @override
+  String get clearExamDate => 'Rimuovi Data Esame';
+
+  @override
+  String daysRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count giorni rimasti',
+      one: '1 giorno rimasto',
+      zero: 'Oggi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dailyNewTarget(int count) {
+    return 'Obiettivo: $count nuove carte/giorno';
+  }
+
+  @override
+  String estimatedReviews(int count) {
+    return '~$count ripassi/giorno';
+  }
+
+  @override
+  String get unsustainableWorkload =>
+      'Carico elevato! Valuta di iniziare prima o ridurre il target di memorizzazione.';
+
+  @override
+  String get setDueDate => 'Imposta Data di Scadenza';
+
+  @override
+  String get resetProgress => 'Azzera Progressi';
+
+  @override
+  String get resetProgressConfirmation =>
+      'Sei sicuro di voler azzerare i progressi di questa carta? Tornerà ad essere una carta nuova, ma la cronologia dei ripassi sarà preservata.';
+
+  @override
+  String get duplicateCard => 'Crea Copia';
+
+  @override
+  String get flag => 'Contrassegno';
+
+  @override
+  String get flagNone => 'Nessun Contrassegno';
+
+  @override
+  String get flagRed => 'Rosso';
+
+  @override
+  String get flagOrange => 'Arancione';
+
+  @override
+  String get flagGreen => 'Verde';
+
+  @override
+  String get flagBlue => 'Blu';
+
+  @override
+  String get filterLeech => 'Sanguisuga';
+
+  @override
+  String get filterFlag => 'Contrassegno';
+
+  @override
+  String get leechDetectedAlert =>
+      'Sanguisuga rilevata! Carta fallita ripetutamente.';
+
+  @override
+  String get leechSuspendedAlert =>
+      'Sanguisuga rilevata! Carta sospesa automaticamente.';
+
+  @override
+  String get autoBackups => 'Backup Automatici';
+
+  @override
+  String get noAutoBackupsYet => 'Nessun backup automatico ancora presente.';
+
+  @override
+  String get restoreBackup => 'Ripristina';
+
+  @override
+  String get restoreBackupConfirmation =>
+      'Sei sicuro di voler ripristinare questo backup? I dati correnti verranno sostituiti.';
 }

@@ -399,7 +399,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fsrsParametersSubtitle => 'Retention and intervals';
 
   @override
-  String get retentionTarget => '90% retention';
+  String retentionTarget(int percent) {
+    return 'Target retention: $percent%';
+  }
 
   @override
   String get desiredRetention => 'Desired Retention';
@@ -1088,4 +1090,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sm2AlgorithmDesc => 'Classic SuperMemo 2 model';
+
+  @override
+  String get examPlan => 'Exam Study Plan';
+
+  @override
+  String get examDate => 'Exam Date';
+
+  @override
+  String get setExamDate => 'Set Exam Date';
+
+  @override
+  String get clearExamDate => 'Clear Exam Date';
+
+  @override
+  String daysRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days remaining',
+      one: '1 day remaining',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dailyNewTarget(int count) {
+    return 'Target: $count new cards/day';
+  }
+
+  @override
+  String estimatedReviews(int count) {
+    return '~$count reviews/day';
+  }
+
+  @override
+  String get unsustainableWorkload =>
+      'Heavy workload! You may want to start earlier or lower retention target.';
+
+  @override
+  String get setDueDate => 'Set Due Date';
+
+  @override
+  String get resetProgress => 'Reset Progress';
+
+  @override
+  String get resetProgressConfirmation =>
+      'Are you sure you want to reset this card\'s SRS progress? It will become a new card, but review logs are kept.';
+
+  @override
+  String get duplicateCard => 'Duplicate Card';
+
+  @override
+  String get flag => 'Flag';
+
+  @override
+  String get flagNone => 'No Flag';
+
+  @override
+  String get flagRed => 'Red Flag';
+
+  @override
+  String get flagOrange => 'Orange Flag';
+
+  @override
+  String get flagGreen => 'Green Flag';
+
+  @override
+  String get flagBlue => 'Blue Flag';
+
+  @override
+  String get filterLeech => 'Leech';
+
+  @override
+  String get filterFlag => 'Flag';
+
+  @override
+  String get leechDetectedAlert =>
+      'Leech detected! Card lapsed multiple times.';
+
+  @override
+  String get leechSuspendedAlert =>
+      'Leech detected! Card automatically suspended.';
+
+  @override
+  String get autoBackups => 'Automatic Backups';
+
+  @override
+  String get noAutoBackupsYet => 'No automatic backups yet.';
+
+  @override
+  String get restoreBackup => 'Restore';
+
+  @override
+  String get restoreBackupConfirmation =>
+      'Are you sure you want to restore this backup? Current data will be replaced.';
 }

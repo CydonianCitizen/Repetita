@@ -19,7 +19,16 @@ class DeckCardSearchQuery extends _$DeckCardSearchQuery {
   void clear() => state = '';
 }
 
-/// Cards of [deckId] filtered by the currently selected tag and search query.
+@riverpod
+class DeckCardFlagFilter extends _$DeckCardFlagFilter {
+  @override
+  int? build() => null;
+
+  void setFilter(int? flag) => state = flag;
+  void clear() => state = null;
+}
+
+/// Cards of [deckId] filtered by the currently selected tag, flag, and search query.
 /// Recomputed only when the card list, the tag map, the tag filter, or search query change.
 @riverpod
 List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
@@ -27,6 +36,7 @@ List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
       ref.watch(cardListControllerProvider(deckId)).value ??
       const <CardEntity>[];
   final selectedTagId = ref.watch(deckTagFilterProvider);
+  final selectedFlag = ref.watch(deckCardFlagFilterProvider);
   final searchQuery = ref.watch(deckCardSearchQueryProvider).toLowerCase();
 
   var result = cards;
@@ -37,6 +47,21 @@ List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
           (c) => (tagsMap?[c.id] ?? const []).any((t) => t.id == selectedTagId),
         )
         .toList();
+  }
+
+  if (selectedFlag != null) {
+    if (selectedFlag == -1) {
+      final tagsMap = ref.watch(deckTagsProvider(deckId)).value;
+      result = result
+          .where(
+            (c) => (tagsMap?[c.id] ?? const []).any(
+              (t) => t.name.toLowerCase() == 'leech',
+            ),
+          )
+          .toList();
+    } else {
+      result = result.where((c) => c.flag == selectedFlag).toList();
+    }
   }
 
   if (searchQuery.isNotEmpty) {
@@ -51,6 +76,7 @@ List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
 
   return result;
 }
+
 
 @riverpod
 class CardListController extends _$CardListController {
@@ -145,4 +171,25 @@ class CardListController extends _$CardListController {
     final dao = ref.read(cardsDaoProvider);
     await dao.unburyCard(id);
   }
+
+  Future<void> setCardFlag(int id, int flag) async {
+    final dao = ref.read(cardsDaoProvider);
+    await dao.setCardFlag(id, flag);
+  }
+
+  Future<void> setCardDueDate(int id, DateTime newDue) async {
+    final dao = ref.read(cardsDaoProvider);
+    await dao.setCardDueDate(id, newDue);
+  }
+
+  Future<void> resetCardProgress(int id) async {
+    final dao = ref.read(cardsDaoProvider);
+    await dao.resetCardProgress(id);
+  }
+
+  Future<int> duplicateCard(int id) async {
+    final dao = ref.read(cardsDaoProvider);
+    return dao.duplicateCard(id);
+  }
 }
+

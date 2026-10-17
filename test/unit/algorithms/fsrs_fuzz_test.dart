@@ -9,13 +9,13 @@ import 'package:repetita/src/core/algorithms/fsrs/models/fsrs_parameters.dart';
 void main() {
   group('FSRS Fuzz Factor Tests', () {
     test('calculateFuzzOffset returns 0 for intervals under 3 days', () {
-      final engine = FsrsEngine(const FsrsParameters(enableFuzz: true));
+      const engine = FsrsEngine(FsrsParameters(enableFuzz: true));
       expect(engine.calculateFuzzOffset(1), equals(0));
       expect(engine.calculateFuzzOffset(2), equals(0));
     });
 
     test('calculateFuzzOffset returns 0 when enableFuzz is false', () {
-      final engine = FsrsEngine(const FsrsParameters(enableFuzz: false));
+      const engine = FsrsEngine(FsrsParameters(enableFuzz: false));
       expect(engine.calculateFuzzOffset(10), equals(0));
       expect(engine.calculateFuzzOffset(100), equals(0));
     });
@@ -31,7 +31,8 @@ void main() {
     });
 
     test('repeat method returns deterministic intervals without fuzz for button previews', () {
-      final engine = FsrsEngine(const FsrsParameters(enableFuzz: true));
+      const engine = FsrsEngine(FsrsParameters(enableFuzz: true));
+
       final card = FsrsCard(
         state: CardState.review,
         stability: 20.0,

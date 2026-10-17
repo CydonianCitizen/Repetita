@@ -12,10 +12,26 @@ import '../../../core/widgets/error_view.dart';
 import '../../settings/data/haptic_service.dart';
 import '../../settings/presentation/controllers/animation_level_controller.dart';
 import '../../settings/presentation/controllers/haptic_controller.dart';
+import '../../../core/database/database_provider.dart';
 import '../domain/models/custom_study_config.dart';
 import 'controllers/study_session_controller.dart';
 import 'widgets/flip_card_view.dart';
 import 'widgets/rating_bar.dart';
+
+Color _getFlagColor(int flag) {
+  switch (flag) {
+    case 1:
+      return Colors.red;
+    case 2:
+      return Colors.orange;
+    case 3:
+      return Colors.green;
+    case 4:
+      return Colors.blue;
+    default:
+      return Colors.transparent;
+  }
+}
 
 class StudyScreen extends ConsumerWidget {
   const StudyScreen({super.key, required this.deckId, this.customStudyConfig});
@@ -29,6 +45,23 @@ class StudyScreen extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final provider = studySessionControllerProvider(deckId, customStudyConfig);
+
+    ref.listen(provider, (previous, next) {
+      final prevLeech = previous?.value?.lastLeechDetected ?? false;
+      final nextLeech = next.value?.lastLeechDetected ?? false;
+      if (nextLeech && !prevLeech) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n?.leechDetectedAlert ??
+                  'Leech detected! Card lapsed multiple times.',
+            ),
+            backgroundColor: Colors.deepOrange,
+          ),
+        );
+      }
+    });
+
 
     return Scaffold(
       appBar: AppBar(
@@ -96,6 +129,83 @@ class StudyScreen extends ConsumerWidget {
           ),
           Consumer(
             builder: (context, ref, _) {
+              final currentCard = ref.watch(
+                provider.select((s) => s.value?.currentCard),
+              );
+              if (currentCard == null) return const SizedBox.shrink();
+              final flag = currentCard.flag;
+              return PopupMenuButton<int>(
+                key: const Key('study_card_flag_button'),
+                icon: Icon(
+                  flag > 0 ? Icons.flag_rounded : Icons.outlined_flag_rounded,
+                  color: flag > 0 ? _getFlagColor(flag) : null,
+                ),
+                tooltip: l10n?.flag ?? 'Flag',
+                onSelected: (newFlag) async {
+                  await ref
+                      .read(cardsDaoProvider)
+                      .setCardFlag(currentCard.id, newFlag);
+                },
+                itemBuilder: (context) {
+                  final itemL10n = AppLocalizations.of(context);
+                  return [
+                    PopupMenuItem(
+                      value: 0,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.outlined_flag, size: 18),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.flagNone ?? 'No Flag'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.flag, size: 18, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.flagRed ?? 'Red Flag'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 2,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.flag, size: 18, color: Colors.orange),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.flagOrange ?? 'Orange Flag'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 3,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.flag, size: 18, color: Colors.green),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.flagGreen ?? 'Green Flag'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 4,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.flag, size: 18, color: Colors.blue),
+                          const SizedBox(width: 8),
+                          Text(itemL10n?.flagBlue ?? 'Blue Flag'),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
               final hasCurrentCard = ref.watch(
                 provider.select((s) => s.value?.currentCard != null),
               );
@@ -105,6 +215,7 @@ class StudyScreen extends ConsumerWidget {
                 icon: const Icon(Icons.more_vert),
                 tooltip: l10n?.cardOptions ?? 'Card options',
                 onSelected: (value) async {
+
                   final controller = ref.read(provider.notifier);
                   try {
                     if (value == 'suspend') {
