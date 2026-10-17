@@ -8,22 +8,25 @@ void main() {
   group('ExamStudyPlanner Tests', () {
     const planner = ExamStudyPlanner();
 
-    test('calculates correct daily new cards quota when days remaining > 0', () {
-      final now = DateTime(2026, 10, 1);
-      final examDate = DateTime(2026, 10, 11); // 10 days remaining
+    test(
+      'calculates correct daily new cards quota when days remaining > 0',
+      () {
+        final now = DateTime(2026, 10, 1);
+        final examDate = DateTime(2026, 10, 11); // 10 days remaining
 
-      final result = planner.calculatePlan(
-        now: now,
-        examDate: examDate,
-        newCardsCount: 100,
-        reviewCardsCount: 50,
-      );
+        final result = planner.calculatePlan(
+          now: now,
+          examDate: examDate,
+          newCardsCount: 100,
+          reviewCardsCount: 50,
+        );
 
-      expect(result.daysRemaining, equals(10));
-      expect(result.dailyNewCardsQuota, equals(10)); // 100 / 10 = 10
-      expect(result.isUnsustainable, isFalse);
-      expect(result.suggestedRetention, equals(0.90));
-    });
+        expect(result.daysRemaining, equals(10));
+        expect(result.dailyNewCardsQuota, equals(10)); // 100 / 10 = 10
+        expect(result.isUnsustainable, isFalse);
+        expect(result.suggestedRetention, equals(0.90));
+      },
+    );
 
     test('ceils daily new cards quota for uneven numbers', () {
       final now = DateTime(2026, 10, 1);
@@ -72,22 +75,25 @@ void main() {
       expect(result.isUnsustainable, isTrue);
     });
 
-    test('flags unsustainable backlog when workload exceeds max daily capacity', () {
-      final now = DateTime(2026, 10, 1);
-      final examDate = DateTime(2026, 10, 3); // 2 days remaining
+    test(
+      'flags unsustainable backlog when workload exceeds max daily capacity',
+      () {
+        final now = DateTime(2026, 10, 1);
+        final examDate = DateTime(2026, 10, 3); // 2 days remaining
 
-      // 300 new cards in 2 days = 150 new cards/day, way above capacity
-      final result = planner.calculatePlan(
-        now: now,
-        examDate: examDate,
-        newCardsCount: 300,
-        reviewCardsCount: 100,
-      );
+        // 300 new cards in 2 days = 150 new cards/day, way above capacity
+        final result = planner.calculatePlan(
+          now: now,
+          examDate: examDate,
+          newCardsCount: 300,
+          reviewCardsCount: 100,
+        );
 
-      expect(result.daysRemaining, equals(2));
-      expect(result.dailyNewCardsQuota, equals(150));
-      expect(result.isUnsustainable, isTrue);
-    });
+        expect(result.daysRemaining, equals(2));
+        expect(result.dailyNewCardsQuota, equals(150));
+        expect(result.isUnsustainable, isTrue);
+      },
+    );
 
     test('preserves custom target retention when specified', () {
       final now = DateTime(2026, 10, 1);

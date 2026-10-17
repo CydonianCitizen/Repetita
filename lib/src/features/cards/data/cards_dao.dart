@@ -185,8 +185,9 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     await transaction(() async {
       for (final card in matchingCards) {
         final shiftedDue = card.due.add(Duration(days: days));
-        await (update(cards)..where((t) => t.id.equals(card.id)))
-            .write(CardsCompanion(due: Value(shiftedDue)));
+        await (update(cards)..where((t) => t.id.equals(card.id))).write(
+          CardsCompanion(due: Value(shiftedDue)),
+        );
       }
     });
     return matchingCards.length;

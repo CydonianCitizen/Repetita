@@ -36,9 +36,8 @@ void main() {
         back: 'Review Back',
         now: now,
       );
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(reviewCardId))).write(
-        const CardsCompanion(state: Value(2)),
-      );
+      await (db.update(db.cards)..where((tbl) => tbl.id.equals(reviewCardId)))
+          .write(const CardsCompanion(state: Value(2)));
 
       // Card 3: Suspended review card (state = 2, isSuspended = true)
       final suspendedCardId = await db.cardsDao.createCard(
@@ -47,7 +46,9 @@ void main() {
         back: 'Suspended Back',
         now: now,
       );
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(suspendedCardId))).write(
+      await (db.update(
+        db.cards,
+      )..where((tbl) => tbl.id.equals(suspendedCardId))).write(
         const CardsCompanion(state: Value(2), isSuspended: Value(true)),
       );
 
@@ -69,22 +70,25 @@ void main() {
       expect(suspendedCard?.due.day, equals(now.day));
     });
 
-    test('VacationModeService manages vacation activation and resumption', () async {
-      final service = VacationModeService(db);
+    test(
+      'VacationModeService manages vacation activation and resumption',
+      () async {
+        final service = VacationModeService(db);
 
-      expect(await service.isVacationActive(), isFalse);
+        expect(await service.isVacationActive(), isFalse);
 
-      final startDate = DateTime.utc(2026, 7, 1);
-      await service.startVacation(startDate);
+        final startDate = DateTime.utc(2026, 7, 1);
+        await service.startVacation(startDate);
 
-      expect(await service.isVacationActive(), isTrue);
+        expect(await service.isVacationActive(), isTrue);
 
-      // Resume 10 days later
-      final endDate = DateTime.utc(2026, 7, 11);
-      final shifted = await service.endVacation(resumeDate: endDate);
+        // Resume 10 days later
+        final endDate = DateTime.utc(2026, 7, 11);
+        final shifted = await service.endVacation(resumeDate: endDate);
 
-      expect(await service.isVacationActive(), isFalse);
-      expect(shifted, greaterThanOrEqualTo(0));
-    });
+        expect(await service.isVacationActive(), isFalse);
+        expect(shifted, greaterThanOrEqualTo(0));
+      },
+    );
   });
 }

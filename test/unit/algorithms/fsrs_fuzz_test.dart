@@ -20,15 +20,18 @@ void main() {
       expect(engine.calculateFuzzOffset(100), equals(0));
     });
 
-    test('calculateFuzzOffset with seeded RNG is deterministic and bounded', () {
-      // 5% of 100 days is maxOffset = 5. Range is [-5, +5].
-      final rng = Random(42);
-      final engine = FsrsEngine(const FsrsParameters(enableFuzz: true), rng);
-      final offset = engine.calculateFuzzOffset(100);
+    test(
+      'calculateFuzzOffset with seeded RNG is deterministic and bounded',
+      () {
+        // 5% of 100 days is maxOffset = 5. Range is [-5, +5].
+        final rng = Random(42);
+        final engine = FsrsEngine(const FsrsParameters(enableFuzz: true), rng);
+        final offset = engine.calculateFuzzOffset(100);
 
-      expect(offset.abs(), lessThanOrEqualTo(5));
-      expect(offset, isNot(equals(0)));
-    });
+        expect(offset.abs(), lessThanOrEqualTo(5));
+        expect(offset, isNot(equals(0)));
+      },
+    );
 
     test('repeat method returns deterministic intervals without fuzz for button previews', () {
       const engine = FsrsEngine(FsrsParameters(enableFuzz: true));
@@ -48,8 +51,14 @@ void main() {
       final preview2 = engine.repeat(card, now);
 
       // Previews must match exactly
-      expect(preview1[Rating.good]?.log.scheduledDays, equals(preview2[Rating.good]?.log.scheduledDays));
-      expect(preview1[Rating.easy]?.log.scheduledDays, equals(preview2[Rating.easy]?.log.scheduledDays));
+      expect(
+        preview1[Rating.good]?.log.scheduledDays,
+        equals(preview2[Rating.good]?.log.scheduledDays),
+      );
+      expect(
+        preview1[Rating.easy]?.log.scheduledDays,
+        equals(preview2[Rating.easy]?.log.scheduledDays),
+      );
     });
   });
 }

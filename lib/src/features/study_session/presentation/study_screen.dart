@@ -62,7 +62,6 @@ class StudyScreen extends ConsumerWidget {
       }
     });
 
-
     return Scaffold(
       appBar: AppBar(
         title: Consumer(
@@ -173,7 +172,11 @@ class StudyScreen extends ConsumerWidget {
                       value: 2,
                       child: Row(
                         children: [
-                          const Icon(Icons.flag, size: 18, color: Colors.orange),
+                          const Icon(
+                            Icons.flag,
+                            size: 18,
+                            color: Colors.orange,
+                          ),
                           const SizedBox(width: 8),
                           Text(itemL10n?.flagOrange ?? 'Orange Flag'),
                         ],
@@ -215,7 +218,6 @@ class StudyScreen extends ConsumerWidget {
                 icon: const Icon(Icons.more_vert),
                 tooltip: l10n?.cardOptions ?? 'Card options',
                 onSelected: (value) async {
-
                   final controller = ref.read(provider.notifier);
                   try {
                     if (value == 'suspend') {

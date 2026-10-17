@@ -33,35 +33,43 @@ void main() {
   });
 
   group('RollingBackupService Tests', () {
-    test('checkAndPerformAutoBackup creates initial backup and updates setting', () async {
-      final now = DateTime.utc(2026, 10, 1, 12, 0, 0);
-      final created = await rollingService.checkAndPerformAutoBackup(now: now);
+    test(
+      'checkAndPerformAutoBackup creates initial backup and updates setting',
+      () async {
+        final now = DateTime.utc(2026, 10, 1, 12, 0, 0);
+        final created = await rollingService.checkAndPerformAutoBackup(
+          now: now,
+        );
 
-      expect(created, isNotNull);
-      expect(created!.existsSync(), isTrue);
+        expect(created, isNotNull);
+        expect(created!.existsSync(), isTrue);
 
-      final backups = await rollingService.listAutoBackups();
-      expect(backups, hasLength(1));
+        final backups = await rollingService.listAutoBackups();
+        expect(backups, hasLength(1));
 
-      final lastTimestamp = await db.getSetting('last_auto_backup_timestamp');
-      expect(lastTimestamp, equals(now.toIso8601String()));
-    });
+        final lastTimestamp = await db.getSetting('last_auto_backup_timestamp');
+        expect(lastTimestamp, equals(now.toIso8601String()));
+      },
+    );
 
-    test('checkAndPerformAutoBackup skips backup if interval has not elapsed', () async {
-      final now = DateTime.utc(2026, 10, 1, 12, 0, 0);
-      await rollingService.checkAndPerformAutoBackup(now: now);
+    test(
+      'checkAndPerformAutoBackup skips backup if interval has not elapsed',
+      () async {
+        final now = DateTime.utc(2026, 10, 1, 12, 0, 0);
+        await rollingService.checkAndPerformAutoBackup(now: now);
 
-      // 2 hours later (interval is 5 hours)
-      final twoHoursLater = now.add(const Duration(hours: 2));
-      final skipped = await rollingService.checkAndPerformAutoBackup(
-        now: twoHoursLater,
-        intervalHours: 5,
-      );
+        // 2 hours later (interval is 5 hours)
+        final twoHoursLater = now.add(const Duration(hours: 2));
+        final skipped = await rollingService.checkAndPerformAutoBackup(
+          now: twoHoursLater,
+          intervalHours: 5,
+        );
 
-      expect(skipped, isNull);
-      final backups = await rollingService.listAutoBackups();
-      expect(backups, hasLength(1));
-    });
+        expect(skipped, isNull);
+        final backups = await rollingService.listAutoBackups();
+        expect(backups, hasLength(1));
+      },
+    );
 
     test('enforces FIFO retention policy deleting oldest files', () async {
       var currentTime = DateTime.utc(2026, 10, 1, 0, 0, 0);

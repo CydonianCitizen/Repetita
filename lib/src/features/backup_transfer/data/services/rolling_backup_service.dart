@@ -56,7 +56,9 @@ class RollingBackupService {
     final dateStr = effectiveNow.toIso8601String().replaceAll(':', '-');
     final backupFile = File(p.join(dir.path, 'backup_$dateStr.json'));
 
-    final payloadJson = await backupService.exportJsonPayload(now: effectiveNow);
+    final payloadJson = await backupService.exportJsonPayload(
+      now: effectiveNow,
+    );
     await backupFile.writeAsString(payloadJson);
 
     await db.setSetting(keyLastAutoBackup, effectiveNow.toIso8601String());
@@ -96,7 +98,8 @@ class RollingBackupService {
         .whereType<File>()
         .where(
           (f) =>
-              p.basename(f.path).startsWith('backup_') && f.path.endsWith('.json'),
+              p.basename(f.path).startsWith('backup_') &&
+              f.path.endsWith('.json'),
         )
         .toList();
 
@@ -109,4 +112,3 @@ class RollingBackupService {
     return getAutoBackups(backupDir: dir);
   }
 }
-

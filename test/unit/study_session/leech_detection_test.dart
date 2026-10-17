@@ -7,7 +7,6 @@ import 'package:repetita/src/core/database/app_database.dart';
 import 'package:repetita/src/core/database/database_provider.dart';
 import 'package:repetita/src/features/study_session/presentation/controllers/study_session_controller.dart';
 
-
 void main() {
   late AppDatabase db;
   late ProviderContainer container;
@@ -59,7 +58,9 @@ void main() {
       await container.read(controllerProvider.future);
 
       // Rating Again -> lapse count becomes 3 (threshold reached!)
-      await container.read(controllerProvider.notifier).submitRating(Rating.again);
+      await container
+          .read(controllerProvider.notifier)
+          .submitRating(Rating.again);
 
       // Verify 'leech' tag is created and attached to card
       final cardTags = await db.tagsDao.getTagsForCard(cardId);
@@ -91,12 +92,13 @@ void main() {
         ),
       );
 
-
       final controllerProvider = studySessionControllerProvider(testDeckId);
       await container.read(controllerProvider.future);
 
       // Rating Again -> lapses becomes 2
-      await container.read(controllerProvider.notifier).submitRating(Rating.again);
+      await container
+          .read(controllerProvider.notifier)
+          .submitRating(Rating.again);
 
       // Verify leech tag attached AND card is suspended
       final cardTags = await db.tagsDao.getTagsForCard(cardId);
@@ -106,26 +108,46 @@ void main() {
       expect(updatedCard?.isSuspended, isTrue);
     });
 
-    test('StatsDao.getLeechCardsCount returns correct count based on threshold', () async {
-      final card1 = await db.cardsDao.createCard(deckId: testDeckId, front: 'Q1', back: 'A1');
-      final card2 = await db.cardsDao.createCard(deckId: testDeckId, front: 'Q2', back: 'A2');
-      final card3 = await db.cardsDao.createCard(deckId: testDeckId, front: 'Q3', back: 'A3');
+    test(
+      'StatsDao.getLeechCardsCount returns correct count based on threshold',
+      () async {
+        final card1 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Q1',
+          back: 'A1',
+        );
+        final card2 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Q2',
+          back: 'A2',
+        );
+        final card3 = await db.cardsDao.createCard(
+          deckId: testDeckId,
+          front: 'Q3',
+          back: 'A3',
+        );
 
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(card1))).write(
-        const CardsCompanion(lapses: Value(8)),
-      );
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(card2))).write(
-        const CardsCompanion(lapses: Value(10)),
-      );
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(card3))).write(
-        const CardsCompanion(lapses: Value(3)),
-      );
+        await (db.update(db.cards)..where((tbl) => tbl.id.equals(card1))).write(
+          const CardsCompanion(lapses: Value(8)),
+        );
+        await (db.update(db.cards)..where((tbl) => tbl.id.equals(card2))).write(
+          const CardsCompanion(lapses: Value(10)),
+        );
+        await (db.update(db.cards)..where((tbl) => tbl.id.equals(card3))).write(
+          const CardsCompanion(lapses: Value(3)),
+        );
 
-      final countDefault = await db.statsDao.getLeechCardsCount(deckId: testDeckId);
-      expect(countDefault, equals(2)); // card1 (8) and card2 (10) >= 8
+        final countDefault = await db.statsDao.getLeechCardsCount(
+          deckId: testDeckId,
+        );
+        expect(countDefault, equals(2)); // card1 (8) and card2 (10) >= 8
 
-      final countLow = await db.statsDao.getLeechCardsCount(deckId: testDeckId, threshold: 3);
-      expect(countLow, equals(3)); // card1, card2, card3 >= 3
-    });
+        final countLow = await db.statsDao.getLeechCardsCount(
+          deckId: testDeckId,
+          threshold: 3,
+        );
+        expect(countLow, equals(3)); // card1, card2, card3 >= 3
+      },
+    );
   });
 }

@@ -28,12 +28,12 @@ class ExamPlanResult {
 
   @override
   int get hashCode => Object.hash(
-        daysRemaining,
-        dailyNewCardsQuota,
-        estimatedDailyReviews,
-        isUnsustainable,
-        suggestedRetention,
-      );
+    daysRemaining,
+    dailyNewCardsQuota,
+    estimatedDailyReviews,
+    isUnsustainable,
+    suggestedRetention,
+  );
 }
 
 class ExamStudyPlanner {
@@ -56,7 +56,10 @@ class ExamStudyPlanner {
     final startOfExam = DateTime(examDate.year, examDate.month, examDate.day);
     final daysRemaining = max(0, startOfExam.difference(startOfToday).inDays);
 
-    final double effectiveRetention = (targetRetention ?? 0.90).clamp(0.70, 0.97);
+    final double effectiveRetention = (targetRetention ?? 0.90).clamp(
+      0.70,
+      0.97,
+    );
 
     if (daysRemaining == 0) {
       final totalPending = newCardsCount + reviewCardsCount;
@@ -72,11 +75,13 @@ class ExamStudyPlanner {
     final dailyNewCards = (newCardsCount / daysRemaining).ceil();
     final baseDailyReviews = (reviewCardsCount / daysRemaining).ceil();
     // In SRS, introducing N new cards/day introduces roughly ~1.5 review cards per day in the short term.
-    final estimatedDailyReviews = baseDailyReviews + (dailyNewCards * 1.5).ceil();
+    final estimatedDailyReviews =
+        baseDailyReviews + (dailyNewCards * 1.5).ceil();
 
     final totalDailyWorkload = dailyNewCards + estimatedDailyReviews;
     final isUnsustainable =
-        dailyNewCards > maxDailyNewCards || totalDailyWorkload > maxDailyWorkload;
+        dailyNewCards > maxDailyNewCards ||
+        totalDailyWorkload > maxDailyWorkload;
 
     return ExamPlanResult(
       daysRemaining: daysRemaining,

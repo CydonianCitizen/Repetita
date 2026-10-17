@@ -307,39 +307,40 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     });
 
-    testWidgets('setting card flag updates the card flag and renders flag icon', (
-      tester,
-    ) async {
-      await db.cardsDao.createCard(
-        deckId: testDeck.id,
-        front: 'Flag Test Question',
-        back: 'Flag Test Answer',
-      );
+    testWidgets(
+      'setting card flag updates the card flag and renders flag icon',
+      (tester) async {
+        await db.cardsDao.createCard(
+          deckId: testDeck.id,
+          front: 'Flag Test Question',
+          back: 'Flag Test Answer',
+        );
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
 
-      // Open context menu
-      await tester.tap(find.byIcon(Icons.more_vert));
-      await tester.pumpAndSettle();
+        // Open context menu
+        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.pumpAndSettle();
 
-      // Tap Flag menu item within PopupMenuItem
-      final flagMenuItem = find.descendant(
-        of: find.byType(PopupMenuItem<String>),
-        matching: find.text('Flag'),
-      );
-      await tester.tap(flagMenuItem);
-      await tester.pumpAndSettle();
+        // Tap Flag menu item within PopupMenuItem
+        final flagMenuItem = find.descendant(
+          of: find.byType(PopupMenuItem<String>),
+          matching: find.text('Flag'),
+        );
+        await tester.tap(flagMenuItem);
+        await tester.pumpAndSettle();
 
-      // Choose Red Flag from dialog
-      await tester.tap(find.text('Red Flag'));
-      await tester.pumpAndSettle();
+        // Choose Red Flag from dialog
+        await tester.tap(find.text('Red Flag'));
+        await tester.pumpAndSettle();
 
-      // Should find flag icon in card tile
-      expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
+        // Should find flag icon in card tile
+        expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump(const Duration(milliseconds: 50));
-    });
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(milliseconds: 50));
+      },
+    );
   });
 }

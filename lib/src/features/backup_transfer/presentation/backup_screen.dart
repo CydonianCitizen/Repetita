@@ -12,7 +12,6 @@ import '../../decks/presentation/controllers/deck_list_controller.dart';
 import '../data/services/rolling_backup_service.dart';
 import 'controllers/backup_controller.dart';
 
-
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
 
@@ -111,8 +110,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(l10n?.restoreBackupTitle ?? 'Confirm Restore'),
         content: Text(
-          l10n?.restoreBackupConfirmation ??
-              'Are you sure you want to restore this backup? Current data will be replaced.',
+          l10n?.restoreBackupConfirmation ?? 'Are you sure you want to restore this backup? Current data will be replaced.',
         ),
         actions: [
           TextButton(
@@ -134,10 +132,9 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
     try {
       final jsonString = await file.readAsString();
-      await ref.read(backupControllerProvider.notifier).importJson(
-            jsonString,
-            replaceExisting: true,
-          );
+      await ref
+          .read(backupControllerProvider.notifier)
+          .importJson(jsonString, replaceExisting: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -155,7 +152,6 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   }
 
   Future<void> _handleExportCsv() async {
-
     try {
       final csvString = await ref
           .read(backupControllerProvider.notifier)
@@ -367,9 +363,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                _AutoBackupsCard(
-                  onRestoreFile: _handleRestoreAutoBackup,
-                ),
+                _AutoBackupsCard(onRestoreFile: _handleRestoreAutoBackup),
               ],
             ),
             if (isLoading)
@@ -497,12 +491,10 @@ class _AutoBackupsCardState extends State<_AutoBackupsCard> {
       ),
     );
   }
-
 }
 
 class _AnkiDestinationDialog extends StatefulWidget {
   const _AnkiDestinationDialog({required this.decks});
-
 
   final List<DeckWithCounts> decks;
 

@@ -33,7 +33,6 @@ Color _getFlagColor(int flag) {
   }
 }
 
-
 class DeckDetailScreen extends ConsumerStatefulWidget {
   const DeckDetailScreen({super.key, required this.deck});
 
@@ -131,7 +130,9 @@ class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
             final now = ref.watch(clockProvider)();
             final dueCount = cards.where((c) => c.isDue(now)).length;
 
-            final deckStream = ref.watch(decksDaoProvider).watchDeckById(widget.deck.id);
+            final deckStream = ref
+                .watch(decksDaoProvider)
+                .watchDeckById(widget.deck.id);
 
             return StreamBuilder<Deck?>(
               stream: deckStream,
@@ -153,24 +154,29 @@ class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
                       onSetExamDate: () async {
                         final picked = await showDatePicker(
                           context: context,
-                          initialDate: currentDeck.examDate ??
+                          initialDate:
+                              currentDeck.examDate ??
                               now.add(const Duration(days: 30)),
                           firstDate: now,
                           lastDate: now.add(const Duration(days: 3650)),
                         );
                         if (picked != null) {
-                          await ref.read(decksDaoProvider).setDeckExamDate(
-                            deckId: currentDeck.id,
-                            examDate: picked,
-                          );
+                          await ref
+                              .read(decksDaoProvider)
+                              .setDeckExamDate(
+                                deckId: currentDeck.id,
+                                examDate: picked,
+                              );
                         }
                       },
                       onClearExamDate: () async {
-                        await ref.read(decksDaoProvider).setDeckExamDate(
-                          deckId: currentDeck.id,
-                          examDate: null,
-                          targetRetention: null,
-                        );
+                        await ref
+                            .read(decksDaoProvider)
+                            .setDeckExamDate(
+                              deckId: currentDeck.id,
+                              examDate: null,
+                              targetRetention: null,
+                            );
                       },
                     ),
                     Expanded(
@@ -185,7 +191,6 @@ class _DeckDetailScreenState extends ConsumerState<DeckDetailScreen> {
                 );
               },
             );
-
           },
         ),
       ),
@@ -232,7 +237,6 @@ class _CardTile extends StatelessWidget {
   final Future<void> Function() onResetProgress;
   final Future<void> Function() onDuplicate;
   final Future<void> Function(int flag) onSetFlag;
-
 
   @override
   Widget build(BuildContext context) {
@@ -421,10 +425,11 @@ class _CardTile extends StatelessWidget {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              title: Text(l10n?.resetProgress ?? 'Reset Progress'),
+                              title: Text(
+                                l10n?.resetProgress ?? 'Reset Progress',
+                              ),
                               content: Text(
-                                l10n?.resetProgressConfirmation ??
-                                    'Are you sure you want to reset this card\'s SRS progress? It will become a new card, but review logs are kept.',
+                                l10n?.resetProgressConfirmation ?? 'Are you sure you want to reset this card\'s SRS progress? It will become a new card, but review logs are kept.',
                               ),
                               actions: [
                                 TextButton(
@@ -465,7 +470,11 @@ class _CardTile extends StatelessWidget {
                                   onPressed: () => Navigator.of(ctx).pop(1),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.flag, size: 20, color: Colors.red),
+                                      const Icon(
+                                        Icons.flag,
+                                        size: 20,
+                                        color: Colors.red,
+                                      ),
                                       const SizedBox(width: 12),
                                       Text(l10n?.flagRed ?? 'Red Flag'),
                                     ],
@@ -475,7 +484,11 @@ class _CardTile extends StatelessWidget {
                                   onPressed: () => Navigator.of(ctx).pop(2),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.flag, size: 20, color: Colors.orange),
+                                      const Icon(
+                                        Icons.flag,
+                                        size: 20,
+                                        color: Colors.orange,
+                                      ),
                                       const SizedBox(width: 12),
                                       Text(l10n?.flagOrange ?? 'Orange Flag'),
                                     ],
@@ -485,7 +498,11 @@ class _CardTile extends StatelessWidget {
                                   onPressed: () => Navigator.of(ctx).pop(3),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.flag, size: 20, color: Colors.green),
+                                      const Icon(
+                                        Icons.flag,
+                                        size: 20,
+                                        color: Colors.green,
+                                      ),
                                       const SizedBox(width: 12),
                                       Text(l10n?.flagGreen ?? 'Green Flag'),
                                     ],
@@ -495,7 +512,11 @@ class _CardTile extends StatelessWidget {
                                   onPressed: () => Navigator.of(ctx).pop(4),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.flag, size: 20, color: Colors.blue),
+                                      const Icon(
+                                        Icons.flag,
+                                        size: 20,
+                                        color: Colors.blue,
+                                      ),
                                       const SizedBox(width: 12),
                                       Text(l10n?.flagBlue ?? 'Blue Flag'),
                                     ],
@@ -530,7 +551,10 @@ class _CardTile extends StatelessWidget {
                             value: 'setDueDate',
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today_outlined, size: 18),
+                                const Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(itemL10n?.setDueDate ?? 'Set Due Date'),
                               ],
@@ -542,7 +566,9 @@ class _CardTile extends StatelessWidget {
                               children: [
                                 const Icon(Icons.restart_alt_rounded, size: 18),
                                 const SizedBox(width: 8),
-                                Text(itemL10n?.resetProgress ?? 'Reset Progress'),
+                                Text(
+                                  itemL10n?.resetProgress ?? 'Reset Progress',
+                                ),
                               ],
                             ),
                           ),
@@ -552,7 +578,9 @@ class _CardTile extends StatelessWidget {
                               children: [
                                 const Icon(Icons.copy_rounded, size: 18),
                                 const SizedBox(width: 8),
-                                Text(itemL10n?.duplicateCard ?? 'Duplicate Card'),
+                                Text(
+                                  itemL10n?.duplicateCard ?? 'Duplicate Card',
+                                ),
                               ],
                             ),
                           ),
@@ -561,9 +589,13 @@ class _CardTile extends StatelessWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  card.flag > 0 ? Icons.flag : Icons.outlined_flag,
+                                  card.flag > 0
+                                      ? Icons.flag
+                                      : Icons.outlined_flag,
                                   size: 18,
-                                  color: card.flag > 0 ? _getFlagColor(card.flag) : null,
+                                  color: card.flag > 0
+                                      ? _getFlagColor(card.flag)
+                                      : null,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(itemL10n?.flag ?? 'Flag'),
@@ -576,12 +608,17 @@ class _CardTile extends StatelessWidget {
                             value: 'suspend',
                             child: Row(
                               children: [
-                                const Icon(Icons.pause_circle_outline, size: 18),
+                                const Icon(
+                                  Icons.pause_circle_outline,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   card.isSuspended
-                                      ? (itemL10n?.unsuspendCard ?? 'Unsuspend Card')
-                                      : (itemL10n?.suspendCard ?? 'Suspend Card'),
+                                      ? (itemL10n?.unsuspendCard ??
+                                            'Unsuspend Card')
+                                      : (itemL10n?.suspendCard ??
+                                            'Suspend Card'),
                                 ),
                               ],
                             ),
@@ -604,7 +641,11 @@ class _CardTile extends StatelessWidget {
                             value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline, size: 18, color: scheme.error),
+                                Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                  color: scheme.error,
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   itemL10n?.delete ?? 'Delete',
@@ -616,7 +657,6 @@ class _CardTile extends StatelessWidget {
                         ];
                       },
                     ),
-
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -895,9 +935,8 @@ class _DeckCardsSection extends ConsumerWidget {
                     key: const Key('filter_flag_all'),
                     label: Text(l10n?.filterFlag ?? 'Flag'),
                     selected: selectedFlag == null,
-                    onSelected: (_) => ref
-                        .read(deckCardFlagFilterProvider.notifier)
-                        .clear(),
+                    onSelected: (_) =>
+                        ref.read(deckCardFlagFilterProvider.notifier).clear(),
                   ),
                 ),
 
@@ -917,7 +956,11 @@ class _DeckCardsSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    avatar: const Icon(Icons.flag, size: 16, color: Colors.orange),
+                    avatar: const Icon(
+                      Icons.flag,
+                      size: 16,
+                      color: Colors.orange,
+                    ),
                     label: Text(l10n?.flagOrange ?? 'Orange'),
                     selected: selectedFlag == 2,
                     onSelected: (selected) {
@@ -930,7 +973,11 @@ class _DeckCardsSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    avatar: const Icon(Icons.flag, size: 16, color: Colors.green),
+                    avatar: const Icon(
+                      Icons.flag,
+                      size: 16,
+                      color: Colors.green,
+                    ),
                     label: Text(l10n?.flagGreen ?? 'Green'),
                     selected: selectedFlag == 3,
                     onSelected: (selected) {
@@ -943,7 +990,11 @@ class _DeckCardsSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    avatar: const Icon(Icons.flag, size: 16, color: Colors.blue),
+                    avatar: const Icon(
+                      Icons.flag,
+                      size: 16,
+                      color: Colors.blue,
+                    ),
                     label: Text(l10n?.flagBlue ?? 'Blue'),
                     selected: selectedFlag == 4,
                     onSelected: (selected) {
@@ -956,7 +1007,11 @@ class _DeckCardsSection extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    avatar: Icon(Icons.warning_amber_rounded, size: 16, color: colorScheme.error),
+                    avatar: Icon(
+                      Icons.warning_amber_rounded,
+                      size: 16,
+                      color: colorScheme.error,
+                    ),
                     label: Text(l10n?.filterLeech ?? 'Leech'),
                     selected: selectedFlag == -1,
                     onSelected: (selected) {
@@ -968,7 +1023,6 @@ class _DeckCardsSection extends ConsumerWidget {
                 ),
               ],
             ),
-
           ),
         ),
         Padding(
@@ -1227,7 +1281,6 @@ class _DeckCardsSection extends ConsumerWidget {
                         }
                       },
                     );
-
                   },
                 ),
         ),

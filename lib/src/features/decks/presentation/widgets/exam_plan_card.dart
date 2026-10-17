@@ -127,7 +127,11 @@ class ExamPlanCard extends StatelessWidget {
                     value: 'clear',
                     child: Row(
                       children: [
-                        Icon(Icons.event_busy, size: 18, color: colorScheme.error),
+                        Icon(
+                          Icons.event_busy,
+                          size: 18,
+                          color: colorScheme.error,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           l10n?.clearExamDate ?? 'Clear Exam Date',
@@ -147,17 +151,20 @@ class ExamPlanCard extends StatelessWidget {
             children: [
               _PlanMetricChip(
                 icon: Icons.fiber_new_rounded,
-                label: l10n?.dailyNewTarget(plan.dailyNewCardsQuota) ??
+                label:
+                    l10n?.dailyNewTarget(plan.dailyNewCardsQuota) ??
                     'Target: ${plan.dailyNewCardsQuota} new/day',
               ),
               _PlanMetricChip(
                 icon: Icons.repeat_rounded,
-                label: l10n?.estimatedReviews(plan.estimatedDailyReviews) ??
+                label:
+                    l10n?.estimatedReviews(plan.estimatedDailyReviews) ??
                     '~${plan.estimatedDailyReviews} reviews/day',
               ),
               _PlanMetricChip(
                 icon: Icons.track_changes_rounded,
-                label: l10n?.retentionTarget(
+                label:
+                    l10n?.retentionTarget(
                       (plan.suggestedRetention * 100).toInt(),
                     ) ??
                     'Retention target: ${(plan.suggestedRetention * 100).toInt()}%',
@@ -177,8 +184,7 @@ class ExamPlanCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    l10n?.unsustainableWorkload ??
-                        'Heavy workload! You may want to start earlier or lower retention target.',
+                    l10n?.unsustainableWorkload ?? 'Heavy workload! You may want to start earlier or lower retention target.',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.error,
                       fontWeight: FontWeight.w500,
@@ -195,10 +201,7 @@ class ExamPlanCard extends StatelessWidget {
 }
 
 class _PlanMetricChip extends StatelessWidget {
-  const _PlanMetricChip({
-    required this.icon,
-    required this.label,
-  });
+  const _PlanMetricChip({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -213,7 +216,9 @@ class _PlanMetricChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.4)),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

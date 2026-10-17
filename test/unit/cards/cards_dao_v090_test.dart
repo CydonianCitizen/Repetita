@@ -47,77 +47,87 @@ void main() {
       expect(card?.flag, equals(0));
     });
 
-    test('setCardDueDate modifies card due date without touching SRS state', () async {
-      final cardId = await cardsDao.createCard(
-        deckId: deckId,
-        front: 'Due Date Front',
-        back: 'Due Date Back',
-      );
+    test(
+      'setCardDueDate modifies card due date without touching SRS state',
+      () async {
+        final cardId = await cardsDao.createCard(
+          deckId: deckId,
+          front: 'Due Date Front',
+          back: 'Due Date Back',
+        );
 
-      final targetDate = DateTime(2027, 5, 20, 10, 0, 0);
-      await cardsDao.setCardDueDate(cardId, targetDate);
+        final targetDate = DateTime(2027, 5, 20, 10, 0, 0);
+        await cardsDao.setCardDueDate(cardId, targetDate);
 
-      final card = await cardsDao.getCardById(cardId);
-      expect(card?.due.year, equals(2027));
-      expect(card?.due.month, equals(5));
-      expect(card?.due.day, equals(20));
-    });
+        final card = await cardsDao.getCardById(cardId);
+        expect(card?.due.year, equals(2027));
+        expect(card?.due.month, equals(5));
+        expect(card?.due.day, equals(20));
+      },
+    );
 
-    test('resetCardProgress resets FSRS and SM-2 parameters to initial state', () async {
-      final cardId = await cardsDao.createCard(
-        deckId: deckId,
-        front: 'Reset Front',
-        back: 'Reset Back',
-      );
+    test(
+      'resetCardProgress resets FSRS and SM-2 parameters to initial state',
+      () async {
+        final cardId = await cardsDao.createCard(
+          deckId: deckId,
+          front: 'Reset Front',
+          back: 'Reset Back',
+        );
 
-      // Mutate card with custom state via custom statement or update
-      await (db.update(db.cards)..where((tbl) => tbl.id.equals(cardId))).write(
-        const CardsCompanion(
-          state: Value(2),
-          reps: Value(12),
-          lapses: Value(4),
-          stability: Value(18.5),
-          difficulty: Value(6.2),
-          easinessFactor: Value(1.7),
-        ),
+        // Mutate card with custom state via custom statement or update
+        await (db.update(
+          db.cards,
+        )..where((tbl) => tbl.id.equals(cardId))).write(
+          const CardsCompanion(
+            state: Value(2),
+            reps: Value(12),
+            lapses: Value(4),
+            stability: Value(18.5),
+            difficulty: Value(6.2),
+            easinessFactor: Value(1.7),
+          ),
+        );
 
-      );
+        var modified = await cardsDao.getCardById(cardId);
+        expect(modified?.state, equals(2));
+        expect(modified?.reps, equals(12));
+        expect(modified?.lapses, equals(4));
 
-      var modified = await cardsDao.getCardById(cardId);
-      expect(modified?.state, equals(2));
-      expect(modified?.reps, equals(12));
-      expect(modified?.lapses, equals(4));
+        // Reset progress
+        await cardsDao.resetCardProgress(cardId);
 
-      // Reset progress
-      await cardsDao.resetCardProgress(cardId);
+        final reset = await cardsDao.getCardById(cardId);
+        expect(reset?.state, equals(0));
+        expect(reset?.reps, equals(0));
+        expect(reset?.lapses, equals(0));
+        expect(reset?.stability, equals(0.0));
+        expect(reset?.difficulty, equals(0.0));
+        expect(reset?.easinessFactor, equals(2.5));
+        expect(reset?.lastReview, isNull);
+      },
+    );
 
-      final reset = await cardsDao.getCardById(cardId);
-      expect(reset?.state, equals(0));
-      expect(reset?.reps, equals(0));
-      expect(reset?.lapses, equals(0));
-      expect(reset?.stability, equals(0.0));
-      expect(reset?.difficulty, equals(0.0));
-      expect(reset?.easinessFactor, equals(2.5));
-      expect(reset?.lastReview, isNull);
-    });
+    test(
+      'duplicateCard creates a new card with identical content and fresh state',
+      () async {
+        final cardId = await cardsDao.createCard(
+          deckId: deckId,
+          front: 'Original Front',
+          back: 'Original Back',
+        );
 
-    test('duplicateCard creates a new card with identical content and fresh state', () async {
-      final cardId = await cardsDao.createCard(
-        deckId: deckId,
-        front: 'Original Front',
-        back: 'Original Back',
-      );
+        final copyId = await cardsDao.duplicateCard(cardId);
+        expect(copyId, isNot(equals(cardId)));
 
-      final copyId = await cardsDao.duplicateCard(cardId);
-      expect(copyId, isNot(equals(cardId)));
-
-      final copy = await cardsDao.getCardById(copyId);
-      expect(copy?.deckId, equals(deckId));
-      expect(copy?.front, equals('Original Front'));
-      expect(copy?.back, equals('Original Back'));
-      expect(copy?.state, equals(0));
-      expect(copy?.reps, equals(0));
-      expect(copy?.flag, equals(0));
-    });
+        final copy = await cardsDao.getCardById(copyId);
+        expect(copy?.deckId, equals(deckId));
+        expect(copy?.front, equals('Original Front'));
+        expect(copy?.back, equals('Original Back'));
+        expect(copy?.state, equals(0));
+        expect(copy?.reps, equals(0));
+        expect(copy?.flag, equals(0));
+      },
+    );
   });
 }

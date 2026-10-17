@@ -213,7 +213,9 @@ class StudySessionController extends _$StudySessionController {
 
           final action = await db.getSetting('leech_action') ?? 'tag';
           if (action == 'tag_and_suspend') {
-            await ref.read(cardsDaoProvider).setCardSuspended(currentCard.id, true);
+            await ref
+                .read(cardsDaoProvider)
+                .setCardSuspended(currentCard.id, true);
           }
         }
       }

@@ -77,7 +77,6 @@ List<CardEntity> filteredDeckCards(Ref ref, int deckId) {
   return result;
 }
 
-
 @riverpod
 class CardListController extends _$CardListController {
   @override
@@ -192,4 +191,3 @@ class CardListController extends _$CardListController {
     return dao.duplicateCard(id);
   }
 }
-
