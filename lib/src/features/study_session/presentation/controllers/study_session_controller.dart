@@ -42,6 +42,7 @@ class StudySessionState {
     this.recordReviews = true,
     this.customStudyConfig,
     this.intervalPreviews = const {},
+    this.lastLeechDetected = false,
   });
 
   final int deckId;
@@ -54,6 +55,7 @@ class StudySessionState {
   final bool recordReviews;
   final CustomStudyConfig? customStudyConfig;
   final Map<Rating, String> intervalPreviews;
+  final bool lastLeechDetected;
 
   bool get canUndo => undoStack.isNotEmpty;
   int get reviewedCount => undoStack.length;
@@ -77,6 +79,7 @@ class StudySessionState {
     bool? recordReviews,
     CustomStudyConfig? customStudyConfig,
     Map<Rating, String>? intervalPreviews,
+    bool? lastLeechDetected,
   }) {
     return StudySessionState(
       deckId: deckId ?? this.deckId,
@@ -89,6 +92,7 @@ class StudySessionState {
       recordReviews: recordReviews ?? this.recordReviews,
       customStudyConfig: customStudyConfig ?? this.customStudyConfig,
       intervalPreviews: intervalPreviews ?? this.intervalPreviews,
+      lastLeechDetected: lastLeechDetected ?? this.lastLeechDetected,
     );
   }
 }
@@ -196,6 +200,24 @@ class StudySessionController extends _$StudySessionController {
         logSnapshot: recordLog.log,
       );
 
+      bool isLeech = false;
+      if (rating == Rating.again) {
+        final db = ref.read(databaseProvider);
+        final thresholdStr = await db.getSetting('leech_threshold');
+        final threshold = int.tryParse(thresholdStr ?? '') ?? 8;
+        if (recordLog.card.lapses >= threshold) {
+          isLeech = true;
+          final tagsDao = ref.read(tagsDaoProvider);
+          final tagId = await tagsDao.getOrCreateTag('leech');
+          await tagsDao.addTagToCard(currentCard.id, tagId);
+
+          final action = await db.getSetting('leech_action') ?? 'tag';
+          if (action == 'tag_and_suspend') {
+            await ref.read(cardsDaoProvider).setCardSuspended(currentCard.id, true);
+          }
+        }
+      }
+
       final nextIndex = current.currentIndex + 1;
       final isCompleted = nextIndex >= current.queue.length;
       final nextCard = !isCompleted && nextIndex < current.queue.length
@@ -216,6 +238,7 @@ class StudySessionController extends _$StudySessionController {
           isCompleted: isCompleted,
           undoStack: [...current.undoStack, undoEntry],
           intervalPreviews: _calculateIntervalPreviews(nextCard, false),
+          lastLeechDetected: isLeech,
         ),
       );
       ref.invalidate(statsControllerProvider);

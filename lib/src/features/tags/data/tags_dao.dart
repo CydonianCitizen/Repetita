@@ -53,6 +53,13 @@ class TagsDao extends DatabaseAccessor<AppDatabase> with _$TagsDaoMixin {
     });
   }
 
+  Future<void> addTagToCard(int cardId, int tagId) async {
+    await into(cardTags).insert(
+      CardTagsCompanion.insert(cardId: cardId, tagId: tagId),
+      mode: InsertMode.insertOrIgnore,
+    );
+  }
+
   Future<List<Tag>> getTagsForCard(int cardId) {
     final query =
         select(tags)

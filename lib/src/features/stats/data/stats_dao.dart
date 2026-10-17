@@ -202,4 +202,18 @@ class StatsDao extends DatabaseAccessor<AppDatabase> with _$StatsDaoMixin {
 
     return calculateStreak(uniqueDays, today);
   }
+
+  Future<int> getLeechCardsCount({int? deckId, int threshold = 8}) async {
+    final countCol = cards.id.count();
+    final query = selectOnly(cards)..addColumns([countCol]);
+    final conditions = <Expression<bool>>[
+      cards.lapses.isBiggerOrEqualValue(threshold),
+    ];
+    if (deckId != null) {
+      conditions.add(cards.deckId.equals(deckId));
+    }
+    query.where(conditions.reduce((a, b) => a & b));
+    final row = await query.getSingleOrNull();
+    return row?.read(countCol) ?? 0;
+  }
 }

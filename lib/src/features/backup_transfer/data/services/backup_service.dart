@@ -371,6 +371,7 @@ class BackupService {
             isSuspended: card.isSuspended,
             buriedUntil: card.buriedUntil,
             clozeIndex: card.clozeIndex,
+            flag: 0,
           );
           existingCardsById[assignedId] = addedCard;
           existingCardsByContent[contentKey] = addedCard;
