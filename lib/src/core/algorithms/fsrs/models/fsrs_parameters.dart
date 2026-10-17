@@ -3,11 +3,13 @@ class FsrsParameters {
     this.requestRetention = 0.9,
     this.maximumInterval = 36500,
     this.w = defaultWeights,
+    this.enableFuzz = false,
   });
 
   final double requestRetention;
   final int maximumInterval;
   final List<double> w;
+  final bool enableFuzz;
 
   static const List<double> defaultWeights = <double>[
     0.4,

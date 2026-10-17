@@ -176,6 +176,22 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     );
   }
 
+  Future<int> shiftDueDatesForVacation(int days) async {
+    if (days <= 0) return 0;
+    final query = select(cards)
+      ..where((t) => t.state.isIn([1, 2]) & t.isSuspended.equals(false));
+    final matchingCards = await query.get();
+
+    await transaction(() async {
+      for (final card in matchingCards) {
+        final shiftedDue = card.due.add(Duration(days: days));
+        await (update(cards)..where((t) => t.id.equals(card.id)))
+            .write(CardsCompanion(due: Value(shiftedDue)));
+      }
+    });
+    return matchingCards.length;
+  }
+
   Future<int> deleteCard(int id) {
     return (delete(cards)..where((t) => t.id.equals(id))).go();
   }

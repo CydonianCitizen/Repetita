@@ -7,9 +7,10 @@ import 'models/fsrs_parameters.dart';
 import 'models/record_log.dart';
 
 class FsrsEngine implements SrsScheduler {
-  const FsrsEngine([this.parameters = const FsrsParameters()]);
+  const FsrsEngine([this.parameters = const FsrsParameters(), this.rng]);
 
   final FsrsParameters parameters;
+  final Random? rng;
 
   static const double factor = 19.0 / 81.0;
 
@@ -67,8 +68,20 @@ class FsrsEngine implements SrsScheduler {
     return interval.clamp(1, parameters.maximumInterval);
   }
 
+  int calculateFuzzOffset(int interval) {
+    if (!parameters.enableFuzz || interval < 3) return 0;
+    final r = rng ?? Random();
+    final maxOffset = max(1, (interval * 0.05).round());
+    return r.nextInt(maxOffset * 2 + 1) - maxOffset;
+  }
+
   @override
-  RecordLog schedule(FsrsCard card, Rating rating, DateTime reviewTime) {
+  RecordLog schedule(
+    FsrsCard card,
+    Rating rating,
+    DateTime reviewTime, {
+    bool applyFuzz = true,
+  }) {
     final reviewTimeUtc = reviewTime.toUtc();
     final int elapsedDays;
     final double r;
@@ -144,7 +157,12 @@ class FsrsEngine implements SrsScheduler {
         }
     }
 
-    final scheduledDays = nextInterval(newStability);
+    final baseInterval = nextInterval(newStability);
+    final fuzzOffset = applyFuzz ? calculateFuzzOffset(baseInterval) : 0;
+    final scheduledDays = (baseInterval + fuzzOffset).clamp(
+      1,
+      parameters.maximumInterval,
+    );
     final due = reviewTimeUtc.add(Duration(days: scheduledDays));
 
     final updatedCard = FsrsCard(
@@ -175,10 +193,10 @@ class FsrsEngine implements SrsScheduler {
   @override
   Map<Rating, RecordLog> repeat(FsrsCard card, DateTime reviewTime) {
     return <Rating, RecordLog>{
-      Rating.again: schedule(card, Rating.again, reviewTime),
-      Rating.hard: schedule(card, Rating.hard, reviewTime),
-      Rating.good: schedule(card, Rating.good, reviewTime),
-      Rating.easy: schedule(card, Rating.easy, reviewTime),
+      Rating.again: schedule(card, Rating.again, reviewTime, applyFuzz: false),
+      Rating.hard: schedule(card, Rating.hard, reviewTime, applyFuzz: false),
+      Rating.good: schedule(card, Rating.good, reviewTime, applyFuzz: false),
+      Rating.easy: schedule(card, Rating.easy, reviewTime, applyFuzz: false),
     };
   }
 }
